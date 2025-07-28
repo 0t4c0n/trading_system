@@ -17,12 +17,15 @@ class ConsistencyAnalyzer:
         self.current_week_data = None
         
     def load_historical_screenings(self, weeks_back=4):
-        """Carga los últimos N resultados de screening semanal"""
+        """Carga los últimos N resultados de screening semanal (optimizado)"""
         print(f"📚 Cargando historial de {weeks_back} semanas...")
         
-        # Buscar archivos de screening semanal
+        # Buscar archivos de screening semanal (optimizado con límite)
         screening_files = glob.glob("weekly_screening_results*.json")
         screening_files.sort(key=os.path.getctime, reverse=True)  # Más reciente primero
+        
+        # Tomar solo los necesarios para velocidad
+        screening_files = screening_files[:weeks_back]
         
         historical_data = []
         

@@ -20,7 +20,7 @@
         }
         
         .container {
-            max-width: 500px;
+            max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -113,7 +113,7 @@
         
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 15px;
             text-align: center;
         }
@@ -150,6 +150,14 @@
         
         .analysis-sections {
             padding: 20px;
+            display: grid;
+            gap: 20px;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
         
         .section-title {
@@ -166,6 +174,10 @@
             margin-right: 8px;
         }
         
+        .section-title.picks::before {
+            content: "🎯";
+        }
+        
         .section-title.consistency::before {
             content: "🏆";
         }
@@ -178,9 +190,130 @@
             background: white;
             border-radius: 15px;
             padding: 15px;
-            margin-bottom: 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             border-left: 4px solid #27ae60;
+        }
+        
+        /* NUEVA SECCIÓN: TOP PICKS CON TRADING LEVELS */
+        .top-picks-grid {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .pick-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 15px;
+            border-left: 4px solid #27ae60;
+            position: relative;
+        }
+        
+        .pick-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .pick-symbol {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #27ae60;
+        }
+        
+        .pick-price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .pick-company {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .trading-levels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .level-item {
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .level-value {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .level-value.stop-loss {
+            color: #e74c3c;
+        }
+        
+        .level-value.take-profit {
+            color: #27ae60;
+        }
+        
+        .level-value.current {
+            color: #3498db;
+        }
+        
+        .level-label {
+            font-size: 0.7em;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .pick-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .metric-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 6px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .metric-label {
+            font-size: 0.6em;
+            color: #666;
+        }
+        
+        .pick-reasoning {
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid rgba(39, 174, 96, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .reasoning-title {
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+        
+        .reasoning-text {
+            font-size: 0.8em;
+            color: #2c3e50;
+            line-height: 1.3;
         }
         
         .consistency-grid {
@@ -257,6 +390,61 @@
         .rotation-title.exit::before {
             content: "⚠️";
             margin-right: 8px;
+        }
+        
+        .rotation-recommendations {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .recommendation-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .recommendation-item.exit {
+            border-left-color: #f39c12;
+        }
+        
+        .recommendation-item.urgent-exit {
+            border-left-color: #e74c3c;
+        }
+        
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .recommendation-symbol {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .recommendation-action {
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #27ae60;
+            color: white;
+        }
+        
+        .recommendation-action.exit {
+            background: #f39c12;
+        }
+        
+        .recommendation-action.urgent-exit {
+            background: #e74c3c;
+        }
+        
+        .recommendation-reason {
+            font-size: 0.85em;
+            color: #666;
+            line-height: 1.3;
         }
         
         .action-badge {
@@ -381,10 +569,13 @@
             transform: scale(1.1);
         }
         
-        @media (max-width: 480px) {
-            .container {
-                margin: 5px;
-                border-radius: 15px;
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .trading-levels {
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .header-content {
@@ -396,18 +587,12 @@
             .title-section {
                 text-align: center;
             }
-            
-            .creator-section {
-                order: -1;
-                align-self: center;
-                padding: 12px 18px;
-                gap: 15px;
-            }
-            
-            .creator-avatar {
-                width: 70px;
-                height: 70px;
-                border-width: 4px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
             }
             
             .summary-grid {
@@ -415,14 +600,12 @@
                 gap: 10px;
             }
             
-            .consistency-grid {
+            .pick-metrics {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
             }
             
-            .spy-metrics {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
+            .trading-levels {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -433,11 +616,11 @@
             <div class="header-content">
                 <div class="title-section">
                     <h1>📈 Conservative Trading Bot</h1>
-                    <div class="subtitle">Análisis Semanal para Largo Plazo</div>
+                    <div class="subtitle">Análisis Semanal con Stop-Loss y Take Profit</div>
                 </div>
                 <div class="creator-section">
                     <div class="creator-avatar">
-                        <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEhUTExMVFhUXFxcVFRUVFxUVFRcVFRgXFxcXFxUYHSggGBolGxUVITEhJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGhAQGi0dHx0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rN//AABEIAOkA2AMBIgACEQEDEQH/xAAbAAABBQEBAAAAAAAAAAAAAAAFAQIDBAYAB//EAEUQAAEDAgMFBAcDCQYHAAAAAAEAAhEDIQQSMQVBUWFxIoGx8AYTEzKRocGz0eEUIzVCUmJyc/EkM3SCkrIVFiU0RMLS/8QAGQEAAwEBAQAAAAAAAAAAAAAAAAECAwQF/8QAJBEBAQACAgIBBAMBAAAAAAAAAAECEQMhEjFBEyJRYQQycUL/2gAMAwEAAhEDEQH/ABB9djbX+fio8g3Ks6sTuXe3gelen0zLVpIdjqdnWvbTuVo176lVMXWInu+izy0NAQprim=" alt="0t4c0n" id="creator-img">
+                        <img src="data:image/jpeg;base64,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">
                     </div>
                     <div class="creator-info">
                         <div class="creator-name">0t4c0n</div>
@@ -449,7 +632,7 @@
         
         <div id="content">
             <div class="loading">
-                <div>🔄 Cargando análisis conservador...</div>
+                <div>🔄 Cargando análisis conservador con niveles de trading...</div>
             </div>
         </div>
     </div>
@@ -459,23 +642,19 @@
     </button>
 
     <script>
-        let lastUpdateTime = null;
-        
         function getNextUpdateTime() {
             const now = new Date();
-            const nextMonday = new Date(now);
+            const nextSaturday = new Date(now);
             
-            // Calcular próximo lunes
-            const daysUntilMonday = (1 + 7 - now.getDay()) % 7;
-            if (daysUntilMonday === 0 && now.getHours() < 14) {
-                // Si es lunes y antes de las 2 PM, el próximo análisis es hoy
-                nextMonday.setHours(14, 0, 0, 0);
+            const daysUntilSaturday = (6 - now.getDay() + 7) % 7;
+            if (daysUntilSaturday === 0 && now.getHours() < 10) {
+                nextSaturday.setHours(10, 0, 0, 0);
             } else {
-                nextMonday.setDate(now.getDate() + (daysUntilMonday || 7));
-                nextMonday.setHours(14, 0, 0, 0);  // 2 PM UTC
+                nextSaturday.setDate(now.getDate() + (daysUntilSaturday || 7));
+                nextSaturday.setHours(10, 0, 0, 0);
             }
             
-            return nextMonday.toLocaleString('es-ES', {
+            return nextSaturday.toLocaleString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
@@ -485,18 +664,104 @@
             });
         }
         
+        function calculateTradingLevels(stock) {
+            const currentPrice = stock.price || stock.current_price || 0;
+            const stopLoss = stock.stop_loss || (currentPrice * 0.85); // 15% default
+            
+            // Cálculo de Take Profit mejorado
+            let takeProfit = currentPrice;
+            
+            // Método 1: Basado en outperformance histórica
+            const outperf60d = stock.metrics?.outperformance_60d || 0;
+            if (outperf60d > 50) {
+                takeProfit = currentPrice * 1.30; // 30% si performance excepcional
+            } else if (outperf60d > 20) {
+                takeProfit = currentPrice * 1.20; // 20% si buena performance
+            } else {
+                takeProfit = currentPrice * 1.15; // 15% conservador
+            }
+            
+            // Método 2: Basado en volatilidad (ATR)
+            const atr = stock.atr || (currentPrice * 0.03); // 3% default ATR
+            const atrBasedTarget = currentPrice + (atr * 3); // 3x ATR
+            
+            // Usar el más conservador de ambos métodos
+            takeProfit = Math.min(takeProfit, atrBasedTarget);
+            
+            // Ajuste por scoring del sistema
+            const score = stock.score || 0;
+            if (score > 300) {
+                takeProfit *= 1.05; // 5% extra para scores altos
+            }
+            
+            return {
+                current: currentPrice,
+                stopLoss: stopLoss,
+                takeProfit: takeProfit,
+                riskReward: ((takeProfit - currentPrice) / (currentPrice - stopLoss)).toFixed(2)
+            };
+        }
+        
+        function generateReasoningText(stock, consistency) {
+            let reasoning = [];
+            
+            // Análisis técnico
+            const outperf = stock.metrics?.outperformance_60d || 0;
+            if (outperf > 50) {
+                reasoning.push(`Outperformance excepcional del ${outperf.toFixed(1)}% vs SPY en 60 días`);
+            } else if (outperf > 20) {
+                reasoning.push(`Sólida outperformance del ${outperf.toFixed(1)}% vs mercado`);
+            }
+            
+            // Análisis de consistencia
+            const frequency = consistency?.frequency || 0;
+            if (frequency >= 4) {
+                reasoning.push(`Consistencia alta: aparece ${frequency}/5 semanas consecutivas`);
+            } else if (frequency === 3) {
+                reasoning.push(`Consistencia media: aparece ${frequency}/5 semanas`);
+            }
+            
+            // Análisis de riesgo
+            const risk = stock.metrics?.risk_pct || 0;
+            if (risk < 8) {
+                reasoning.push(`Riesgo bajo (${risk.toFixed(1)}%) con stop-loss conservador`);
+            } else if (risk < 12) {
+                reasoning.push(`Riesgo moderado (${risk.toFixed(1)}%) dentro de parámetros`);
+            }
+            
+            // Análisis fundamental
+            const fundamentalScore = stock.metrics?.fundamental_score || 0;
+            if (fundamentalScore > 40) {
+                reasoning.push(`Fundamentales sólidos (${fundamentalScore} pts): crecimiento y ROE positivos`);
+            } else if (fundamentalScore > 20) {
+                reasoning.push(`Fundamentales aceptables (${fundamentalScore} pts)`);
+            }
+            
+            // Momentum
+            const volumeSurge = stock.metrics?.volume_surge || 0;
+            if (volumeSurge > 30) {
+                reasoning.push(`Momentum fuerte: volumen aumentó ${volumeSurge.toFixed(1)}%`);
+            }
+            
+            if (reasoning.length === 0) {
+                reasoning.push("Análisis basado en filtros técnicos y de consistencia del sistema");
+            }
+            
+            return reasoning.join(". ");
+        }
+        
         async function loadData() {
             try {
                 const response = await fetch('data.json');
                 if (!response.ok) throw new Error('No se pudieron cargar los datos');
                 
                 const data = await response.json();
-                renderConservativeDashboard(data);
+                renderImprovedDashboard(data);
                 
             } catch (error) {
                 console.error('Error loading data:', error);
                 
-                // Fallback: mostrar datos de ejemplo
+                // Fallback con datos de ejemplo más completos
                 const fallbackData = {
                     "timestamp": new Date().toISOString(),
                     "market_date": new Date().toISOString().split('T')[0],
@@ -506,20 +771,82 @@
                         "passed_filters": 12,
                         "consistent_winners": 5,
                         "strong_candidates": 3,
-                        "message": "Testing local - Sin datos reales"
+                        "message": "Testing local - Datos de ejemplo con niveles de trading"
                     },
+                    "top_picks": [
+                        {
+                            "rank": 1,
+                            "symbol": "NVDA",
+                            "company": "NVIDIA Corporation",
+                            "sector": "Technology",
+                            "price": 789.80,
+                            "current_price": 789.80,
+                            "stop_loss": 671.33,
+                            "score": 387.5,
+                            "metrics": {
+                                "risk_pct": 7.5,
+                                "outperformance_60d": 85.2,
+                                "volume_surge": 45.3,
+                                "fundamental_score": 65
+                            },
+                            "ma_levels": {
+                                "ma_21": 760.20,
+                                "ma_50": 720.15,
+                                "ma_200": 650.80
+                            },
+                            "target_hold": "2-3 meses"
+                        },
+                        {
+                            "rank": 2,
+                            "symbol": "GOOGL",
+                            "company": "Alphabet Inc Class A",
+                            "sector": "Technology",
+                            "price": 140.50,
+                            "current_price": 140.50,
+                            "stop_loss": 125.25,
+                            "score": 342.1,
+                            "metrics": {
+                                "risk_pct": 10.8,
+                                "outperformance_60d": 42.1,
+                                "volume_surge": 23.7,
+                                "fundamental_score": 55
+                            },
+                            "ma_levels": {
+                                "ma_21": 138.90,
+                                "ma_50": 135.20,
+                                "ma_200": 128.50
+                            },
+                            "target_hold": "2-3 meses"
+                        }
+                    ],
                     "consistency_analysis": {
                         "weeks_analyzed": 5,
-                        "consistent_winners": ["AAPL", "NVDA", "GOOGL", "MSFT", "META"],
+                        "consistent_winners": ["NVDA", "GOOGL", "AAPL", "MSFT", "META"],
                         "strong_candidates": ["TSLA", "AMZN", "CRM"],
                         "newly_emerged": ["ASML", "NOW"]
                     },
                     "rotation_recommendations": {
-                        "overall_action": "EVALUATE_CHANGES",
+                        "overall_action": "ACTION_REQUIRED",
                         "strong_buys": ["NVDA", "GOOGL"],
                         "consider_exits": ["AMD"],
                         "urgent_exits": [],
-                        "holds": ["AAPL", "MSFT"]
+                        "holds": ["AAPL", "MSFT"],
+                        "detailed_recommendations": [
+                            {
+                                "symbol": "NVDA",
+                                "action": "STRONG_BUY",
+                                "reason": "Consistent winner 5/5 semanas. Outperformance excepcional del 85% vs SPY. Fundamentales sólidos con crecimiento AI. Risk/Reward ratio 2.8:1.",
+                                "price": 789.80,
+                                "stop_loss": 671.33,
+                                "take_profit": 987.25
+                            },
+                            {
+                                "symbol": "AMD",
+                                "action": "CONSIDER_EXIT",
+                                "reason": "Perdiendo consistencia: solo 1/5 últimas semanas. Underperformance del -12% vs SPY en 60 días. Presión competitiva de NVDA.",
+                                "current_position": "15% de cartera"
+                            }
+                        ]
                     },
                     "market_context": {
                         "spy_20d": 2.3,
@@ -528,17 +855,16 @@
                     }
                 };
                 
-                console.log('Usando datos de fallback para testing local');
-                renderConservativeDashboard(fallbackData);
+                console.log('Usando datos de fallback mejorados para testing local');
+                renderImprovedDashboard(fallbackData);
                 
-                // Mostrar información de error
                 const errorInfo = document.createElement('div');
                 errorInfo.innerHTML = `
                     <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px; color: #856404;">
-                        <strong>⚠️ Modo Testing Local</strong><br>
+                        <strong>⚠️ Modo Testing Local - Datos de Ejemplo</strong><br>
                         <small>
-                            No se pueden cargar datos reales desde archivo local.<br>
-                            Para datos reales, ejecuta desde servidor HTTP.<br>
+                            Se muestran datos de ejemplo con niveles de trading completos.<br>
+                            Para datos reales, ejecuta desde servidor HTTP con archivos del bot.<br>
                         </small>
                     </div>
                 `;
@@ -546,10 +872,10 @@
             }
         }
         
-        function renderConservativeDashboard(data) {
+        function renderImprovedDashboard(data) {
             const contentEl = document.getElementById('content');
             
-            // Resumen
+            // Resumen mejorado
             const summaryHtml = `
                 <div class="summary">
                     <div class="summary-grid">
@@ -565,12 +891,96 @@
                             <div class="summary-number warning">${data.summary.strong_candidates}</div>
                             <div class="summary-label">Candidates</div>
                         </div>
+                        <div class="summary-item">
+                            <div class="summary-number info">${data.top_picks ? data.top_picks.length : 0}</div>
+                            <div class="summary-label">Top Picks</div>
+                        </div>
                     </div>
                 </div>
             `;
             
-            // Secciones de análisis
             let analysisHtml = `<div class="analysis-sections">`;
+            
+            // TOP PICKS con niveles de trading
+            if (data.top_picks && data.top_picks.length > 0) {
+                analysisHtml += `
+                    <div class="analysis-card">
+                        <div class="section-title picks">Top Picks con Niveles de Trading</div>
+                        <div class="top-picks-grid">
+                `;
+                
+                data.top_picks.slice(0, 8).forEach(stock => {
+                    const levels = calculateTradingLevels(stock);
+                    const consistency = data.consistency_analysis ? 
+                        (data.consistency_analysis.consistent_winners.includes(stock.symbol) ? 
+                            {frequency: 5, category: 'consistent_winner'} :
+                            {frequency: 3, category: 'strong_candidate'}) :
+                        {frequency: 2, category: 'emerging'};
+                    
+                    const reasoning = generateReasoningText(stock, consistency);
+                    
+                    analysisHtml += `
+                        <div class="pick-card">
+                            <div class="pick-header">
+                                <div class="pick-symbol">${stock.symbol}</div>
+                                <div class="pick-price">$${levels.current.toFixed(2)}</div>
+                            </div>
+                            <div class="pick-company">${stock.company || 'N/A'} • ${stock.sector || 'N/A'}</div>
+                            
+                            <div class="trading-levels">
+                                <div class="level-item">
+                                    <div class="level-value current">$${levels.current.toFixed(2)}</div>
+                                    <div class="level-label">Precio Actual</div>
+                                </div>
+                                <div class="level-item">
+                                    <div class="level-value stop-loss">$${levels.stopLoss.toFixed(2)}</div>
+                                    <div class="level-label">Stop Loss</div>
+                                </div>
+                                <div class="level-item">
+                                    <div class="level-value take-profit">$${levels.takeProfit.toFixed(2)}</div>
+                                    <div class="level-label">Take Profit</div>
+                                </div>
+                                <div class="level-item">
+                                    <div class="level-value">${levels.riskReward}:1</div>
+                                    <div class="level-label">Risk/Reward</div>
+                                </div>
+                            </div>
+                            
+                            <div class="pick-metrics">
+                                <div class="metric-item">
+                                    <div class="metric-value">${((levels.takeProfit - levels.current) / levels.current * 100).toFixed(1)}%</div>
+                                    <div class="metric-label">Upside</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">${stock.metrics?.risk_pct?.toFixed(1) || 'N/A'}%</div>
+                                    <div class="metric-label">Risk</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">+${stock.metrics?.outperformance_60d?.toFixed(1) || 'N/A'}%</div>
+                                    <div class="metric-label">vs SPY 60d</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">${stock.score?.toFixed(0) || 'N/A'}</div>
+                                    <div class="metric-label">Score</div>
+                                </div>
+                            </div>
+                            
+                            <div class="pick-reasoning">
+                                <div class="reasoning-title">📋 Por qué esta recomendación:</div>
+                                <div class="reasoning-text">${reasoning}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                analysisHtml += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Layout de dos columnas para el resto
+            analysisHtml += `<div class="two-column">`;
             
             // Análisis de consistencia
             if (data.consistency_analysis) {
@@ -590,7 +1000,7 @@
                         </div>
                         
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">🏆 Consistent Winners:</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">🏆 Consistent Winners (4-5 semanas):</div>
                             <div class="symbol-list">
                                 ${data.consistency_analysis.consistent_winners.map(symbol => 
                                     `<span class="symbol-badge">${symbol}</span>`
@@ -599,7 +1009,7 @@
                         </div>
                         
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">💎 Strong Candidates:</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">💎 Strong Candidates (3 semanas):</div>
                             <div class="symbol-list">
                                 ${data.consistency_analysis.strong_candidates.map(symbol => 
                                     `<span class="symbol-badge candidate">${symbol}</span>`
@@ -609,7 +1019,7 @@
                         
                         ${data.consistency_analysis.newly_emerged.length > 0 ? `
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">🆕 Newly Emerged:</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">🆕 Newly Emerged (vigilar):</div>
                             <div class="symbol-list">
                                 ${data.consistency_analysis.newly_emerged.map(symbol => 
                                     `<span class="symbol-badge emerging">${symbol}</span>`
@@ -621,7 +1031,7 @@
                 `;
             }
             
-            // Recomendaciones de rotación
+            // Recomendaciones de rotación mejoradas
             if (data.rotation_recommendations) {
                 const overallAction = data.rotation_recommendations.overall_action;
                 let actionBadgeClass = 'no-action';
@@ -642,87 +1052,86 @@
                         <div style="margin-bottom: 15px;">
                             <span class="action-badge ${actionBadgeClass}">${actionText}</span>
                         </div>
+                        
+                        <div class="rotation-recommendations">
                 `;
                 
-                if (data.rotation_recommendations.holds.length > 0) {
-                    analysisHtml += `
-                        <div class="rotation-section">
-                            <div class="rotation-title hold">Mantener:</div>
-                            <div class="symbol-list">
-                                ${data.rotation_recommendations.holds.map(symbol => 
-                                    `<span class="symbol-badge">${symbol}</span>`
-                                ).join('')}
+                // Usar recomendaciones detalladas si están disponibles
+                if (data.rotation_recommendations.detailed_recommendations) {
+                    data.rotation_recommendations.detailed_recommendations.forEach(rec => {
+                        let actionClass = 'hold';
+                        if (rec.action.includes('EXIT')) actionClass = rec.action.includes('URGENT') ? 'urgent-exit' : 'exit';
+                        else if (rec.action.includes('BUY')) actionClass = 'buy';
+                        
+                        analysisHtml += `
+                            <div class="recommendation-item ${actionClass}">
+                                <div class="recommendation-header">
+                                    <span class="recommendation-symbol">${rec.symbol}</span>
+                                    <span class="recommendation-action ${actionClass}">${rec.action.replace('_', ' ')}</span>
+                                </div>
+                                <div class="recommendation-reason">${rec.reason}</div>
+                                ${rec.price ? `
+                                    <div style="margin-top: 8px; font-size: 0.8em; color: #666;">
+                                        Precio: $${rec.price} 
+                                        ${rec.stop_loss ? `| Stop: $${rec.stop_loss}` : ''}
+                                        ${rec.take_profit ? `| Target: $${rec.take_profit}` : ''}
+                                    </div>
+                                ` : ''}
                             </div>
-                        </div>
-                    `;
+                        `;
+                    });
+                } else {
+                    // Fallback a formato original
+                    if (data.rotation_recommendations.holds.length > 0) {
+                        data.rotation_recommendations.holds.forEach(symbol => {
+                            analysisHtml += `
+                                <div class="recommendation-item">
+                                    <div class="recommendation-header">
+                                        <span class="recommendation-symbol">${symbol}</span>
+                                        <span class="recommendation-action">MANTENER</span>
+                                    </div>
+                                    <div class="recommendation-reason">Mantiene fuerza consistente en el análisis semanal</div>
+                                </div>
+                            `;
+                        });
+                    }
                 }
                 
-                if (data.rotation_recommendations.strong_buys.length > 0) {
-                    analysisHtml += `
-                        <div class="rotation-section">
-                            <div class="rotation-title buy">Compra fuerte:</div>
-                            <div class="symbol-list">
-                                ${data.rotation_recommendations.strong_buys.map(symbol => 
-                                    `<span class="symbol-badge">${symbol}</span>`
-                                ).join('')}
-                            </div>
+                analysisHtml += `
                         </div>
-                    `;
-                }
-                
-                if (data.rotation_recommendations.consider_exits.length > 0) {
-                    analysisHtml += `
-                        <div class="rotation-section">
-                            <div class="rotation-title exit">Considerar salida:</div>
-                            <div class="symbol-list">
-                                ${data.rotation_recommendations.consider_exits.map(symbol => 
-                                    `<span class="symbol-badge emerging">${symbol}</span>`
-                                ).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                if (data.rotation_recommendations.urgent_exits.length > 0) {
-                    analysisHtml += `
-                        <div class="rotation-section">
-                            <div class="rotation-title exit">Salida urgente:</div>
-                            <div class="symbol-list">
-                                ${data.rotation_recommendations.urgent_exits.map(symbol => 
-                                    `<span class="symbol-badge" style="background: #e74c3c;">${symbol}</span>`
-                                ).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                analysisHtml += `</div>`;
+                    </div>
+                `;
             }
+            
+            analysisHtml += `</div>`; // Cerrar two-column
             
             // Contexto de mercado
             if (data.market_context) {
                 analysisHtml += `
                     <div class="market-context">
-                        <h4>📊 Contexto SPY</h4>
+                        <h4>📊 Contexto SPY & Gestión Activa</h4>
                         <div class="spy-metrics">
                             <div class="spy-metric">
                                 <div class="spy-value ${data.market_context.spy_20d >= 0 ? 'positive' : 'negative'}">
                                     ${data.market_context.spy_20d >= 0 ? '+' : ''}${data.market_context.spy_20d.toFixed(1)}%
                                 </div>
-                                <div class="spy-label">20 días</div>
+                                <div class="spy-label">SPY 20 días</div>
                             </div>
                             <div class="spy-metric">
                                 <div class="spy-value ${data.market_context.spy_60d >= 0 ? 'positive' : 'negative'}">
                                     ${data.market_context.spy_60d >= 0 ? '+' : ''}${data.market_context.spy_60d.toFixed(1)}%
                                 </div>
-                                <div class="spy-label">60 días</div>
+                                <div class="spy-label">SPY 60 días</div>
                             </div>
                             <div class="spy-metric">
                                 <div class="spy-value ${data.market_context.spy_90d >= 0 ? 'positive' : 'negative'}">
                                     ${data.market_context.spy_90d >= 0 ? '+' : ''}${data.market_context.spy_90d.toFixed(1)}%
                                 </div>
-                                <div class="spy-label">90 días</div>
+                                <div class="spy-label">SPY 90 días</div>
                             </div>
+                        </div>
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 8px; font-size: 0.85em; color: #666;">
+                            <strong>💡 Gestión Activa:</strong> Los take profit son orientativos. Revisa semanalmente: si una acción pierde consistencia (no aparece 2+ semanas consecutivas), considera salida gradual independientemente del precio target.
                         </div>
                     </div>
                 `;
@@ -737,8 +1146,9 @@
                     📅 Última actualización: ${updateTime}<br>
                     🗓️ Fecha de análisis: ${data.market_date}<br>
                     ⏰ Próximo análisis: ${getNextUpdateTime()}<br>
+                    📅 Ejecución automática: Sábados 10 AM España<br>
                     <div class="signature">
-                        <small>🚀 Conservative Trading Bot by <strong>0t4c0n</strong></small>
+                        <small>🚀 Conservative Trading Bot con Niveles de Trading by <strong>0t4c0n</strong></small>
                     </div>
                 </div>
             `;

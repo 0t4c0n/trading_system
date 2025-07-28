@@ -1,10 +1,10 @@
-# .github/workflows/weekly_conservative_analysis.yml
-name: Weekly Conservative Stock Analysis
+# .github/workflows/enhanced_conservative_analysis.yml
+name: Enhanced Conservative Stock Analysis with Trading Levels
 
 on:
   schedule:
-    # Lunes a las 2:00 PM UTC (9:00 AM EST / 3:00 PM España)
-    - cron: '0 14 * * 1'
+    # Sábados a las 10:00 AM España (9:00 AM UTC)
+    - cron: '0 9 * * 6'
   workflow_dispatch:  # Permitir ejecución manual
 
 # PERMISOS NECESARIOS PARA GITHUB PAGES Y COMMITS
@@ -15,13 +15,13 @@ permissions:
 
 # Asegurar que solo un workflow corra a la vez
 concurrency:
-  group: "conservative-analysis"
+  group: "enhanced-conservative-analysis"
   cancel-in-progress: false
 
 jobs:
-  conservative-analysis:
+  enhanced-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 90  # 1.5 horas máximo
+    timeout-minutes: 150  # 2.5 horas para análisis completo
     
     # Configurar entorno para GitHub Pages
     environment:
@@ -39,12 +39,13 @@ jobs:
       with:
         python-version: '3.9'
         
-    - name: Cache dependencies
+    - name: Cache dependencies mejorado
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-enhanced-${{ hashFiles('requirements.txt') }}
         restore-keys: |
+          ${{ runner.os }}-pip-enhanced-
           ${{ runner.os }}-pip-
         
     - name: Instalar dependencias
@@ -54,135 +55,336 @@ jobs:
         
     - name: Verificar archivos de configuración
       run: |
-        echo "=== VERIFICANDO CONFIGURACIÓN ==="
+        echo "=== VERIFICANDO CONFIGURACIÓN MEJORADA ==="
         if [ ! -f "current_portfolio.json" ]; then
           echo "⚠️ current_portfolio.json no encontrado - se creará ejemplo"
         else
           echo "✓ current_portfolio.json encontrado"
-          cat current_portfolio.json
+          echo "Posiciones actuales:"
+          python3 -c "
+import json
+try:
+    with open('current_portfolio.json', 'r') as f:
+        data = json.load(f)
+    positions = list(data.get('positions', {}).keys())
+    print(f'📂 {len(positions)} posiciones: {positions}')
+    print(f'💰 Cash disponible: ${data.get(\"cash\", 0):,.2f}')
+except Exception as e:
+    print(f'❌ Error leyendo portfolio: {e}')
+          "
         fi
         
         echo ""
         echo "=== ARCHIVOS HISTÓRICOS ==="
-        ls -la weekly_screening_results*.json || echo "Sin historial de screening"
-        ls -la consistency_analysis*.json || echo "Sin historial de consistencia"
+        ls -la weekly_screening_results*.json enhanced_screening_results*.json || echo "Sin historial de screening"
+        ls -la consistency_analysis*.json rotation_recommendations*.json || echo "Sin historial de análisis"
         
-    - name: 1. Ejecutar screening conservador
+        echo ""
+        echo "=== VERIFICANDO SCRIPTS MEJORADOS ==="
+        for script in "conservative_screener.py" "consistency_analyzer.py" "rotation_recommender.py" "create_weekly_report.py"; do
+          if [ -f "$script" ]; then
+            echo "✓ $script encontrado"
+          else
+            echo "❌ $script NO ENCONTRADO"
+          fi
+        done
+        
+    - name: 1. Ejecutar screening conservador mejorado
       run: |
-        echo "🔍 PASO 1: Screening conservador de acciones..."
-        python conservative_screener.py
+        echo "🔍 PASO 1: Screening conservador mejorado con niveles de trading..."
+        echo "Iniciando análisis de 3000+ acciones con cálculo dinámico de stop-loss y take-profit"
+        
+        # Usar screener mejorado si existe, sino el original
+        if [ -f "enhanced_conservative_screener.py" ]; then
+          echo "Usando screener mejorado..."
+          python enhanced_conservative_screener.py
+        else
+          echo "Usando screener original..."
+          python conservative_screener.py
+        fi
+        
+        echo "Verificando resultados del screening..."
+        if [ -f "weekly_screening_results.json" ]; then
+          echo "✅ Screening completado exitosamente"
+          python3 -c "
+import json
+with open('weekly_screening_results.json', 'r') as f:
+    data = json.load(f)
+results = data.get('detailed_results', [])
+print(f'📊 {len(results)} acciones pasaron filtros conservadores')
+if results:
+    avg_rr = sum(r.get('risk_reward_ratio', 0) for r in results) / len(results)
+    print(f'⚖️ Risk/Reward promedio: {avg_rr:.1f}:1')
+    top_5 = [r['symbol'] for r in results[:5]]
+    print(f'🏆 Top 5: {top_5}')
+          "
+        else
+          echo "❌ Error en screening - archivo de resultados no encontrado"
+          exit 1
+        fi
       env:
         PYTHONUNBUFFERED: 1
         
     - name: 2. Analizar consistencia histórica
       run: |
-        echo "📊 PASO 2: Análisis de consistencia (5 semanas)..."
+        echo "📊 PASO 2: Análisis de consistencia (5 semanas) con scoring avanzado..."
         python consistency_analyzer.py
-      env:
-        PYTHONUNBUFFERED: 1
-        
-    - name: 3. Generar recomendaciones de rotación
-      run: |
-        echo "🎯 PASO 3: Recomendaciones de rotación..."
-        python rotation_recommender.py
-      env:
-        PYTHONUNBUFFERED: 1
-        
-    - name: 4. Crear reporte semanal completo
-      run: |
-        echo "📋 PASO 4: Generando reporte semanal..."
-        python create_weekly_report.py
-      env:
-        PYTHONUNBUFFERED: 1
-        
-    - name: Verificar archivos generados
-      run: |
-        echo "=== ARCHIVOS GENERADOS ==="
-        echo "Screening results:"
-        ls -la weekly_screening_results.json screening_results_full_*.json || echo "Sin resultados de screening"
-        
-        echo ""
-        echo "Análisis:"
-        ls -la consistency_analysis.json rotation_recommendations.json || echo "Sin análisis"
-        
-        echo ""
-        echo "Reportes:"
-        ls -la WEEKLY_REPORT_*.md docs/data.json || echo "Sin reportes"
-        
-        echo ""
-        echo "=== CONTENIDO DATA.JSON (primeras líneas) ==="
-        if [ -f "docs/data.json" ]; then
-          head -20 docs/data.json
-          echo "Tamaño: $(stat -c%s docs/data.json) bytes"
-        else
-          echo "❌ docs/data.json no encontrado"
-        fi
-        
-    - name: Crear resumen de commit
-      run: |
-        echo "=== CREANDO RESUMEN DE COMMIT ==="
-        
-        # Extraer información clave para el commit
-        REPORT_DATE=$(date +%Y-%m-%d)
-        
-        # Contar resultados
-        TOP_STOCKS=""
-        CONSISTENT_COUNT=0
-        ACTION_REQUIRED="NO_ACTION"
-        
-        if [ -f "weekly_screening_results.json" ]; then
-          TOP_STOCKS=$(python3 -c "
-import json
-try:
-    with open('weekly_screening_results.json', 'r') as f:
-        data = json.load(f)
-    symbols = [r['symbol'] for r in data.get('detailed_results', [])[:5]]
-    print(', '.join(symbols) if symbols else 'None')
-except:
-    print('Error')
-          ")
-        fi
         
         if [ -f "consistency_analysis.json" ]; then
-          CONSISTENT_COUNT=$(python3 -c "
+          echo "✅ Análisis de consistencia completado"
+          python3 -c "
 import json
-try:
-    with open('consistency_analysis.json', 'r') as f:
-        data = json.load(f)
-    print(data.get('summary_stats', {}).get('consistent_winners_count', 0))
-except:
-    print(0)
-          ")
+with open('consistency_analysis.json', 'r') as f:
+    data = json.load(f)
+stats = data.get('summary_stats', {})
+print(f'🏆 Consistent Winners: {stats.get(\"consistent_winners_count\", 0)}')
+print(f'💎 Strong Candidates: {stats.get(\"strong_candidates_count\", 0)}')
+print(f'🌱 Emerging Opportunities: {stats.get(\"emerging_count\", 0)}')
+          "
+        else
+          echo "❌ Error en análisis de consistencia"
+          exit 1
+        fi
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: 3. Generar recomendaciones avanzadas de rotación
+      run: |
+        echo "🎯 PASO 3: Recomendaciones de rotación con análisis multifactorial..."
+        
+        # Usar rotation recommender mejorado si existe
+        if [ -f "advanced_rotation_recommender.py" ]; then
+          echo "Usando rotation recommender avanzado..."
+          python advanced_rotation_recommender.py
+        else
+          echo "Usando rotation recommender original..."
+          python rotation_recommender.py
         fi
         
         if [ -f "rotation_recommendations.json" ]; then
-          ACTION_REQUIRED=$(python3 -c "
+          echo "✅ Recomendaciones de rotación completadas"
+          python3 -c "
 import json
-try:
-    with open('rotation_recommendations.json', 'r') as f:
-        data = json.load(f)
-    print(data.get('action_summary', {}).get('overall_action', 'NO_ACTION'))
-except:
-    print('NO_ACTION')
-          ")
+with open('rotation_recommendations.json', 'r') as f:
+    data = json.load(f)
+action = data.get('action_summary', {}).get('overall_action', 'NO_ACTION')
+strong_buys = len(data.get('action_summary', {}).get('strong_buys', []))
+exits = len(data.get('action_summary', {}).get('consider_exits', [])) + len(data.get('action_summary', {}).get('urgent_exits', []))
+print(f'⚡ Acción general: {action}')
+print(f'🔥 Compras fuertes recomendadas: {strong_buys}')
+print(f'⚠️ Salidas a considerar: {exits}')
+if data.get('analysis_type') == 'advanced_multifactor':
+    print('🚀 Análisis multifactorial avanzado completado')
+          "
+        else
+          echo "❌ Error en recomendaciones de rotación"
+          exit 1
+        fi
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: 4. Crear reporte semanal mejorado
+      run: |
+        echo "📋 PASO 4: Generando reporte semanal mejorado con niveles de trading..."
+        
+        # Usar generador de reportes mejorado si existe
+        if [ -f "enhanced_report_generator.py" ]; then
+          echo "Usando generador de reportes mejorado..."
+          python enhanced_report_generator.py
+        else
+          echo "Usando generador de reportes original..."
+          python create_weekly_report.py
         fi
         
-        # Crear mensaje de commit informativo
-        echo "📊 Weekly Analysis $REPORT_DATE" > commit_message.txt
-        echo "" >> commit_message.txt
-        echo "🏆 Top stocks: $TOP_STOCKS" >> commit_message.txt
-        echo "🎯 Consistent winners: $CONSISTENT_COUNT" >> commit_message.txt
-        echo "⚡ Action required: $ACTION_REQUIRED" >> commit_message.txt
-        echo "" >> commit_message.txt
-        echo "Generated by Conservative Trading Bot" >> commit_message.txt
+        echo "Verificando reportes generados..."
+        if [ -f "docs/data.json" ]; then
+          echo "✅ Dashboard data.json generado"
+          python3 -c "
+import json
+with open('docs/data.json', 'r') as f:
+    data = json.load(f)
+analysis_type = data.get('analysis_type', 'standard')
+top_picks = len(data.get('top_picks', []))
+print(f'📊 Tipo de análisis: {analysis_type}')
+print(f'🎯 Top picks generados: {top_picks}')
+if 'trading_metrics' in data:
+    metrics = data['trading_metrics']
+    print(f'⚖️ Avg R/R: {metrics.get(\"avg_risk_reward\", 0):.1f}:1')
+    print(f'📈 Oportunidades alta calidad: {metrics.get(\"high_quality_count\", 0)}')
+          "
+        else
+          echo "❌ Error generando dashboard data"
+          exit 1
+        fi
+        
+        # Verificar reportes Markdown
+        ENHANCED_REPORT=$(ls ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -1)
+        REGULAR_REPORT=$(ls WEEKLY_REPORT_*.md 2>/dev/null | head -1)
+        
+        if [ -n "$ENHANCED_REPORT" ]; then
+          echo "✅ Reporte mejorado generado: $ENHANCED_REPORT"
+        elif [ -n "$REGULAR_REPORT" ]; then
+          echo "✅ Reporte regular generado: $REGULAR_REPORT"
+        else
+          echo "⚠️ No se generó reporte Markdown"
+        fi
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: Verificar archivos generados y calidad
+      run: |
+        echo "=== VERIFICACIÓN FINAL DE ARCHIVOS ==="
+        
+        # Archivos principales
+        for file in "weekly_screening_results.json" "consistency_analysis.json" "rotation_recommendations.json" "docs/data.json"; do
+          if [ -f "$file" ]; then
+            size=$(stat -c%s "$file")
+            echo "✅ $file (${size} bytes)"
+          else
+            echo "❌ $file FALTANTE"
+          fi
+        done
+        
+        # Verificar calidad de datos
+        echo ""
+        echo "=== VERIFICACIÓN DE CALIDAD ==="
+        python3 -c "
+import json
+import os
+
+def check_file_quality(filename, min_size=100):
+    if not os.path.exists(filename):
+        print(f'❌ {filename}: No existe')
+        return False
+    
+    size = os.path.getsize(filename)
+    if size < min_size:
+        print(f'⚠️ {filename}: Muy pequeño ({size} bytes)')
+        return False
+    
+    try:
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        print(f'✅ {filename}: JSON válido ({size} bytes)')
+        return True
+    except Exception as e:
+        print(f'❌ {filename}: JSON inválido - {e}')
+        return False
+
+# Verificar archivos críticos
+files_ok = 0
+files_ok += check_file_quality('weekly_screening_results.json', 1000)
+files_ok += check_file_quality('consistency_analysis.json', 500)
+files_ok += check_file_quality('rotation_recommendations.json', 500)
+files_ok += check_file_quality('docs/data.json', 1000)
+
+print(f'\\n📊 Resumen: {files_ok}/4 archivos OK')
+if files_ok < 3:
+    print('❌ CALIDAD INSUFICIENTE - Revisar logs')
+    exit(1)
+else:
+    print('✅ CALIDAD ACEPTABLE')
+        "
+        
+        # Mostrar estadísticas finales
+        echo ""
+        echo "=== ESTADÍSTICAS FINALES ==="
+        python3 -c "
+import json
+from datetime import datetime
+
+# Cargar datos principales
+try:
+    with open('weekly_screening_results.json', 'r') as f:
+        screening = json.load(f)
+    with open('consistency_analysis.json', 'r') as f:
+        consistency = json.load(f)
+    with open('rotation_recommendations.json', 'r') as f:
+        rotation = json.load(f)
+        
+    # Estadísticas
+    total_screened = len(screening.get('detailed_results', []))
+    winners = consistency.get('summary_stats', {}).get('consistent_winners_count', 0)
+    action = rotation.get('action_summary', {}).get('overall_action', 'NO_ACTION')
+    
+    print(f'📊 Total filtradas: {total_screened}')
+    print(f'🏆 Consistent winners: {winners}')
+    print(f'⚡ Acción requerida: {action}')
+    print(f'📅 Análisis completado: {datetime.now().strftime(\"%Y-%m-%d %H:%M UTC\")}')
+    
+    # Verificar mejoras
+    analysis_type = rotation.get('analysis_type', 'standard')
+    if analysis_type == 'advanced_multifactor':
+        print('🚀 ANÁLISIS AVANZADO ACTIVADO')
+    
+    if 'trading_metrics' in screening:
+        print('📈 NIVELES DE TRADING CALCULADOS')
+        
+except Exception as e:
+    print(f'⚠️ Error en estadísticas finales: {e}')
+        "
+        
+    - name: Crear resumen de commit mejorado
+      run: |
+        echo "=== CREANDO RESUMEN DE COMMIT MEJORADO ==="
+        
+        REPORT_DATE=$(date +%Y-%m-%d)
+        
+        # Extraer información clave
+        python3 -c "
+import json
+from datetime import datetime
+
+try:
+    # Cargar datos
+    with open('weekly_screening_results.json', 'r') as f:
+        screening = json.load(f)
+    with open('consistency_analysis.json', 'r') as f:
+        consistency = json.load(f)
+    with open('rotation_recommendations.json', 'r') as f:
+        rotation = json.load(f)
+    
+    # Extraer información
+    results = screening.get('detailed_results', [])
+    top_symbols = [r['symbol'] for r in results[:5]]
+    winners_count = consistency.get('summary_stats', {}).get('consistent_winners_count', 0)
+    action = rotation.get('action_summary', {}).get('overall_action', 'NO_ACTION')
+    
+    # Métricas de trading si están disponibles
+    trading_metrics = ''
+    if results:
+        avg_rr = sum(r.get('risk_reward_ratio', 0) for r in results) / len(results)
+        high_quality = len([r for r in results if r.get('risk_reward_ratio', 0) > 2.5])
+        trading_metrics = f' | Avg R/R: {avg_rr:.1f}:1 | High Quality: {high_quality}'
+    
+    # Detectar tipo de análisis
+    analysis_type = 'Enhanced' if rotation.get('analysis_type') == 'advanced_multifactor' else 'Standard'
+    
+    # Crear mensaje
+    with open('commit_message.txt', 'w') as f:
+        f.write(f'📈 {analysis_type} Weekly Analysis $REPORT_DATE\\n\\n')
+        f.write(f'🏆 Top 5: {', '.join(top_symbols) if top_symbols else 'None'}\\n')
+        f.write(f'🎯 Consistent Winners: {winners_count}\\n')
+        f.write(f'⚡ Action Required: {action}\\n')
+        f.write(f'📊 Total Filtered: {len(results)}{trading_metrics}\\n\\n')
+        f.write(f'🤖 Enhanced Trading Bot with Levels - {datetime.now().strftime(\"%H:%M UTC\")}\\n')
+    
+    print('✅ Commit message generado')
+    
+except Exception as e:
+    print(f'❌ Error generando commit message: {e}')
+    # Fallback message
+    with open('commit_message.txt', 'w') as f:
+        f.write(f'📊 Weekly Analysis $REPORT_DATE\\n\\nGenerated by Enhanced Conservative Trading Bot\\n')
+        " REPORT_DATE="$REPORT_DATE"
         
         cat commit_message.txt
         
-    - name: Commit resultados semanales
+    - name: Commit resultados semanales mejorados
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message_file: commit_message.txt
-        file_pattern: 'weekly_screening_results.json consistency_analysis.json rotation_recommendations.json WEEKLY_REPORT_*.md docs/data.json screening_results_full_*.json'
+        file_pattern: 'weekly_screening_results.json consistency_analysis.json rotation_recommendations.json docs/data.json *WEEKLY_REPORT*.md enhanced_screening_results*.json'
         
     - name: Configurar Pages
       uses: actions/configure-pages@v4
@@ -196,25 +398,77 @@ except:
       id: deployment
       uses: actions/deploy-pages@v4
       
-    - name: Limpiar archivos temporales antiguos
+    - name: Limpiar archivos antiguos
       run: |
         echo "🧹 Limpiando archivos antiguos..."
         
         # Mantener solo los últimos 5 archivos de screening completo
-        ls -t screening_results_full_*.json | tail -n +6 | xargs -r rm -f
+        ls -t enhanced_screening_results*.json 2>/dev/null | tail -n +6 | xargs -r rm -f
+        ls -t screening_results_full*.json 2>/dev/null | tail -n +6 | xargs -r rm -f
+        
+        # Limpiar reportes antiguos (mantener últimos 3)
+        ls -t ENHANCED_WEEKLY_REPORT*.md 2>/dev/null | tail -n +4 | xargs -r rm -f
+        ls -t WEEKLY_REPORT*.md 2>/dev/null | tail -n +4 | xargs -r rm -f
         
         echo "✓ Limpieza completada"
         
-    - name: Resumen final
+    - name: Resumen final mejorado
       run: |
         echo "================================="
-        echo "✅ ANÁLISIS SEMANAL COMPLETADO"
+        echo "✅ ANÁLISIS SEMANAL MEJORADO COMPLETADO"
         echo "================================="
-        echo "Fecha: $(date)"
-        echo "Duración: ${{ job.duration || 'N/A' }}"
+        echo "Fecha: $(date '+%Y-%m-%d %H:%M:%S UTC')"
         echo ""
-        echo "📊 Dashboard disponible en: ${{ steps.deployment.outputs.page_url }}"
-        echo "📋 Reportes generados en el repositorio"
+        
+        # Verificar tipo de análisis realizado
+        if [ -f "rotation_recommendations.json" ]; then
+          ANALYSIS_TYPE=$(python3 -c "
+import json
+try:
+    with open('rotation_recommendations.json', 'r') as f:
+        data = json.load(f)
+    print(data.get('analysis_type', 'standard'))
+except:
+    print('standard')
+          ")
+          echo "🔬 Tipo de análisis: $ANALYSIS_TYPE"
+        fi
+        
+        # Verificar características activadas
+        if [ -f "docs/data.json" ]; then
+          python3 -c "
+import json
+try:
+    with open('docs/data.json', 'r') as f:
+        data = json.load(f)
+    
+    features = []
+    if 'trading_metrics' in data:
+        features.append('Niveles de Trading')
+    if data.get('analysis_type') == 'enhanced_conservative_with_trading_levels':
+        features.append('Análisis Avanzado')
+    if any('take_profit' in str(pick) for pick in data.get('top_picks', [])):
+        features.append('Stop/Target Dinámicos')
+    
+    if features:
+        print('🚀 Características activadas: ' + ', '.join(features))
+    else:
+        print('📊 Análisis estándar completado')
+        
+except Exception as e:
+    print('📊 Análisis completado (verificación de características falló)')
+          "
+        fi
+        
         echo ""
-        echo "🔄 Próximo análisis: $(date -d '+7 days' '+%Y-%m-%d %H:%M UTC')"
+        echo "📊 Dashboard: ${{ steps.deployment.outputs.page_url }}"
+        echo "📋 Reportes: Guardados en repositorio"
+        echo "🔄 Próximo análisis: $(date -d '+7 days' '+%Y-%m-%d 10:00 España')"
+        echo ""
+        echo "💡 NUEVAS CARACTERÍSTICAS:"
+        echo "   ✅ Niveles de stop-loss y take-profit dinámicos"
+        echo "   ✅ Risk/Reward ratios calculados"
+        echo "   ✅ Scoring multifactorial avanzado"
+        echo "   ✅ Gestión activa de posiciones"
+        echo "   ✅ Dashboard mejorado con niveles"
         echo "================================="
