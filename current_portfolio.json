@@ -1,0 +1,49 @@
+{
+  "positions": {
+    "GOGO": {
+      "shares": 24,
+      "entry_price": 16.20,
+      "entry_date": "2025-07-28T21:00:00Z",
+      "broker": "Degiro",
+      "notes": "Inicial"
+    },
+    "TTMI": {
+      "shares": 8,
+      "entry_price": 46.06,
+      "entry_date": "2025-07-28T21:00:00Z",
+      "broker": "Degiro",
+      "notes": "Inicial"
+    },
+    "ADNT": {
+      "shares": 17,
+      "entry_price": 22.7399,
+      "entry_date": "2025-07-28T21:00:00Z",
+      "broker": "Degiro",
+      "notes": "Inicial"
+    },
+    "SOFI": {
+      "shares": 20,
+      "entry_price": 21.015,
+      "entry_date": "2025-07-28T21:00:00Z",
+      "broker": "Degiro",
+      "notes": "Inicial"
+    },
+    "ACAD": {
+      "shares": 16,
+      "entry_price": 22.75,
+      "entry_date": "2025-07-28T21:00:00Z",
+      "broker": "Degiro",
+      "notes": "Inicial"
+    }
+  },
+  "cash": 0,
+  "total_invested": 1718,
+  "last_manual_update": "2025-07-28T10:00:00Z",
+  "notes": "Archivo de ejemplo - actualizar con tus posiciones reales y precios de entrada",
+  "strategy": {
+    "max_positions": 5,
+    "target_hold_period": "2-3 meses",
+    "risk_per_position": "15% máximo",
+    "objective": "Superar SPY con riesgo controlado"
+  }
+}

@@ -1,0 +1,41 @@
+# Enhanced Conservative Trading Bot - Requirements
+# Versión 2.0.0 con niveles de trading dinámicos
+
+# Core financial data and analysis
+yfinance==0.2.60                # Yahoo Finance API para datos históricos
+pandas==2.2.3                   # Análisis y manipulación de datos
+numpy==1.24.3                   # Computación numérica para cálculos técnicos
+
+# HTTP requests para APIs
+requests==2.31.0               # Requests para APIs de exchanges (NYSE/NASDAQ)
+
+# Enhanced dependencies for advanced features
+scipy==1.11.4                  # Funciones científicas para percentiles y estadísticas
+scikit-learn==1.3.2           # Machine learning básico para scoring
+matplotlib==3.8.2             # Visualización opcional para backtesting
+
+# Data validation and processing
+jsonschema==4.20.0            # Validación de JSON schemas
+python-dateutil==2.8.2        # Manejo avanzado de fechas
+
+# Optional: Enhanced analysis capabilities
+#ta-lib==0.6.3                # Technical Analysis Library (opcional)
+# Nota: TA-Lib requiere instalación manual en algunos sistemas
+# Si falla, el sistema funcionará sin esta dependencia
+
+# Performance and caching
+lru-dict==1.2.0               # Cache optimizado para datos frecuentes
+
+# Development and testing (opcional)
+pytest==7.4.3                 # Testing framework
+pytest-cov==4.1.0             # Coverage testing
+black==23.11.0                # Code formatting
+flake8==6.1.0                 # Code linting
+
+# Backup libraries (en caso de problemas con principales)
+beautifulsoup4==4.12.2        # Web scraping alternativo
+lxml==4.9.3                   # XML/HTML parsing
+
+# Logging and monitoring
+colorama==0.4.6               # Colored terminal output
+tqdm==4.66.1                  # Progress bars para análisis largos
