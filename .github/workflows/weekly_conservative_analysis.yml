@@ -1,0 +1,220 @@
+# .github/workflows/weekly_conservative_analysis.yml
+name: Weekly Conservative Stock Analysis
+
+on:
+  schedule:
+    # Lunes a las 2:00 PM UTC (9:00 AM EST / 3:00 PM España)
+    - cron: '0 14 * * 1'
+  workflow_dispatch:  # Permitir ejecución manual
+
+# PERMISOS NECESARIOS PARA GITHUB PAGES Y COMMITS
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Asegurar que solo un workflow corra a la vez
+concurrency:
+  group: "conservative-analysis"
+  cancel-in-progress: false
+
+jobs:
+  conservative-analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90  # 1.5 horas máximo
+    
+    # Configurar entorno para GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Historial completo para análisis de consistencia
+        
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+        
+    - name: Instalar dependencias
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Verificar archivos de configuración
+      run: |
+        echo "=== VERIFICANDO CONFIGURACIÓN ==="
+        if [ ! -f "current_portfolio.json" ]; then
+          echo "⚠️ current_portfolio.json no encontrado - se creará ejemplo"
+        else
+          echo "✓ current_portfolio.json encontrado"
+          cat current_portfolio.json
+        fi
+        
+        echo ""
+        echo "=== ARCHIVOS HISTÓRICOS ==="
+        ls -la weekly_screening_results*.json || echo "Sin historial de screening"
+        ls -la consistency_analysis*.json || echo "Sin historial de consistencia"
+        
+    - name: 1. Ejecutar screening conservador
+      run: |
+        echo "🔍 PASO 1: Screening conservador de acciones..."
+        python conservative_screener.py
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: 2. Analizar consistencia histórica
+      run: |
+        echo "📊 PASO 2: Análisis de consistencia (5 semanas)..."
+        python consistency_analyzer.py
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: 3. Generar recomendaciones de rotación
+      run: |
+        echo "🎯 PASO 3: Recomendaciones de rotación..."
+        python rotation_recommender.py
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: 4. Crear reporte semanal completo
+      run: |
+        echo "📋 PASO 4: Generando reporte semanal..."
+        python create_weekly_report.py
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: Verificar archivos generados
+      run: |
+        echo "=== ARCHIVOS GENERADOS ==="
+        echo "Screening results:"
+        ls -la weekly_screening_results.json screening_results_full_*.json || echo "Sin resultados de screening"
+        
+        echo ""
+        echo "Análisis:"
+        ls -la consistency_analysis.json rotation_recommendations.json || echo "Sin análisis"
+        
+        echo ""
+        echo "Reportes:"
+        ls -la WEEKLY_REPORT_*.md docs/data.json || echo "Sin reportes"
+        
+        echo ""
+        echo "=== CONTENIDO DATA.JSON (primeras líneas) ==="
+        if [ -f "docs/data.json" ]; then
+          head -20 docs/data.json
+          echo "Tamaño: $(stat -c%s docs/data.json) bytes"
+        else
+          echo "❌ docs/data.json no encontrado"
+        fi
+        
+    - name: Crear resumen de commit
+      run: |
+        echo "=== CREANDO RESUMEN DE COMMIT ==="
+        
+        # Extraer información clave para el commit
+        REPORT_DATE=$(date +%Y-%m-%d)
+        
+        # Contar resultados
+        TOP_STOCKS=""
+        CONSISTENT_COUNT=0
+        ACTION_REQUIRED="NO_ACTION"
+        
+        if [ -f "weekly_screening_results.json" ]; then
+          TOP_STOCKS=$(python3 -c "
+import json
+try:
+    with open('weekly_screening_results.json', 'r') as f:
+        data = json.load(f)
+    symbols = [r['symbol'] for r in data.get('detailed_results', [])[:5]]
+    print(', '.join(symbols) if symbols else 'None')
+except:
+    print('Error')
+          ")
+        fi
+        
+        if [ -f "consistency_analysis.json" ]; then
+          CONSISTENT_COUNT=$(python3 -c "
+import json
+try:
+    with open('consistency_analysis.json', 'r') as f:
+        data = json.load(f)
+    print(data.get('summary_stats', {}).get('consistent_winners_count', 0))
+except:
+    print(0)
+          ")
+        fi
+        
+        if [ -f "rotation_recommendations.json" ]; then
+          ACTION_REQUIRED=$(python3 -c "
+import json
+try:
+    with open('rotation_recommendations.json', 'r') as f:
+        data = json.load(f)
+    print(data.get('action_summary', {}).get('overall_action', 'NO_ACTION'))
+except:
+    print('NO_ACTION')
+          ")
+        fi
+        
+        # Crear mensaje de commit informativo
+        echo "📊 Weekly Analysis $REPORT_DATE" > commit_message.txt
+        echo "" >> commit_message.txt
+        echo "🏆 Top stocks: $TOP_STOCKS" >> commit_message.txt
+        echo "🎯 Consistent winners: $CONSISTENT_COUNT" >> commit_message.txt
+        echo "⚡ Action required: $ACTION_REQUIRED" >> commit_message.txt
+        echo "" >> commit_message.txt
+        echo "Generated by Conservative Trading Bot" >> commit_message.txt
+        
+        cat commit_message.txt
+        
+    - name: Commit resultados semanales
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message_file: commit_message.txt
+        file_pattern: 'weekly_screening_results.json consistency_analysis.json rotation_recommendations.json WEEKLY_REPORT_*.md docs/data.json screening_results_full_*.json'
+        
+    - name: Configurar Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Subir artefacto de Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './docs'
+        
+    - name: Desplegar a GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      
+    - name: Limpiar archivos temporales antiguos
+      run: |
+        echo "🧹 Limpiando archivos antiguos..."
+        
+        # Mantener solo los últimos 5 archivos de screening completo
+        ls -t screening_results_full_*.json | tail -n +6 | xargs -r rm -f
+        
+        echo "✓ Limpieza completada"
+        
+    - name: Resumen final
+      run: |
+        echo "================================="
+        echo "✅ ANÁLISIS SEMANAL COMPLETADO"
+        echo "================================="
+        echo "Fecha: $(date)"
+        echo "Duración: ${{ job.duration || 'N/A' }}"
+        echo ""
+        echo "📊 Dashboard disponible en: ${{ steps.deployment.outputs.page_url }}"
+        echo "📋 Reportes generados en el repositorio"
+        echo ""
+        echo "🔄 Próximo análisis: $(date -d '+7 days' '+%Y-%m-%d %H:%M UTC')"
+        echo "================================="
