@@ -666,5 +666,4 @@ EOF
         echo "       • Limpieza inteligente (mantiene 4-6 semanas)"
         echo "       • Compatibilidad con múltiples formatos"
         echo "       • Análisis de consistencia con historial real"
-        echo "       • Sin intervención manual requerida"
         echo "================================="
