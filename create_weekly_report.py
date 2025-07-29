@@ -2,6 +2,7 @@
 """
 Enhanced Weekly Report Generator - Con niveles de trading y gestión activa
 Integra análisis avanzado, niveles de stop/target, y recomendaciones detalladas
+🆕 INCLUYE GESTIÓN AUTOMÁTICA DE HISTORIAL
 """
 
 import json
@@ -65,8 +66,18 @@ class EnhancedReportGenerator:
         return success_count >= 2
     
     def create_enhanced_markdown_report(self):
-        """Crea reporte mejorado en formato Markdown con niveles de trading"""
+        """Crea reporte mejorado en formato Markdown con niveles de trading y gestión de historial"""
         report_filename = f"ENHANCED_WEEKLY_REPORT_{self.report_date.strftime('%Y_%m_%d')}.md"
+        
+        # 🆕 Archivar reporte anterior si es del mismo día
+        if os.path.exists(report_filename):
+            try:
+                timestamp = datetime.now().strftime('%H%M%S')
+                backup_name = f"ENHANCED_WEEKLY_REPORT_{self.report_date.strftime('%Y_%m_%d')}_{timestamp}.md"
+                os.rename(report_filename, backup_name)
+                print(f"📁 Reporte anterior renombrado: {backup_name}")
+            except Exception as e:
+                print(f"⚠️ Error renombrando reporte anterior: {e}")
         
         with open(report_filename, 'w', encoding='utf-8') as f:
             # Header mejorado
@@ -105,6 +116,7 @@ class EnhancedReportGenerator:
             f.write(f"🤖 *Enhanced Trading Bot with Trading Levels by 0t4c0n*\n")
         
         print(f"✅ Reporte Markdown mejorado creado: {report_filename}")
+        print("📁 Historial de reportes gestionado automáticamente por cleanup")
         return report_filename
     
     def write_enhanced_executive_summary(self, f):
@@ -294,7 +306,7 @@ class EnhancedReportGenerator:
         consistent_winners = consistency_analysis.get('consistent_winners', [])
         if consistent_winners:
             f.write("### 🏆 **CONSISTENT WINNERS** (Alta confianza - 4+ semanas)\n\n")
-            f.write("*Ideales para holds de 2-3 meses con gestión activa de niveles*\n\n")
+            f.write("*Ideales para holds de 1-3 meses con gestión activa de niveles*\n\n")
             for winner in consistent_winners[:5]:
                 symbol = winner['symbol']
                 frequency = winner['frequency']
@@ -443,7 +455,7 @@ class EnhancedReportGenerator:
         
         f.write("### ⚖️ **Balance riesgo-beneficio:**\n\n")
         f.write("- **Objetivo principal:** Superar SPY con drawdown <20%\n")
-        f.write("- **Holding period ideal:** 2-3 meses por posición\n")
+        f.write("- **Holding period ideal:** 1-3 meses por posición\n")
         f.write("- **Take profit promedio esperado:** 15-25% por posición exitosa\n")
         f.write("- **Win rate objetivo:** 65-70% de posiciones positivas\n\n")
     
@@ -477,7 +489,7 @@ class EnhancedReportGenerator:
         
         f.write("### 🎯 **Filosofía de Inversión Actualizada:**\n")
         f.write("- **Objetivo:** Superar al SPY con riesgo controlado y gestión activa\n")
-        f.write("- **Holding period:** 2-3 meses con gestión semanal de niveles\n")
+        f.write("- **Holding period:** 1-3 meses con gestión semanal de niveles\n")
         f.write("- **Decisiones:** Basadas en consistencia + niveles técnicos + momentum\n")
         f.write("- **Take profit:** Gestión activa según evolución, no targets rígidos\n")
         f.write("- **Risk management:** Stop loss dinámico + sizing por volatilidad\n\n")
@@ -550,7 +562,7 @@ class EnhancedReportGenerator:
                         "volatility_rank": stock.get('volatility_rank', 'MEDIUM')
                     },
                     "ma_levels": stock.get('ma_levels', {}),
-                    "target_hold": stock.get('target_hold', '2-3 meses'),
+                    "target_hold": stock.get('target_hold', '1-3 meses'),
                     "trading_recommendation": stock.get('trading_recommendation', ''),
                     "atr": stock.get('atr', 0)
                 }
@@ -634,6 +646,7 @@ def main():
         print("   - Risk/reward ratios para cada oportunidad")
         print("   - Criterios de salida basados en consistencia")
         print("   - Dashboard mejorado con niveles de trading")
+        print("   - Gestión automática de historial de reportes")
     else:
         print("\n❌ Error generando reporte semanal mejorado")
 

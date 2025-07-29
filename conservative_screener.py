@@ -2,6 +2,7 @@
 """
 Ultra Conservative Stock Screener - Con score final mejorado que incluye Risk/Reward
 Score final = technical_score + (risk_reward_ratio * peso) para mejor ranking
+🆕 INCLUYE GESTIÓN AUTOMÁTICA DE HISTORIAL
 """
 
 import yfinance as yf
@@ -14,6 +15,7 @@ import json
 import os
 from typing import Dict, List, Optional, Any
 import math
+import glob
 
 class UltraConservativeScreener:
     def __init__(self):
@@ -763,17 +765,90 @@ class UltraConservativeScreener:
             
         return all_results
 
+def cleanup_old_files():
+    """🆕 Limpia archivos antiguos manteniendo solo las últimas 6 semanas"""
+    print("🧹 Iniciando limpieza automática de archivos...")
+    
+    def cleanup_file_type(pattern, keep_count, file_type_name):
+        """Limpia un tipo específico de archivos"""
+        files = glob.glob(pattern)
+        if not files:
+            print(f"   📂 {file_type_name}: No hay archivos para limpiar")
+            return
+        
+        # Ordenar por fecha de creación (más reciente primero)
+        files.sort(key=os.path.getctime, reverse=True)
+        
+        files_to_delete = files[keep_count:]
+        if files_to_delete:
+            for old_file in files_to_delete:
+                try:
+                    os.remove(old_file)
+                    print(f"   🗑️ Eliminado: {old_file}")
+                except Exception as e:
+                    print(f"   ⚠️ Error eliminando {old_file}: {e}")
+        
+        remaining_count = len(files) - len(files_to_delete)
+        print(f"   ✅ {file_type_name}: {remaining_count}/{len(files)} archivos mantenidos")
+    
+    # Limpiar diferentes tipos de archivos
+    cleanup_file_type("weekly_screening_results_*.json", 6, "Screening históricos")
+    cleanup_file_type("ultra_conservative_results_*.json", 6, "Resultados ultra conservadores")
+    cleanup_file_type("ENHANCED_WEEKLY_REPORT_*.md", 4, "Reportes semanales")
+    cleanup_file_type("consistency_analysis_*.json", 4, "Análisis de consistencia") 
+    cleanup_file_type("rotation_recommendations_*.json", 4, "Recomendaciones de rotación")
+    
+    print("✅ Limpieza automática completada")
+
+def archive_previous_results():
+    """🆕 Archiva el archivo anterior para mantener historial"""
+    if not os.path.exists("weekly_screening_results.json"):
+        print("📁 No hay archivo anterior para archivar")
+        return
+    
+    try:
+        # Leer fecha del archivo anterior
+        with open("weekly_screening_results.json", 'r') as f:
+            prev_data = json.load(f)
+            prev_date = prev_data.get('analysis_date', '')
+            
+        # Extraer solo la fecha (YYYYMMDD)
+        if prev_date:
+            date_part = prev_date[:10].replace('-', '')  # 2025-07-28 → 20250728
+        else:
+            date_part = "unknown"
+        
+        # Crear nombre del archivo histórico
+        archive_filename = f"weekly_screening_results_{date_part}.json"
+        
+        # Renombrar archivo (mover a historial)
+        os.rename("weekly_screening_results.json", archive_filename)
+        print(f"📁 Archivo anterior archivado: {archive_filename}")
+        
+    except Exception as e:
+        print(f"⚠️ Error archivando archivo anterior: {e}")
+        # Si hay error, intentar backup con timestamp
+        try:
+            backup_name = f"weekly_screening_results_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            os.rename("weekly_screening_results.json", backup_name)
+            print(f"📁 Backup creado: {backup_name}")
+        except Exception as e2:
+            print(f"❌ Error creando backup: {e2}")
+
 def main():
-    """Función principal ultra conservadora con score mejorado"""
+    """Función principal ultra conservadora con gestión de historial mejorada"""
     screener = UltraConservativeScreener()
     
-    # Ejecutar screening ultra conservador
+    # 🆕 PASO 1: Archivar archivo anterior (si existe)
+    archive_previous_results()
+    
+    # PASO 2: Ejecutar screening ultra conservador
     results = screener.screen_all_stocks_ultra_conservative()
     
-    # Guardar resultados
+    # PASO 3: Guardar resultados
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # Archivo completo
+    # Archivo completo con timestamp
     full_results_file = f"ultra_conservative_results_{timestamp}.json"
     with open(full_results_file, 'w') as f:
         json.dump({
@@ -794,34 +869,40 @@ def main():
             }
         }, f, indent=2, default=str)
     
-    # Compatible con sistema existente
+    # Archivo compatible con sistema existente (NUEVO)
     top_15 = results[:15]
-    with open("weekly_screening_results.json", 'w') as f:
-        json.dump({
-            'analysis_date': datetime.now().isoformat(),
-            'analysis_type': 'ultra_conservative_sustainable_momentum_scoring',
-            'max_risk_filter': screener.max_allowed_risk,
-            'rr_weight_in_final_score': screener.rr_weight,
-            'top_symbols': [r['symbol'] for r in top_15],
-            'detailed_results': top_15,
-            'benchmark_context': {
-                'spy_20d': screener.spy_benchmark['return_20d'] if screener.spy_benchmark else 0,
-                'spy_60d': screener.spy_benchmark['return_60d'] if screener.spy_benchmark else 0,
-                'spy_90d': screener.spy_benchmark['return_90d'] if screener.spy_benchmark else 0
-            },
-            'ultra_conservative_stats': {
-                'avg_risk': sum(r.get('risk_pct', 0) for r in top_15) / len(top_15) if top_15 else 0,
-                'avg_risk_reward': sum(r.get('risk_reward_ratio', 0) for r in top_15) / len(top_15) if top_15 else 0,
-                'avg_final_score': sum(r.get('score', 0) for r in top_15) / len(top_15) if top_15 else 0,
-                'avg_technical_score': sum(r.get('technical_score', 0) for r in top_15) / len(top_15) if top_15 else 0,
-                'max_risk_found': max(r.get('risk_pct', 0) for r in top_15) if top_15 else 0,
-                'min_risk_found': min(r.get('risk_pct', 0) for r in top_15) if top_15 else 0
-            }
-        }, f, indent=2, default=str)
+    screening_data = {
+        'analysis_date': datetime.now().isoformat(),
+        'analysis_type': 'ultra_conservative_sustainable_momentum_scoring',
+        'max_risk_filter': screener.max_allowed_risk,
+        'rr_weight_in_final_score': screener.rr_weight,
+        'top_symbols': [r['symbol'] for r in top_15],
+        'detailed_results': top_15,
+        'benchmark_context': {
+            'spy_20d': screener.spy_benchmark['return_20d'] if screener.spy_benchmark else 0,
+            'spy_60d': screener.spy_benchmark['return_60d'] if screener.spy_benchmark else 0,
+            'spy_90d': screener.spy_benchmark['return_90d'] if screener.spy_benchmark else 0
+        },
+        'ultra_conservative_stats': {
+            'avg_risk': sum(r.get('risk_pct', 0) for r in top_15) / len(top_15) if top_15 else 0,
+            'avg_risk_reward': sum(r.get('risk_reward_ratio', 0) for r in top_15) / len(top_15) if top_15 else 0,
+            'avg_final_score': sum(r.get('score', 0) for r in top_15) / len(top_15) if top_15 else 0,
+            'avg_technical_score': sum(r.get('technical_score', 0) for r in top_15) / len(top_15) if top_15 else 0,
+            'max_risk_found': max(r.get('risk_pct', 0) for r in top_15) if top_15 else 0,
+            'min_risk_found': min(r.get('risk_pct', 0) for r in top_15) if top_15 else 0
+        }
+    }
     
-    print(f"\n✅ Archivos guardados:")
+    with open("weekly_screening_results.json", 'w') as f:
+        json.dump(screening_data, f, indent=2, default=str)
+    
+    # 🆕 PASO 4: Limpieza automática
+    cleanup_old_files()
+    
+    print(f"\n✅ Archivos guardados con gestión de historial:")
     print(f"   - {full_results_file} (resultados ultra conservadores)")
-    print(f"   - weekly_screening_results.json (compatible)")
+    print(f"   - weekly_screening_results.json (actual)")
+    print(f"   - Archivos históricos mantenidos automáticamente")
     
     if len(top_15) > 0:
         print(f"\n🏆 TOP 5 ULTRA CONSERVADORAS (Score Final con R/R):")
