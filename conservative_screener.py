@@ -359,81 +359,80 @@ class UltraConservativeScreener:
         return fundamental_data
     
     def calculate_advanced_take_profit(self, hist, current_price, atr, support_resistance, outperformance_60d, score):
-        """Take profit calculation con media en lugar de mediana"""
         try:
+            if score > 180:
+                momentum_strength = "FUERTE"
+                atr_multiplier = 3.0
+                min_reasonable = current_price * 1.10
+                max_reasonable = current_price * 1.60
+                projection_factor = 0.5
+            elif score >= 120:
+                momentum_strength = "MODERADO"
+                atr_multiplier = 2.5
+                min_reasonable = current_price * 1.07
+                max_reasonable = current_price * 1.40
+                projection_factor = 0.4
+            else:
+                momentum_strength = "DÉBIL"
+                atr_multiplier = 2.0
+                min_reasonable = current_price * 1.05
+                max_reasonable = current_price * 1.30
+                projection_factor = 0.3
+
             targets = []
-            
-            # Método 1: Basado en resistencia técnica
+
+            target_atr = current_price + atr * atr_multiplier
+            targets.append(('atr_adaptive', target_atr))
+
             if support_resistance and support_resistance['resistance'] > current_price:
-                resistance_target = current_price + (support_resistance['resistance'] - current_price) * 0.95
-                targets.append(('resistance', resistance_target))
-            
-            # Método 2: Basado en outperformance histórica proyectada
+                target_resistance = current_price + (support_resistance['resistance'] - current_price) * 0.95
+                targets.append(('resistance', target_resistance))
+
             if outperformance_60d > 0:
-                if outperformance_60d > 80:
-                    projection_factor = 0.4
-                elif outperformance_60d > 50:
-                    projection_factor = 0.35
-                elif outperformance_60d > 25:
-                    projection_factor = 0.3
-                else:
-                    projection_factor = 0.25
-                
-                outperf_target = current_price * (1 + (outperformance_60d / 100) * projection_factor)
-                targets.append(('outperformance', outperf_target))
-            
-            # Método 3: Basado en ATR (🆕 rangos ajustados al nuevo scoring)
-            if atr > 0:
-                atr_multiplier = 4 if score > 150 else 3.5 if score > 100 else 3
-                atr_target = current_price + (atr * atr_multiplier)
-                targets.append(('atr', atr_target))
-            
-            # Método 4: Target basado en scoring (🆕 rangos mejorados más realistas)
-            if score > 200:        # Excepcional (top 5%)
-                score_target = current_price * 1.25    # +25%
-            elif score > 150:      # Muy bueno (top 15%)
-                score_target = current_price * 1.22    # +22%
-            elif score > 100:      # Bueno (top 40%)
-                score_target = current_price * 1.18    # +18%
-            elif score > 60:       # Decente (top 70%)
-                score_target = current_price * 1.15    # +15%
-            else:                  # Básico (bottom 30%)
-                score_target = current_price * 1.12    # +12%
-            
-            targets.append(('score_based', score_target))
-            
-            # 🆕 USAR MEDIA en lugar de mediana
-            if targets:
-                target_values = [t[1] for t in targets]
-                
-                # USAR MEDIA
-                final_target = sum(target_values) / len(target_values)
-    
-                # Aplicar límites de sensatez
-                min_reasonable = current_price * 1.05  # Mínimo 5%
-                max_reasonable = current_price * 1.35  # Máximo 35%
-                final_target = max(min_reasonable, min(final_target, max_reasonable))
-                
+                target_outperf = current_price * (1 + (outperformance_60d / 100) * projection_factor)
+                targets.append(('outperformance', target_outperf))
+
+            candidate_targets = [t[1] for t in targets if t[1] > current_price]
+            if not candidate_targets:
+                fallback_target = current_price + atr * 2.0
                 return {
-                    'target_price': final_target,
-                    'upside_percentage': ((final_target / current_price) - 1) * 100,
-                    'methods_used': [t[0] for t in targets],
-                    'all_targets': {t[0]: t[1] for t in targets},
-                    'calculation_method': 'mean'
+                    'target_price': fallback_target,
+                    'upside_percentage': ((fallback_target / current_price) - 1) * 100,
+                    'momentum_strength': momentum_strength,
+                    'atr_multiplier_used': 2.0,
+                    'confidence_level': 'Fallback',
+                    'primary_method': 'fallback_atr',
+                    'methods_used': ['fallback'],
+                    'calculation_method': 'fallback_simple'
                 }
-            
+
+            raw_final_target = max(candidate_targets)
+            final_target = max(min_reasonable, min(raw_final_target, max_reasonable))
+            upside_percentage = ((final_target / current_price) - 1) * 100
+
             return {
-                'target_price': current_price * 1.15,
-                'upside_percentage': 15.0,
-                'methods_used': ['fallback'],
-                'calculation_method': 'fallback'
+                'target_price': final_target,
+                'upside_percentage': upside_percentage,
+                'momentum_strength': momentum_strength,
+                'atr_multiplier_used': atr_multiplier,
+                'confidence_level': 'Alta' if score > 180 else 'Media' if score >= 120 else 'Baja',
+                'primary_method': 'best_of_three',
+                'methods_used': [t[0] for t in targets],
+                'all_targets': {t[0]: t[1] for t in targets},
+                'calculation_method': 'best_target_selection',
+                'score_range': f"{score:.1f} ({momentum_strength})"
             }
-            
+
         except Exception as e:
+            fallback_target = current_price + atr * 2.0
             return {
-                'target_price': current_price * 1.12,
-                'upside_percentage': 12.0,
-                'methods_used': ['error_fallback'],
+                'target_price': fallback_target,
+                'upside_percentage': ((fallback_target / current_price) - 1) * 100,
+                'momentum_strength': 'UNKNOWN',
+                'atr_multiplier_used': 2.0,
+                'confidence_level': 'Fallback',
+                'primary_method': 'error_fallback',
+                'methods_used': ['error'],
                 'error': str(e),
                 'calculation_method': 'error_fallback'
             }
@@ -459,7 +458,18 @@ class UltraConservativeScreener:
         """
         🆕 EVALUACIÓN ULTRA CONSERVADORA con score final mejorado
         """
+        def normalize_symbol(symbol):
+            # Convierte símbolos con ^ (como OAK^B) a formato Yahoo: OAK-PB
+            if '^' in symbol:
+                parts = symbol.split('^')
+                if len(parts) == 2 and len(parts[1]) == 1:
+                    return f"{parts[0]}-P{parts[1]}"
+            elif '.' in symbol:
+                return symbol.replace(".","-")
+            else:
+                return symbol
         try:
+            symbol = normalize_symbol(symbol)
             ticker = yf.Ticker(symbol)
             hist = ticker.history(period="1y")
             
