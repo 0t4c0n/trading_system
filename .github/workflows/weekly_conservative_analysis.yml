@@ -62,15 +62,15 @@ jobs:
           echo "SUCCESS: current_portfolio.json encontrado"
           echo "Posiciones actuales:"
           python3 -c '
-            import json
-            try:
-                with open("current_portfolio.json", "r") as f:
-                    data = json.load(f)
-                positions = list(data.get("positions", {}).keys())
-                print(f"Positions: {len(positions)} posiciones: {positions}")
-                print(f"Cash disponible: ${data.get(\"cash\", 0):,.2f}")
-            except Exception as e:
-                print(f"ERROR leyendo portfolio: {e}")
+          import json
+          try:
+              with open("current_portfolio.json", "r") as f:
+                  data = json.load(f)
+              positions = list(data.get("positions", {}).keys())
+              print(f"Positions: {len(positions)} posiciones: {positions}")
+              print(f"Cash disponible: ${data.get(\"cash\", 0):,.2f}")
+          except Exception as e:
+              print(f"ERROR leyendo portfolio: {e}")
           '
         fi
         
@@ -106,15 +106,15 @@ jobs:
         if [ -f "weekly_screening_results.json" ]; then
           echo "SUCCESS: Último screening encontrado - será archivado automáticamente"
           python3 -c '
-            import json
-            try:
-                with open("weekly_screening_results.json", "r") as f:
-                    data = json.load(f)
-                date = data.get("analysis_date", "")[:10]
-                symbols = len(data.get("detailed_results", []))
-                print(f"   Fecha: {date} | Símbolos: {symbols}")
-            except:
-                print("   WARNING: Error leyendo archivo actual")
+          import json
+          try:
+              with open("weekly_screening_results.json", "r") as f:
+                  data = json.load(f)
+              date = data.get("analysis_date", "")[:10]
+              symbols = len(data.get("detailed_results", []))
+              print(f"   Fecha: {date} | Símbolos: {symbols}")
+          except:
+              print("   WARNING: Error leyendo archivo actual")
           '
         else
           echo "INFO: Sin screening previo - primera ejecución o análisis inicial"
@@ -133,31 +133,31 @@ jobs:
         if [ -f "weekly_screening_results.json" ]; then
           echo "SUCCESS: Screening completado exitosamente con gestión de historial"
           python3 -c '
-            import json
-            with open("weekly_screening_results.json", "r") as f:
-                data = json.load(f)
-            results = data.get("detailed_results", [])
-            print(f"{len(results)} acciones pasaron filtros conservadores mejorados")
-            if results:
-                # Verificar si tiene el scoring mejorado
-                if "technical_score" in results[0]:
-                    avg_tech = sum(r.get("technical_score", 0) for r in results) / len(results)
-                    avg_final = sum(r.get("score", 0) for r in results) / len(results)
-                    avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
-                    print(f"Score técnico promedio: {avg_tech:.1f}")
-                    print(f"Score final promedio: {avg_final:.1f}")
-                    print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
-                    print("SUCCESS: SCORING MEJORADO Y GESTIÓN DE HISTORIAL DETECTADOS")
-                else:
-                    avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
-                    print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
-                
-                top_5 = [r["symbol"] for r in results[:5]]
-                print(f"Top 5: {top_5}")
-                
-                # Verificar tipo de análisis
-                analysis_type = data.get("analysis_type", "standard")
-                print(f"Tipo de análisis: {analysis_type}")
+          import json
+          with open("weekly_screening_results.json", "r") as f:
+              data = json.load(f)
+          results = data.get("detailed_results", [])
+          print(f"{len(results)} acciones pasaron filtros conservadores mejorados")
+          if results:
+              # Verificar si tiene el scoring mejorado
+              if "technical_score" in results[0]:
+                  avg_tech = sum(r.get("technical_score", 0) for r in results) / len(results)
+                  avg_final = sum(r.get("score", 0) for r in results) / len(results)
+                  avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
+                  print(f"Score técnico promedio: {avg_tech:.1f}")
+                  print(f"Score final promedio: {avg_final:.1f}")
+                  print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
+                  print("SUCCESS: SCORING MEJORADO Y GESTIÓN DE HISTORIAL DETECTADOS")
+              else:
+                  avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
+                  print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
+              
+              top_5 = [r["symbol"] for r in results[:5]]
+              print(f"Top 5: {top_5}")
+              
+              # Verificar tipo de análisis
+              analysis_type = data.get("analysis_type", "standard")
+              print(f"Tipo de análisis: {analysis_type}")
           '
         else
           echo "ERROR: Error en screening - archivo de resultados no encontrado"
@@ -177,21 +177,21 @@ jobs:
         if [ -f "consistency_analysis.json" ]; then
           echo "SUCCESS: Análisis de consistencia completado con gestión de historial"
           python3 -c '
-            import json
-            with open("consistency_analysis.json", "r") as f:
-                data = json.load(f)
-            stats = data.get("summary_stats", {})
-            sources = data.get("data_sources", {})
-            print(f"Consistent Winners: {stats.get(\"consistent_winners_count\", 0)}")
-            print(f"Strong Candidates: {stats.get(\"strong_candidates_count\", 0)}")
-            print(f"Emerging Opportunities: {stats.get(\"emerging_count\", 0)}")
-            print(f"Total símbolos únicos analizados: {stats.get(\"total_unique_symbols\", 0)}")
-            print(f"Semanas analizadas: {data.get(\"weeks_analyzed\", 0)}")
+          import json
+          with open("consistency_analysis.json", "r") as f:
+              data = json.load(f)
+          stats = data.get("summary_stats", {})
+          sources = data.get("data_sources", {})
+          print(f"Consistent Winners: {stats.get(\"consistent_winners_count\", 0)}")
+          print(f"Strong Candidates: {stats.get(\"strong_candidates_count\", 0)}")
+          print(f"Emerging Opportunities: {stats.get(\"emerging_count\", 0)}")
+          print(f"Total símbolos únicos analizados: {stats.get(\"total_unique_symbols\", 0)}")
+          print(f"Semanas analizadas: {data.get(\"weeks_analyzed\", 0)}")
 
-            # Mostrar fuentes de datos
-            hist_files = sources.get("historical_files", [])
-            valid_files = [f for f in hist_files if "N/A" not in f]
-            print(f"Archivos históricos válidos: {len(valid_files)}")
+          # Mostrar fuentes de datos
+          hist_files = sources.get("historical_files", [])
+          valid_files = [f for f in hist_files if "N/A" not in f]
+          print(f"Archivos históricos válidos: {len(valid_files)}")
           '
         else
           echo "ERROR: Error en análisis de consistencia"
@@ -210,24 +210,24 @@ jobs:
         if [ -f "rotation_recommendations.json" ]; then
           echo "SUCCESS: Recomendaciones de rotación completadas con gestión de historial"
           python3 -c '
-            import json
-            with open("rotation_recommendations.json", "r") as f:
-                data = json.load(f)
-            action = data.get("action_summary", {}).get("overall_action", "NO_ACTION")
-            strong_buys = len(data.get("action_summary", {}).get("strong_buys", []))
-            exits = len(data.get("action_summary", {}).get("consider_exits", [])) + len(data.get("action_summary", {}).get("urgent_exits", []))
-            holds = len(data.get("action_summary", {}).get("holds", []))
-            print(f"Acción general: {action}")
-            print(f"Compras fuertes recomendadas: {strong_buys}")
-            print(f"Salidas a considerar: {exits}")
-            print(f"Mantener posiciones: {holds}")
+          import json
+          with open("rotation_recommendations.json", "r") as f:
+              data = json.load(f)
+          action = data.get("action_summary", {}).get("overall_action", "NO_ACTION")
+          strong_buys = len(data.get("action_summary", {}).get("strong_buys", []))
+          exits = len(data.get("action_summary", {}).get("consider_exits", [])) + len(data.get("action_summary", {}).get("urgent_exits", []))
+          holds = len(data.get("action_summary", {}).get("holds", []))
+          print(f"Acción general: {action}")
+          print(f"Compras fuertes recomendadas: {strong_buys}")
+          print(f"Salidas a considerar: {exits}")
+          print(f"Mantener posiciones: {holds}")
 
-            # Verificar si es análisis avanzado
-            analysis_type = data.get("analysis_type", "standard")
-            if "advanced" in analysis_type or "multifactor" in analysis_type:
-                print("SUCCESS: ANÁLISIS MULTIFACTORIAL AVANZADO CON HISTORIAL DETECTADO")
-            else:
-                print("Análisis estándar completado")
+          # Verificar si es análisis avanzado
+          analysis_type = data.get("analysis_type", "standard")
+          if "advanced" in analysis_type or "multifactor" in analysis_type:
+              print("SUCCESS: ANÁLISIS MULTIFACTORIAL AVANZADO CON HISTORIAL DETECTADO")
+          else:
+              print("Análisis estándar completado")
           '
         else
           echo "ERROR: Error en recomendaciones de rotación"
@@ -247,30 +247,30 @@ jobs:
         if [ -f "docs/data.json" ]; then
           echo "SUCCESS: Dashboard data.json generado"
           python3 -c '
-            import json
-            with open("docs/data.json", "r") as f:
-                data = json.load(f)
-            analysis_type = data.get("analysis_type", "standard")
-            top_picks = len(data.get("top_picks", []))
-            print(f"Tipo de análisis: {analysis_type}")
-            print(f"Top picks generados: {top_picks}")
+          import json
+          with open("docs/data.json", "r") as f:
+              data = json.load(f)
+          analysis_type = data.get("analysis_type", "standard")
+          top_picks = len(data.get("top_picks", []))
+          print(f"Tipo de análisis: {analysis_type}")
+          print(f"Top picks generados: {top_picks}")
 
-            # Verificar características avanzadas
-            features = []
-            if "trading_metrics" in data:
-                metrics = data["trading_metrics"]
-                print(f"Avg R/R: {metrics.get(\"avg_risk_reward\", 0):.1f}:1")
-                print(f"Oportunidades alta calidad: {metrics.get(\"high_quality_count\", 0)}")
-                features.append("Trading Metrics")
+          # Verificar características avanzadas
+          features = []
+          if "trading_metrics" in data:
+              metrics = data["trading_metrics"]
+              print(f"Avg R/R: {metrics.get(\"avg_risk_reward\", 0):.1f}:1")
+              print(f"Oportunidades alta calidad: {metrics.get(\"high_quality_count\", 0)}")
+              features.append("Trading Metrics")
 
-            if any("take_profit" in str(pick) for pick in data.get("top_picks", [])):
-                features.append("Stop/Target Dinámicos")
+          if any("take_profit" in str(pick) for pick in data.get("top_picks", [])):
+              features.append("Stop/Target Dinámicos")
 
-            if any("technical_score" in str(pick) for pick in data.get("top_picks", [])):
-                features.append("Scoring Avanzado")
+          if any("technical_score" in str(pick) for pick in data.get("top_picks", [])):
+              features.append("Scoring Avanzado")
 
-            if features:
-                print(f"Características detectadas: {\" | \".join(features)}")
+          if features:
+              print(f"Características detectadas: {\" | \".join(features)}")
           '
         else
           echo "ERROR: Error generando dashboard data"
