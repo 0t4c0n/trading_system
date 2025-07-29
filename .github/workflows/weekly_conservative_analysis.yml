@@ -61,17 +61,17 @@ jobs:
         else
           echo "SUCCESS: current_portfolio.json encontrado"
           echo "Posiciones actuales:"
-          python3 -c "
+          python3 -c '
 import json
 try:
-    with open('current_portfolio.json', 'r') as f:
+    with open("current_portfolio.json", "r") as f:
         data = json.load(f)
-    positions = list(data.get('positions', {}).keys())
-    print(f'Positions: {len(positions)} posiciones: {positions}')
-    print(f'Cash disponible: \${data.get(\"cash\", 0):,.2f}')
+    positions = list(data.get("positions", {}).keys())
+    print(f"Positions: {len(positions)} posiciones: {positions}")
+    print(f"Cash disponible: ${data.get(\"cash\", 0):,.2f}")
 except Exception as e:
-    print(f'ERROR leyendo portfolio: {e}')
-          "
+    print(f"ERROR leyendo portfolio: {e}")
+          '
         fi
         
         echo ""
@@ -105,17 +105,17 @@ except Exception as e:
         # Verificar archivo actual (último análisis)
         if [ -f "weekly_screening_results.json" ]; then
           echo "SUCCESS: Último screening encontrado - será archivado automáticamente"
-          python3 -c "
+          python3 -c '
 import json
 try:
-    with open('weekly_screening_results.json', 'r') as f:
+    with open("weekly_screening_results.json", "r") as f:
         data = json.load(f)
-    date = data.get('analysis_date', '')[:10]
-    symbols = len(data.get('detailed_results', []))
-    print(f'   Fecha: {date} | Símbolos: {symbols}')
+    date = data.get("analysis_date", "")[:10]
+    symbols = len(data.get("detailed_results", []))
+    print(f"   Fecha: {date} | Símbolos: {symbols}")
 except:
-    print('   WARNING: Error leyendo archivo actual')
-          "
+    print("   WARNING: Error leyendo archivo actual")
+          '
         else
           echo "INFO: Sin screening previo - primera ejecución o análisis inicial"
         fi
@@ -132,33 +132,33 @@ except:
         echo "Verificando resultados del screening con historial..."
         if [ -f "weekly_screening_results.json" ]; then
           echo "SUCCESS: Screening completado exitosamente con gestión de historial"
-          python3 -c "
+          python3 -c '
 import json
-with open('weekly_screening_results.json', 'r') as f:
+with open("weekly_screening_results.json", "r") as f:
     data = json.load(f)
-results = data.get('detailed_results', [])
-print(f'{len(results)} acciones pasaron filtros conservadores mejorados')
+results = data.get("detailed_results", [])
+print(f"{len(results)} acciones pasaron filtros conservadores mejorados")
 if results:
     # Verificar si tiene el scoring mejorado
-    if 'technical_score' in results[0]:
-        avg_tech = sum(r.get('technical_score', 0) for r in results) / len(results)
-        avg_final = sum(r.get('score', 0) for r in results) / len(results)
-        avg_rr = sum(r.get('risk_reward_ratio', 0) for r in results) / len(results)
-        print(f'Score técnico promedio: {avg_tech:.1f}')
-        print(f'Score final promedio: {avg_final:.1f}')
-        print(f'Risk/Reward promedio: {avg_rr:.1f}:1')
-        print('SUCCESS: SCORING MEJORADO Y GESTIÓN DE HISTORIAL DETECTADOS')
+    if "technical_score" in results[0]:
+        avg_tech = sum(r.get("technical_score", 0) for r in results) / len(results)
+        avg_final = sum(r.get("score", 0) for r in results) / len(results)
+        avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
+        print(f"Score técnico promedio: {avg_tech:.1f}")
+        print(f"Score final promedio: {avg_final:.1f}")
+        print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
+        print("SUCCESS: SCORING MEJORADO Y GESTIÓN DE HISTORIAL DETECTADOS")
     else:
-        avg_rr = sum(r.get('risk_reward_ratio', 0) for r in results) / len(results)
-        print(f'Risk/Reward promedio: {avg_rr:.1f}:1')
+        avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
+        print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
     
-    top_5 = [r['symbol'] for r in results[:5]]
-    print(f'Top 5: {top_5}')
+    top_5 = [r["symbol"] for r in results[:5]]
+    print(f"Top 5: {top_5}")
     
     # Verificar tipo de análisis
-    analysis_type = data.get('analysis_type', 'standard')
-    print(f'Tipo de análisis: {analysis_type}')
-          "
+    analysis_type = data.get("analysis_type", "standard")
+    print(f"Tipo de análisis: {analysis_type}")
+          '
         else
           echo "ERROR: Error en screening - archivo de resultados no encontrado"
           exit 1
@@ -176,23 +176,23 @@ if results:
         
         if [ -f "consistency_analysis.json" ]; then
           echo "SUCCESS: Análisis de consistencia completado con gestión de historial"
-          python3 -c "
+          python3 -c '
 import json
-with open('consistency_analysis.json', 'r') as f:
+with open("consistency_analysis.json", "r") as f:
     data = json.load(f)
-stats = data.get('summary_stats', {})
-sources = data.get('data_sources', {})
-print(f'Consistent Winners: {stats.get(\"consistent_winners_count\", 0)}')
-print(f'Strong Candidates: {stats.get(\"strong_candidates_count\", 0)}')
-print(f'Emerging Opportunities: {stats.get(\"emerging_count\", 0)}')
-print(f'Total símbolos únicos analizados: {stats.get(\"total_unique_symbols\", 0)}')
-print(f'Semanas analizadas: {data.get(\"weeks_analyzed\", 0)}')
+stats = data.get("summary_stats", {})
+sources = data.get("data_sources", {})
+print(f"Consistent Winners: {stats.get(\"consistent_winners_count\", 0)}")
+print(f"Strong Candidates: {stats.get(\"strong_candidates_count\", 0)}")
+print(f"Emerging Opportunities: {stats.get(\"emerging_count\", 0)}")
+print(f"Total símbolos únicos analizados: {stats.get(\"total_unique_symbols\", 0)}")
+print(f"Semanas analizadas: {data.get(\"weeks_analyzed\", 0)}")
 
 # Mostrar fuentes de datos
-hist_files = sources.get('historical_files', [])
-valid_files = [f for f in hist_files if 'N/A' not in f]
-print(f'Archivos históricos válidos: {len(valid_files)}')
-          "
+hist_files = sources.get("historical_files", [])
+valid_files = [f for f in hist_files if "N/A" not in f]
+print(f"Archivos históricos válidos: {len(valid_files)}")
+          '
         else
           echo "ERROR: Error en análisis de consistencia"
           exit 1
@@ -209,26 +209,26 @@ print(f'Archivos históricos válidos: {len(valid_files)}')
         
         if [ -f "rotation_recommendations.json" ]; then
           echo "SUCCESS: Recomendaciones de rotación completadas con gestión de historial"
-          python3 -c "
+          python3 -c '
 import json
-with open('rotation_recommendations.json', 'r') as f:
+with open("rotation_recommendations.json", "r") as f:
     data = json.load(f)
-action = data.get('action_summary', {}).get('overall_action', 'NO_ACTION')
-strong_buys = len(data.get('action_summary', {}).get('strong_buys', []))
-exits = len(data.get('action_summary', {}).get('consider_exits', [])) + len(data.get('action_summary', {}).get('urgent_exits', []))
-holds = len(data.get('action_summary', {}).get('holds', []))
-print(f'Acción general: {action}')
-print(f'Compras fuertes recomendadas: {strong_buys}')
-print(f'Salidas a considerar: {exits}')
-print(f'Mantener posiciones: {holds}')
+action = data.get("action_summary", {}).get("overall_action", "NO_ACTION")
+strong_buys = len(data.get("action_summary", {}).get("strong_buys", []))
+exits = len(data.get("action_summary", {}).get("consider_exits", [])) + len(data.get("action_summary", {}).get("urgent_exits", []))
+holds = len(data.get("action_summary", {}).get("holds", []))
+print(f"Acción general: {action}")
+print(f"Compras fuertes recomendadas: {strong_buys}")
+print(f"Salidas a considerar: {exits}")
+print(f"Mantener posiciones: {holds}")
 
 # Verificar si es análisis avanzado
-analysis_type = data.get('analysis_type', 'standard')
-if 'advanced' in analysis_type or 'multifactor' in analysis_type:
-    print('SUCCESS: ANÁLISIS MULTIFACTORIAL AVANZADO CON HISTORIAL DETECTADO')
+analysis_type = data.get("analysis_type", "standard")
+if "advanced" in analysis_type or "multifactor" in analysis_type:
+    print("SUCCESS: ANÁLISIS MULTIFACTORIAL AVANZADO CON HISTORIAL DETECTADO")
 else:
-    print('Análisis estándar completado')
-          "
+    print("Análisis estándar completado")
+          '
         else
           echo "ERROR: Error en recomendaciones de rotación"
           exit 1
@@ -246,32 +246,32 @@ else:
         echo "Verificando reportes generados..."
         if [ -f "docs/data.json" ]; then
           echo "SUCCESS: Dashboard data.json generado"
-          python3 -c "
+          python3 -c '
 import json
-with open('docs/data.json', 'r') as f:
+with open("docs/data.json", "r") as f:
     data = json.load(f)
-analysis_type = data.get('analysis_type', 'standard')
-top_picks = len(data.get('top_picks', []))
-print(f'Tipo de análisis: {analysis_type}')
-print(f'Top picks generados: {top_picks}')
+analysis_type = data.get("analysis_type", "standard")
+top_picks = len(data.get("top_picks", []))
+print(f"Tipo de análisis: {analysis_type}")
+print(f"Top picks generados: {top_picks}")
 
 # Verificar características avanzadas
 features = []
-if 'trading_metrics' in data:
-    metrics = data['trading_metrics']
-    print(f'Avg R/R: {metrics.get(\"avg_risk_reward\", 0):.1f}:1')
-    print(f'Oportunidades alta calidad: {metrics.get(\"high_quality_count\", 0)}')
-    features.append('Trading Metrics')
+if "trading_metrics" in data:
+    metrics = data["trading_metrics"]
+    print(f"Avg R/R: {metrics.get(\"avg_risk_reward\", 0):.1f}:1")
+    print(f"Oportunidades alta calidad: {metrics.get(\"high_quality_count\", 0)}")
+    features.append("Trading Metrics")
 
-if any('take_profit' in str(pick) for pick in data.get('top_picks', [])):
-    features.append('Stop/Target Dinámicos')
+if any("take_profit" in str(pick) for pick in data.get("top_picks", [])):
+    features.append("Stop/Target Dinámicos")
 
-if any('technical_score' in str(pick) for pick in data.get('top_picks', [])):
-    features.append('Scoring Avanzado')
+if any("technical_score" in str(pick) for pick in data.get("top_picks", [])):
+    features.append("Scoring Avanzado")
 
 if features:
-    print(f'Características detectadas: {\" | \".join(features)}')
-          "
+    print(f"Características detectadas: {\" | \".join(features)}")
+          '
         else
           echo "ERROR: Error generando dashboard data"
           exit 1
@@ -325,7 +325,7 @@ if features:
         # Verificar calidad de datos
         echo ""
         echo "=== VERIFICACIÓN DE CALIDAD ==="
-        python3 -c "
+        cat > check_quality.py << 'EOF'
 import json
 import os
 
@@ -355,18 +355,21 @@ files_ok += check_file_quality('consistency_analysis.json', 500)
 files_ok += check_file_quality('rotation_recommendations.json', 500)
 files_ok += check_file_quality('docs/data.json', 1000)
 
-print(f'\\nResumen: {files_ok}/4 archivos OK')
+print(f'\nResumen: {files_ok}/4 archivos OK')
 if files_ok < 3:
     print('ERROR: CALIDAD INSUFICIENTE - Revisar logs')
     exit(1)
 else:
     print('SUCCESS: CALIDAD ACEPTABLE')
-        "
+EOF
+        
+        python3 check_quality.py
+        rm check_quality.py
         
         # Mostrar estadísticas finales
         echo ""
         echo "=== ESTADÍSTICAS FINALES CON HISTORIAL ==="
-        python3 -c "
+        cat > final_stats.py << 'EOF'
 import json
 from datetime import datetime
 
@@ -390,7 +393,7 @@ try:
     print(f'Consistent winners: {winners}')
     print(f'Acción requerida: {action}')
     print(f'Semanas de historial analizadas: {weeks_analyzed}')
-    print(f'Análisis completado: {datetime.now().strftime(\"%Y-%m-%d %H:%M UTC\")}')
+    print(f'Análisis completado: {datetime.now().strftime("%Y-%m-%d %H:%M UTC")}')
     
     # Verificar mejoras aplicadas
     analysis_type = screening.get('analysis_type', 'standard')
@@ -410,13 +413,16 @@ try:
         features.append('Gestión de Historial')
         
     if features:
-        print(f'CARACTERÍSTICAS MEJORADAS: {\", \".join(features)}')
+        print(f'CARACTERÍSTICAS MEJORADAS: {", ".join(features)}')
     else:
         print('Análisis estándar realizado')
         
 except Exception as e:
     print(f'WARNING: Error en estadísticas finales: {e}')
-        "
+EOF
+        
+        python3 final_stats.py
+        rm final_stats.py
         
     - name: Crear resumen de commit mejorado con historial
       run: |
@@ -425,9 +431,10 @@ except Exception as e:
         REPORT_DATE=$(date +%Y-%m-%d)
         
         # Extraer información clave
-        python3 -c "
+        cat > create_commit_msg.py << 'EOF'
 import json
 from datetime import datetime
+import os
 
 try:
     # Cargar datos
@@ -466,15 +473,18 @@ try:
     else:
         analysis_label = 'Standard + Historial'
     
+    # Obtener fecha del entorno
+    report_date = os.environ.get('REPORT_DATE', datetime.now().strftime('%Y-%m-%d'))
+    
     # Crear mensaje
     with open('commit_message.txt', 'w') as f:
-        f.write(f'{analysis_label} Analysis $REPORT_DATE\\n\\n')
-        f.write(f'Top 5: {\", \".join(top_symbols) if top_symbols else \"None\"}\\n')
-        f.write(f'Consistent Winners: {winners_count}\\n')
-        f.write(f'Action: {action}\\n')
-        f.write(f'Filtered: {len(results)}{trading_metrics}\\n')
-        f.write(f'History: {weeks_analyzed} weeks analyzed\\n\\n')
-        f.write(f'Enhanced Bot v2.1 + Auto History - {datetime.now().strftime(\"%H:%M UTC\")}\\n')
+        f.write(f'{analysis_label} Analysis {report_date}\n\n')
+        f.write(f'Top 5: {", ".join(top_symbols) if top_symbols else "None"}\n')
+        f.write(f'Consistent Winners: {winners_count}\n')
+        f.write(f'Action: {action}\n')
+        f.write(f'Filtered: {len(results)}{trading_metrics}\n')
+        f.write(f'History: {weeks_analyzed} weeks analyzed\n\n')
+        f.write(f'Enhanced Bot v2.1 + Auto History - {datetime.now().strftime("%H:%M UTC")}\n')
     
     print('SUCCESS: Commit message con historial generado')
     
@@ -482,8 +492,12 @@ except Exception as e:
     print(f'ERROR: Error generando commit message: {e}')
     # Fallback message
     with open('commit_message.txt', 'w') as f:
-        f.write(f'Weekly Analysis + Auto History $REPORT_DATE\\n\\nGenerated by Enhanced Conservative Trading Bot with History Management\\n')
-        " REPORT_DATE="$REPORT_DATE"
+        report_date = os.environ.get('REPORT_DATE', datetime.now().strftime('%Y-%m-%d'))
+        f.write(f'Weekly Analysis + Auto History {report_date}\n\nGenerated by Enhanced Conservative Trading Bot with History Management\n')
+EOF
+        
+        REPORT_DATE="$REPORT_DATE" python3 create_commit_msg.py
+        rm create_commit_msg.py
         
         cat commit_message.txt
         
