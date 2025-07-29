@@ -2,6 +2,7 @@
 """
 Rotation Recommender Mejorado - Criterios avanzados más allá de la frecuencia
 Incluye análisis de momentum, risk-adjusted returns, y scoring multifactorial
+🆕 INCLUYE GESTIÓN AUTOMÁTICA DE HISTORIAL
 """
 
 import json
@@ -502,7 +503,7 @@ class AdvancedRotationRecommender:
         return ". ".join(reasons).capitalize()
     
     def generate_rotation_recommendations(self):
-        """Genera recomendaciones completas con análisis avanzado"""
+        """Genera recomendaciones completas con análisis avanzado y gestión de historial"""
         print("🎯 Generando recomendaciones avanzadas de rotación...")
         
         # Cargar todos los datos necesarios
@@ -513,6 +514,20 @@ class AdvancedRotationRecommender:
             print("⚠️ Sin datos de screening - análisis limitado")
         
         portfolio_loaded = self.load_current_portfolio()
+        
+        # 🆕 Archivar archivo anterior si existe
+        if os.path.exists('rotation_recommendations.json'):
+            try:
+                # Leer fecha del archivo anterior
+                with open('rotation_recommendations.json', 'r') as f:
+                    prev_data = json.load(f)
+                    prev_date = prev_data.get('analysis_date', '')[:10].replace('-', '')
+                
+                archive_name = f"rotation_recommendations_{prev_date}.json"
+                os.rename('rotation_recommendations.json', archive_name)
+                print(f"📁 Recomendaciones anteriores archivadas: {archive_name}")
+            except Exception as e:
+                print(f"⚠️ Error archivando recomendaciones anteriores: {e}")
         
         # Análisis avanzado
         position_analysis = self.analyze_current_positions_advanced()
@@ -542,11 +557,12 @@ class AdvancedRotationRecommender:
             }
         }
         
-        # Guardar recomendaciones
+        # Guardar recomendaciones (archivo actual)
         with open('rotation_recommendations.json', 'w') as f:
             json.dump(recommendations, f, indent=2, default=str)
         
         print("✅ Recomendaciones avanzadas guardadas: rotation_recommendations.json")
+        print("📁 Historial de recomendaciones gestionado automáticamente")
         return recommendations
     
     def create_advanced_action_summary(self, position_analysis, new_opportunities):

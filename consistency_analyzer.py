@@ -2,6 +2,7 @@
 """
 Consistency Analyzer - Analiza la consistencia de recomendaciones semanales
 Identifica patrones de aparición para decisiones conservadoras de largo plazo
+🆕 INCLUYE GESTIÓN AUTOMÁTICA DE HISTORIAL
 """
 
 import json
@@ -17,33 +18,67 @@ class ConsistencyAnalyzer:
         self.current_week_data = None
         
     def load_historical_screenings(self, weeks_back=4):
-        """Carga los últimos N resultados de screening semanal (optimizado)"""
+        """🆕 Carga los últimos N resultados de screening semanal con gestión de historial mejorada"""
         print(f"📚 Cargando historial de {weeks_back} semanas...")
         
-        # Buscar archivos de screening semanal (optimizado con límite)
-        screening_files = glob.glob("weekly_screening_results*.json")
-        screening_files.sort(key=os.path.getctime, reverse=True)  # Más reciente primero
+        # 🆕 Buscar TODOS los archivos de screening históricos
+        all_screening_files = []
+        
+        # 1. Archivos históricos con fecha (nuevos)
+        historical_files = glob.glob("weekly_screening_results_*.json")
+        all_screening_files.extend(historical_files)
+        
+        # 2. Archivo actual (si existe)
+        if os.path.exists("weekly_screening_results.json"):
+            all_screening_files.append("weekly_screening_results.json")
+        
+        # 3. Archivos con timestamp (respaldo por compatibilidad)
+        timestamped_files = glob.glob("ultra_conservative_results_*.json")
+        # Solo usar timestamped si no hay suficientes históricos
+        if len(all_screening_files) < weeks_back:
+            all_screening_files.extend(timestamped_files[:weeks_back - len(all_screening_files)])
+        
+        if not all_screening_files:
+            print("⚠️ No se encontraron archivos de screening")
+            return []
+        
+        # Ordenar por fecha de creación (más reciente primero)
+        all_screening_files.sort(key=os.path.getctime, reverse=True)
         
         # Tomar solo los necesarios para velocidad
-        screening_files = screening_files[:weeks_back]
+        all_screening_files = all_screening_files[:weeks_back]
         
         historical_data = []
         
         # Cargar archivos existentes
-        for i, file_path in enumerate(screening_files[:weeks_back]):
+        for i, file_path in enumerate(all_screening_files):
             try:
                 with open(file_path, 'r') as f:
                     data = json.load(f)
+                
+                # 🆕 Manejar diferentes formatos de archivo
+                if 'detailed_results' in data:
+                    # Formato nuevo (weekly_screening_results)
+                    symbols = data.get('top_symbols', [])
+                    detailed_results = data.get('detailed_results', [])
+                elif 'results' in data:
+                    # Formato timestamped (ultra_conservative_results)
+                    symbols = [r.get('symbol', '') for r in data.get('results', [])[:15]]
+                    detailed_results = data.get('results', [])[:15]
+                else:
+                    print(f"⚠️ Formato no reconocido en {file_path}")
+                    continue
                     
                 historical_data.append({
                     'week': weeks_back - i,  # Semana 4, 3, 2, 1
-                    'date': data.get('analysis_date', ''),
-                    'symbols': data.get('top_symbols', []),
-                    'detailed_results': data.get('detailed_results', []),
-                    'file_path': file_path
+                    'date': data.get('analysis_date', data.get('timestamp', '')),
+                    'symbols': symbols,
+                    'detailed_results': detailed_results,
+                    'file_path': file_path,
+                    'file_type': 'historical' if 'weekly_screening_results_' in file_path else 'current' if file_path == 'weekly_screening_results.json' else 'timestamped'
                 })
                 
-                print(f"✓ Semana {weeks_back - i}: {len(data.get('top_symbols', []))} símbolos - {file_path}")
+                print(f"✓ Semana {weeks_back - i}: {len(symbols)} símbolos - {os.path.basename(file_path)} ({historical_data[-1]['file_type']})")
                 
             except Exception as e:
                 print(f"⚠️ Error cargando {file_path}: {e}")
@@ -56,11 +91,22 @@ class ConsistencyAnalyzer:
                 'date': (datetime.now() - timedelta(weeks=missing_week)).isoformat(),
                 'symbols': [],
                 'detailed_results': [],
-                'file_path': 'N/A - Sin datos'
+                'file_path': 'N/A - Sin datos',
+                'file_type': 'missing'
             })
             print(f"⚠️ Semana {missing_week}: Sin datos históricos")
         
         self.historical_data = sorted(historical_data, key=lambda x: x['week'])
+        
+        # 🆕 Estadísticas del historial cargado
+        total_files = len([h for h in historical_data if h['file_type'] != 'missing'])
+        historical_count = len([h for h in historical_data if h['file_type'] == 'historical'])
+        current_count = len([h for h in historical_data if h['file_type'] == 'current'])
+        timestamped_count = len([h for h in historical_data if h['file_type'] == 'timestamped'])
+        
+        print(f"📊 Historial cargado: {total_files}/{weeks_back} archivos disponibles")
+        print(f"   - Históricos: {historical_count} | Actual: {current_count} | Timestamped: {timestamped_count}")
+        
         return self.historical_data
     
     def load_current_week_screening(self):
@@ -229,7 +275,7 @@ class ConsistencyAnalyzer:
         return trend_changes
     
     def generate_consistency_report(self):
-        """Genera reporte completo de consistencia"""
+        """Genera reporte completo de consistencia con gestión de historial"""
         print("📋 Generando reporte de consistencia...")
         
         # Cargar datos
@@ -237,6 +283,20 @@ class ConsistencyAnalyzer:
             return None
         
         self.load_historical_screenings(4)
+        
+        # 🆕 Archivar archivo anterior si existe
+        if os.path.exists('consistency_analysis.json'):
+            try:
+                # Leer fecha del archivo anterior
+                with open('consistency_analysis.json', 'r') as f:
+                    prev_data = json.load(f)
+                    prev_date = prev_data.get('analysis_date', '')[:10].replace('-', '')
+                
+                archive_name = f"consistency_analysis_{prev_date}.json"
+                os.rename('consistency_analysis.json', archive_name)
+                print(f"📁 Análisis anterior archivado: {archive_name}")
+            except Exception as e:
+                print(f"⚠️ Error archivando análisis anterior: {e}")
         
         # Análisis
         consistency_analysis = self.analyze_symbol_consistency()
@@ -271,6 +331,7 @@ class ConsistencyAnalyzer:
             json.dump(report, f, indent=2, default=str)
         
         print("✅ Reporte de consistencia guardado: consistency_analysis.json")
+        print("📁 Historial de consistencia gestionado automáticamente")
         return report
     
     def print_summary(self, report):
