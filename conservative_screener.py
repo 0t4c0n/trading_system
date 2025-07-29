@@ -731,7 +731,7 @@ class UltraConservativeScreener:
                         risk = result.get('risk_pct', 0)
                         print(f"✅ {symbol} - Score: {final_score:.1f} (técnico: {technical_score:.1f}) - R/R: {rr_ratio:.1f} - Risk: {risk:.1f}%")
                     else:
-                        print(f"❌ {symbol} - Filtrado")
+                        pass
                         
                 except Exception as e:
                     failed_count += 1

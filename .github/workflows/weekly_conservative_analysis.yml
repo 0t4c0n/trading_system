@@ -61,17 +61,19 @@ jobs:
         else
           echo "SUCCESS: current_portfolio.json encontrado"
           echo "Posiciones actuales:"
-          python3 -c '
-          import json
-          try:
-            with open("current_portfolio.json", "r") as f:
-              data = json.load(f)
-            positions = list(data.get("positions", {}).keys())
-            print(f"Positions: {len(positions)} posiciones: {positions}")
-            print(f"Cash disponible: ${data.get(\"cash\", 0):,.2f}")
-          except Exception as e:
-            print(f"ERROR leyendo portfolio: {e}")
-          '
+          cat > check_portfolio.py << 'EOF'
+import json
+try:
+    with open("current_portfolio.json", "r") as f:
+        data = json.load(f)
+    positions = list(data.get("positions", {}).keys())
+    print(f"Positions: {len(positions)} posiciones: {positions}")
+    print(f"Cash disponible: ${data.get('cash', 0):,.2f}")
+except Exception as e:
+    print(f"ERROR leyendo portfolio: {e}")
+EOF
+          python3 check_portfolio.py
+          rm check_portfolio.py
         fi
         
         echo ""
@@ -105,17 +107,19 @@ jobs:
         # Verificar archivo actual (último análisis)
         if [ -f "weekly_screening_results.json" ]; then
           echo "SUCCESS: Último screening encontrado - será archivado automáticamente"
-          python3 -c '
-          import json
-          try:
-            with open("weekly_screening_results.json", "r") as f:
-              data = json.load(f)
-            date = data.get("analysis_date", "")[:10]
-            symbols = len(data.get("detailed_results", []))
-            print(f"   Fecha: {date} | Símbolos: {symbols}")
-          except:
-            print("   WARNING: Error leyendo archivo actual")
-          '
+          cat > check_screening.py << 'EOF'
+import json
+try:
+    with open("weekly_screening_results.json", "r") as f:
+        data = json.load(f)
+    date = data.get("analysis_date", "")[:10]
+    symbols = len(data.get("detailed_results", []))
+    print(f"   Fecha: {date} | Símbolos: {symbols}")
+except:
+    print("   WARNING: Error leyendo archivo actual")
+EOF
+          python3 check_screening.py
+          rm check_screening.py
         else
           echo "INFO: Sin screening previo - primera ejecución o análisis inicial"
         fi
@@ -132,33 +136,35 @@ jobs:
         echo "Verificando resultados del screening con historial..."
         if [ -f "weekly_screening_results.json" ]; then
           echo "SUCCESS: Screening completado exitosamente con gestión de historial"
-          python3 -c '
-          import json
-          with open("weekly_screening_results.json", "r") as f:
-            data = json.load(f)
-          results = data.get("detailed_results", [])
-          print(f"{len(results)} acciones pasaron filtros conservadores mejorados")
-          if results:
-            # Verificar si tiene el scoring mejorado
-            if "technical_score" in results[0]:
-              avg_tech = sum(r.get("technical_score", 0) for r in results) / len(results)
-              avg_final = sum(r.get("score", 0) for r in results) / len(results)
-              avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
-              print(f"Score técnico promedio: {avg_tech:.1f}")
-              print(f"Score final promedio: {avg_final:.1f}")
-              print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
-              print("SUCCESS: SCORING MEJORADO Y GESTIÓN DE HISTORIAL DETECTADOS")
-            else:
-              avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
-              print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
-            
-            top_5 = [r["symbol"] for r in results[:5]]
-            print(f"Top 5: {top_5}")
-            
-            # Verificar tipo de análisis
-            analysis_type = data.get("analysis_type", "standard")
-            print(f"Tipo de análisis: {analysis_type}")
-          '
+          cat > verify_screening.py << 'EOF'
+import json
+with open("weekly_screening_results.json", "r") as f:
+    data = json.load(f)
+results = data.get("detailed_results", [])
+print(f"{len(results)} acciones pasaron filtros conservadores mejorados")
+if results:
+    # Verificar si tiene el scoring mejorado
+    if "technical_score" in results[0]:
+        avg_tech = sum(r.get("technical_score", 0) for r in results) / len(results)
+        avg_final = sum(r.get("score", 0) for r in results) / len(results)
+        avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
+        print(f"Score técnico promedio: {avg_tech:.1f}")
+        print(f"Score final promedio: {avg_final:.1f}")
+        print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
+        print("SUCCESS: SCORING MEJORADO Y GESTIÓN DE HISTORIAL DETECTADOS")
+    else:
+        avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
+        print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
+    
+    top_5 = [r["symbol"] for r in results[:5]]
+    print(f"Top 5: {top_5}")
+    
+    # Verificar tipo de análisis
+    analysis_type = data.get("analysis_type", "standard")
+    print(f"Tipo de análisis: {analysis_type}")
+EOF
+          python3 verify_screening.py
+          rm verify_screening.py
         else
           echo "ERROR: Error en screening - archivo de resultados no encontrado"
           exit 1
@@ -176,23 +182,25 @@ jobs:
         
         if [ -f "consistency_analysis.json" ]; then
           echo "SUCCESS: Análisis de consistencia completado con gestión de historial"
-          python3 -c '
-          import json
-          with open("consistency_analysis.json", "r") as f:
-            data = json.load(f)
-          stats = data.get("summary_stats", {})
-          sources = data.get("data_sources", {})
-          print(f"Consistent Winners: {stats.get(\"consistent_winners_count\", 0)}")
-          print(f"Strong Candidates: {stats.get(\"strong_candidates_count\", 0)}")
-          print(f"Emerging Opportunities: {stats.get(\"emerging_count\", 0)}")
-          print(f"Total símbolos únicos analizados: {stats.get(\"total_unique_symbols\", 0)}")
-          print(f"Semanas analizadas: {data.get(\"weeks_analyzed\", 0)}")
+          cat > verify_consistency.py << 'EOF'
+import json
+with open("consistency_analysis.json", "r") as f:
+    data = json.load(f)
+stats = data.get("summary_stats", {})
+sources = data.get("data_sources", {})
+print(f"Consistent Winners: {stats.get('consistent_winners_count', 0)}")
+print(f"Strong Candidates: {stats.get('strong_candidates_count', 0)}")
+print(f"Emerging Opportunities: {stats.get('emerging_count', 0)}")
+print(f"Total símbolos únicos analizados: {stats.get('total_unique_symbols', 0)}")
+print(f"Semanas analizadas: {data.get('weeks_analyzed', 0)}")
 
-          # Mostrar fuentes de datos
-          hist_files = sources.get("historical_files", [])
-          valid_files = [f for f in hist_files if "N/A" not in f]
-          print(f"Archivos históricos válidos: {len(valid_files)}")
-          '
+# Mostrar fuentes de datos
+hist_files = sources.get("historical_files", [])
+valid_files = [f for f in hist_files if "N/A" not in f]
+print(f"Archivos históricos válidos: {len(valid_files)}")
+EOF
+          python3 verify_consistency.py
+          rm verify_consistency.py
         else
           echo "ERROR: Error en análisis de consistencia"
           exit 1
@@ -209,26 +217,28 @@ jobs:
         
         if [ -f "rotation_recommendations.json" ]; then
           echo "SUCCESS: Recomendaciones de rotación completadas con gestión de historial"
-          python3 -c '
-          import json
-          with open("rotation_recommendations.json", "r") as f:
-            data = json.load(f)
-          action = data.get("action_summary", {}).get("overall_action", "NO_ACTION")
-          strong_buys = len(data.get("action_summary", {}).get("strong_buys", []))
-          exits = len(data.get("action_summary", {}).get("consider_exits", [])) + len(data.get("action_summary", {}).get("urgent_exits", []))
-          holds = len(data.get("action_summary", {}).get("holds", []))
-          print(f"Acción general: {action}")
-          print(f"Compras fuertes recomendadas: {strong_buys}")
-          print(f"Salidas a considerar: {exits}")
-          print(f"Mantener posiciones: {holds}")
+          cat > verify_rotation.py << 'EOF'
+import json
+with open("rotation_recommendations.json", "r") as f:
+    data = json.load(f)
+action = data.get("action_summary", {}).get("overall_action", "NO_ACTION")
+strong_buys = len(data.get("action_summary", {}).get("strong_buys", []))
+exits = len(data.get("action_summary", {}).get("consider_exits", [])) + len(data.get("action_summary", {}).get("urgent_exits", []))
+holds = len(data.get("action_summary", {}).get("holds", []))
+print(f"Acción general: {action}")
+print(f"Compras fuertes recomendadas: {strong_buys}")
+print(f"Salidas a considerar: {exits}")
+print(f"Mantener posiciones: {holds}")
 
-          # Verificar si es análisis avanzado
-          analysis_type = data.get("analysis_type", "standard")
-          if "advanced" in analysis_type or "multifactor" in analysis_type:
-            print("SUCCESS: ANÁLISIS MULTIFACTORIAL AVANZADO CON HISTORIAL DETECTADO")
-          else:
-            print("Análisis estándar completado")
-          '
+# Verificar si es análisis avanzado
+analysis_type = data.get("analysis_type", "standard")
+if "advanced" in analysis_type or "multifactor" in analysis_type:
+    print("SUCCESS: ANÁLISIS MULTIFACTORIAL AVANZADO CON HISTORIAL DETECTADO")
+else:
+    print("Análisis estándar completado")
+EOF
+          python3 verify_rotation.py
+          rm verify_rotation.py
         else
           echo "ERROR: Error en recomendaciones de rotación"
           exit 1
@@ -246,32 +256,34 @@ jobs:
         echo "Verificando reportes generados..."
         if [ -f "docs/data.json" ]; then
           echo "SUCCESS: Dashboard data.json generado"
-          python3 -c '
-          import json
-          with open("docs/data.json", "r") as f:
-            data = json.load(f)
-          analysis_type = data.get("analysis_type", "standard")
-          top_picks = len(data.get("top_picks", []))
-          print(f"Tipo de análisis: {analysis_type}")
-          print(f"Top picks generados: {top_picks}")
+          cat > verify_dashboard.py << 'EOF'
+import json
+with open("docs/data.json", "r") as f:
+    data = json.load(f)
+analysis_type = data.get("analysis_type", "standard")
+top_picks = len(data.get("top_picks", []))
+print(f"Tipo de análisis: {analysis_type}")
+print(f"Top picks generados: {top_picks}")
 
-          # Verificar características avanzadas
-          features = []
-          if "trading_metrics" in data:
-            metrics = data["trading_metrics"]
-            print(f"Avg R/R: {metrics.get(\"avg_risk_reward\", 0):.1f}:1")
-            print(f"Oportunidades alta calidad: {metrics.get(\"high_quality_count\", 0)}")
-            features.append("Trading Metrics")
+# Verificar características avanzadas
+features = []
+if "trading_metrics" in data:
+    metrics = data["trading_metrics"]
+    print(f"Avg R/R: {metrics.get('avg_risk_reward', 0):.1f}:1")
+    print(f"Oportunidades alta calidad: {metrics.get('high_quality_count', 0)}")
+    features.append("Trading Metrics")
 
-          if any("take_profit" in str(pick) for pick in data.get("top_picks", [])):
-            features.append("Stop/Target Dinámicos")
+if any("take_profit" in str(pick) for pick in data.get("top_picks", [])):
+    features.append("Stop/Target Dinámicos")
 
-          if any("technical_score" in str(pick) for pick in data.get("top_picks", [])):
-            features.append("Scoring Avanzado")
+if any("technical_score" in str(pick) for pick in data.get("top_picks", [])):
+    features.append("Scoring Avanzado")
 
-          if features:
-            print(f"Características detectadas: {\" | \".join(features)}")
-          '
+if features:
+    print(f"Características detectadas: {' | '.join(features)}")
+EOF
+          python3 verify_dashboard.py
+          rm verify_dashboard.py
         else
           echo "ERROR: Error generando dashboard data"
           exit 1
@@ -326,100 +338,100 @@ jobs:
         echo ""
         echo "=== VERIFICACIÓN DE CALIDAD ==="
         cat > check_quality.py << 'EOF'
-        import json
-        import os
+import json
+import os
 
-        def check_file_quality(filename, min_size=100):
-            if not os.path.exists(filename):
-                print(f'ERROR: {filename}: No existe')
-                return False
-            
-            size = os.path.getsize(filename)
-            if size < min_size:
-                print(f'WARNING: {filename}: Muy pequeño ({size} bytes)')
-                return False
-            
-            try:
-                with open(filename, 'r') as f:
-                    data = json.load(f)
-                print(f'SUCCESS: {filename}: JSON válido ({size} bytes)')
-                return True
-            except Exception as e:
-                print(f'ERROR: {filename}: JSON inválido - {e}')
-                return False
+def check_file_quality(filename, min_size=100):
+    if not os.path.exists(filename):
+        print(f'ERROR: {filename}: No existe')
+        return False
+    
+    size = os.path.getsize(filename)
+    if size < min_size:
+        print(f'WARNING: {filename}: Muy pequeño ({size} bytes)')
+        return False
+    
+    try:
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        print(f'SUCCESS: {filename}: JSON válido ({size} bytes)')
+        return True
+    except Exception as e:
+        print(f'ERROR: {filename}: JSON inválido - {e}')
+        return False
 
-        # Verificar archivos críticos
-        files_ok = 0
-        files_ok += check_file_quality('weekly_screening_results.json', 1000)
-        files_ok += check_file_quality('consistency_analysis.json', 500)
-        files_ok += check_file_quality('rotation_recommendations.json', 500)
-        files_ok += check_file_quality('docs/data.json', 1000)
+# Verificar archivos críticos
+files_ok = 0
+files_ok += check_file_quality('weekly_screening_results.json', 1000)
+files_ok += check_file_quality('consistency_analysis.json', 500)
+files_ok += check_file_quality('rotation_recommendations.json', 500)
+files_ok += check_file_quality('docs/data.json', 1000)
 
-        print(f'\nResumen: {files_ok}/4 archivos OK')
-        if files_ok < 3:
-            print('ERROR: CALIDAD INSUFICIENTE - Revisar logs')
-            exit(1)
-        else:
-            print('SUCCESS: CALIDAD ACEPTABLE')
-        EOF
-                
-                python3 check_quality.py
-                rm check_quality.py
-                
-                # Mostrar estadísticas finales
-                echo ""
-                echo "=== ESTADÍSTICAS FINALES CON HISTORIAL ==="
-                cat > final_stats.py << 'EOF'
-        import json
-        from datetime import datetime
+print(f'\nResumen: {files_ok}/4 archivos OK')
+if files_ok < 3:
+    print('ERROR: CALIDAD INSUFICIENTE - Revisar logs')
+    exit(1)
+else:
+    print('SUCCESS: CALIDAD ACEPTABLE')
+EOF
+        
+        python3 check_quality.py
+        rm check_quality.py
+        
+        # Mostrar estadísticas finales
+        echo ""
+        echo "=== ESTADÍSTICAS FINALES CON HISTORIAL ==="
+        cat > final_stats.py << 'EOF'
+import json
+from datetime import datetime
 
-        # Cargar datos principales
-        try:
-            with open('weekly_screening_results.json', 'r') as f:
-                screening = json.load(f)
-            with open('consistency_analysis.json', 'r') as f:
-                consistency = json.load(f)
-            with open('rotation_recommendations.json', 'r') as f:
-                rotation = json.load(f)
-                
-            # Estadísticas básicas
-            results = screening.get('detailed_results', [])
-            total_screened = len(results)
-            winners = consistency.get('summary_stats', {}).get('consistent_winners_count', 0)
-            action = rotation.get('action_summary', {}).get('overall_action', 'NO_ACTION')
-            weeks_analyzed = consistency.get('weeks_analyzed', 0)
-            
-            print(f'Total filtradas: {total_screened}')
-            print(f'Consistent winners: {winners}')
-            print(f'Acción requerida: {action}')
-            print(f'Semanas de historial analizadas: {weeks_analyzed}')
-            print(f'Análisis completado: {datetime.now().strftime("%Y-%m-%d %H:%M UTC")}')
-            
-            # Verificar mejoras aplicadas
-            analysis_type = screening.get('analysis_type', 'standard')
-            print(f'Tipo de análisis aplicado: {analysis_type}')
-            
-            # Detectar características mejoradas
-            features = []
-            if results and 'technical_score' in results[0]:
-                features.append('Scoring Avanzado')
-            if results and 'rr_bonus' in str(results[0]):
-                features.append('R/R Integrado')  
-            if 'sustainable_momentum' in analysis_type:
-                features.append('Momentum Sostenible')
-            if 'timeframe' in str(screening.get('methodology', {})):
-                features.append('Rangos por Timeframe')
-            if 'historial' in str(consistency.get('data_sources', {})):
-                features.append('Gestión de Historial')
-                
-            if features:
-                print(f'CARACTERÍSTICAS MEJORADAS: {", ".join(features)}')
-            else:
-                print('Análisis estándar realizado')
-                
-        except Exception as e:
-            print(f'WARNING: Error en estadísticas finales: {e}')
-        EOF
+# Cargar datos principales
+try:
+    with open('weekly_screening_results.json', 'r') as f:
+        screening = json.load(f)
+    with open('consistency_analysis.json', 'r') as f:
+        consistency = json.load(f)
+    with open('rotation_recommendations.json', 'r') as f:
+        rotation = json.load(f)
+        
+    # Estadísticas básicas
+    results = screening.get('detailed_results', [])
+    total_screened = len(results)
+    winners = consistency.get('summary_stats', {}).get('consistent_winners_count', 0)
+    action = rotation.get('action_summary', {}).get('overall_action', 'NO_ACTION')
+    weeks_analyzed = consistency.get('weeks_analyzed', 0)
+    
+    print(f'Total filtradas: {total_screened}')
+    print(f'Consistent winners: {winners}')
+    print(f'Acción requerida: {action}')
+    print(f'Semanas de historial analizadas: {weeks_analyzed}')
+    print(f'Análisis completado: {datetime.now().strftime("%Y-%m-%d %H:%M UTC")}')
+    
+    # Verificar mejoras aplicadas
+    analysis_type = screening.get('analysis_type', 'standard')
+    print(f'Tipo de análisis aplicado: {analysis_type}')
+    
+    # Detectar características mejoradas
+    features = []
+    if results and 'technical_score' in results[0]:
+        features.append('Scoring Avanzado')
+    if results and 'rr_bonus' in str(results[0]):
+        features.append('R/R Integrado')  
+    if 'sustainable_momentum' in analysis_type:
+        features.append('Momentum Sostenible')
+    if 'timeframe' in str(screening.get('methodology', {})):
+        features.append('Rangos por Timeframe')
+    if 'historial' in str(consistency.get('data_sources', {})):
+        features.append('Gestión de Historial')
+        
+    if features:
+        print(f'CARACTERÍSTICAS MEJORADAS: {", ".join(features)}')
+    else:
+        print('Análisis estándar realizado')
+        
+except Exception as e:
+    print(f'WARNING: Error en estadísticas finales: {e}')
+EOF
         
         python3 final_stats.py
         rm final_stats.py
@@ -432,69 +444,69 @@ jobs:
         
         # Extraer información clave
         cat > create_commit_msg.py << 'EOF'
-        import json
-        from datetime import datetime
-        import os
+import json
+from datetime import datetime
+import os
 
-        try:
-            # Cargar datos
-            with open('weekly_screening_results.json', 'r') as f:
-                screening = json.load(f)
-            with open('consistency_analysis.json', 'r') as f:
-                consistency = json.load(f)
-            with open('rotation_recommendations.json', 'r') as f:
-                rotation = json.load(f)
-            
-            # Extraer información
-            results = screening.get('detailed_results', [])
-            top_symbols = [r['symbol'] for r in results[:5]]
-            winners_count = consistency.get('summary_stats', {}).get('consistent_winners_count', 0)
-            action = rotation.get('action_summary', {}).get('overall_action', 'NO_ACTION')
-            weeks_analyzed = consistency.get('weeks_analyzed', 0)
-            
-            # Métricas de trading
-            trading_metrics = ''
-            if results:
-                if 'technical_score' in results[0]:
-                    avg_tech = sum(r.get('technical_score', 0) for r in results) / len(results)
-                    avg_final = sum(r.get('score', 0) for r in results) / len(results)
-                    trading_metrics = f' | Tech: {avg_tech:.0f} Final: {avg_final:.0f}'
-                
-                avg_rr = sum(r.get('risk_reward_ratio', 0) for r in results) / len(results)
-                high_quality = len([r for r in results if r.get('risk_reward_ratio', 0) > 2.5])
-                trading_metrics += f' | R/R: {avg_rr:.1f}:1 | HQ: {high_quality}'
-            
-            # Detectar tipo de análisis
-            analysis_type = screening.get('analysis_type', 'standard')
-            if 'sustainable_momentum' in analysis_type:
-                analysis_label = 'Sustainable Momentum + Historial'
-            elif 'enhanced' in analysis_type:
-                analysis_label = 'Enhanced + Historial'
-            else:
-                analysis_label = 'Standard + Historial'
-            
-            # Obtener fecha del entorno
-            report_date = os.environ.get('REPORT_DATE', datetime.now().strftime('%Y-%m-%d'))
-            
-            # Crear mensaje
-            with open('commit_message.txt', 'w') as f:
-                f.write(f'{analysis_label} Analysis {report_date}\n\n')
-                f.write(f'Top 5: {", ".join(top_symbols) if top_symbols else "None"}\n')
-                f.write(f'Consistent Winners: {winners_count}\n')
-                f.write(f'Action: {action}\n')
-                f.write(f'Filtered: {len(results)}{trading_metrics}\n')
-                f.write(f'History: {weeks_analyzed} weeks analyzed\n\n')
-                f.write(f'Enhanced Bot v2.1 + Auto History - {datetime.now().strftime("%H:%M UTC")}\n')
-            
-            print('SUCCESS: Commit message con historial generado')
-            
-        except Exception as e:
-            print(f'ERROR: Error generando commit message: {e}')
-            # Fallback message
-            with open('commit_message.txt', 'w') as f:
-                report_date = os.environ.get('REPORT_DATE', datetime.now().strftime('%Y-%m-%d'))
-                f.write(f'Weekly Analysis + Auto History {report_date}\n\nGenerated by Enhanced Conservative Trading Bot with History Management\n')
-        EOF
+try:
+    # Cargar datos
+    with open('weekly_screening_results.json', 'r') as f:
+        screening = json.load(f)
+    with open('consistency_analysis.json', 'r') as f:
+        consistency = json.load(f)
+    with open('rotation_recommendations.json', 'r') as f:
+        rotation = json.load(f)
+    
+    # Extraer información
+    results = screening.get('detailed_results', [])
+    top_symbols = [r['symbol'] for r in results[:5]]
+    winners_count = consistency.get('summary_stats', {}).get('consistent_winners_count', 0)
+    action = rotation.get('action_summary', {}).get('overall_action', 'NO_ACTION')
+    weeks_analyzed = consistency.get('weeks_analyzed', 0)
+    
+    # Métricas de trading
+    trading_metrics = ''
+    if results:
+        if 'technical_score' in results[0]:
+            avg_tech = sum(r.get('technical_score', 0) for r in results) / len(results)
+            avg_final = sum(r.get('score', 0) for r in results) / len(results)
+            trading_metrics = f' | Tech: {avg_tech:.0f} Final: {avg_final:.0f}'
+        
+        avg_rr = sum(r.get('risk_reward_ratio', 0) for r in results) / len(results)
+        high_quality = len([r for r in results if r.get('risk_reward_ratio', 0) > 2.5])
+        trading_metrics += f' | R/R: {avg_rr:.1f}:1 | HQ: {high_quality}'
+    
+    # Detectar tipo de análisis
+    analysis_type = screening.get('analysis_type', 'standard')
+    if 'sustainable_momentum' in analysis_type:
+        analysis_label = 'Sustainable Momentum + Historial'
+    elif 'enhanced' in analysis_type:
+        analysis_label = 'Enhanced + Historial'
+    else:
+        analysis_label = 'Standard + Historial'
+    
+    # Obtener fecha del entorno
+    report_date = os.environ.get('REPORT_DATE', datetime.now().strftime('%Y-%m-%d'))
+    
+    # Crear mensaje
+    with open('commit_message.txt', 'w') as f:
+        f.write(f'{analysis_label} Analysis {report_date}\n\n')
+        f.write(f'Top 5: {", ".join(top_symbols) if top_symbols else "None"}\n')
+        f.write(f'Consistent Winners: {winners_count}\n')
+        f.write(f'Action: {action}\n')
+        f.write(f'Filtered: {len(results)}{trading_metrics}\n')
+        f.write(f'History: {weeks_analyzed} weeks analyzed\n\n')
+        f.write(f'Enhanced Bot v2.1 + Auto History - {datetime.now().strftime("%H:%M UTC")}\n')
+    
+    print('SUCCESS: Commit message con historial generado')
+    
+except Exception as e:
+    print(f'ERROR: Error generando commit message: {e}')
+    # Fallback message
+    with open('commit_message.txt', 'w') as f:
+        report_date = os.environ.get('REPORT_DATE', datetime.now().strftime('%Y-%m-%d'))
+        f.write(f'Weekly Analysis + Auto History {report_date}\n\nGenerated by Enhanced Conservative Trading Bot with History Management\n')
+EOF
         
         REPORT_DATE="$REPORT_DATE" python3 create_commit_msg.py
         rm create_commit_msg.py
