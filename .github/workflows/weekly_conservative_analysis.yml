@@ -57,116 +57,42 @@ jobs:
       run: |
         echo "=== VERIFICANDO CONFIGURACION MEJORADA CON HISTORIAL ==="
         if [ ! -f "current_portfolio.json" ]; then
-          echo "WARNING: current_portfolio.json no encontrado - se creara ejemplo"
-        else
-          echo "SUCCESS: current_portfolio.json encontrado"
-          echo "Posiciones actuales:"
-          cat > check_portfolio.py << 'EOF'
-          import json
-          try:
-              with open("current_portfolio.json", "r") as f:
-                  data = json.load(f)
-              positions = list(data.get("positions", {}).keys())
-              print(f"Positions: {len(positions)} posiciones: {positions}")
-              print(f"Cash disponible: ${data.get('cash', 0):,.2f}")
-          except Exception as e:
-              print(f"ERROR leyendo portfolio: {e}")
-          EOF
-          python3 check_portfolio.py
-          rm check_portfolio.py
+          echo "ERROR: current_portfolio.json no encontrado"
+          exit 1
         fi
+        echo "✅ Configuración verificada"
         
-        echo ""
-        echo "=== VERIFICANDO SCRIPTS PRINCIPALES ==="
-        for script in "conservative_screener.py" "consistency_analyzer.py" "rotation_recommender.py" "create_weekly_report.py"; do
-          if [ -f "$script" ]; then
-            echo "SUCCESS: $script encontrado"
-          else
-            echo "ERROR: $script NO ENCONTRADO"
-            exit 1
-          fi
-        done
-        
-        echo ""
-        echo "=== ESTADO DEL HISTORIAL ACTUAL ==="
-        
-        # Contar archivos históricos por tipo
-        hist_screening=$(ls weekly_screening_results_*.json 2>/dev/null | wc -l)
-        hist_ultra=$(ls ultra_conservative_results_*.json 2>/dev/null | wc -l)
-        hist_consistency=$(ls consistency_analysis_*.json 2>/dev/null | wc -l)
-        hist_rotation=$(ls rotation_recommendations_*.json 2>/dev/null | wc -l)
-        hist_reports=$(ls *WEEKLY_REPORT*.md 2>/dev/null | wc -l)
-        
-        echo "Estado del historial antes del análisis:"
-        echo "   - Screening históricos: $hist_screening archivos"
-        echo "   - Ultra conservadores: $hist_ultra archivos"
-        echo "   - Análisis consistencia: $hist_consistency archivos"
-        echo "   - Recomendaciones: $hist_rotation archivos"
-        echo "   - Reportes: $hist_reports archivos"
-        
-        # Verificar archivo actual (último análisis)
-        if [ -f "weekly_screening_results.json" ]; then
-          echo "SUCCESS: Último screening encontrado - será archivado automáticamente"
-          cat > check_screening.py << 'EOF'
-          import json
-          try:
-              with open("weekly_screening_results.json", "r") as f:
-                  data = json.load(f)
-              date = data.get("analysis_date", "")[:10]
-              symbols = len(data.get("detailed_results", []))
-              print(f"   Fecha: {date} | Símbolos: {symbols}")
-          except:
-              print("   WARNING: Error leyendo archivo actual")
-          EOF
-          python3 check_screening.py
-          rm check_screening.py
+        # Verificar estado del historial
+        if [ -d "historical_data" ]; then
+          hist_count=$(ls historical_data/ 2>/dev/null | wc -l)
+          echo "📚 Archivos históricos disponibles: $hist_count"
         else
-          echo "INFO: Sin screening previo - primera ejecución o análisis inicial"
+          echo "ℹ️  Primera ejecución - se creará historial automáticamente"
         fi
+      env:
+        PYTHONUNBUFFERED: 1
         
-    - name: 1. Ejecutar screening conservador con gestión de historial
+    - name: Configurar variables de entorno para análisis mejorado
       run: |
-        echo "STEP 1: Screening conservador mejorado con gestión automática de historial..."
-        echo "El sistema archivará automáticamente el screening anterior (si existe)"
-        echo "Aplicará limpieza automática de archivos antiguos"
+        echo "REPORT_DATE=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+        echo "ANALYSIS_START_TIME=$(date -u +%H:%M)" >> $GITHUB_ENV
+        echo "ENHANCED_MODE=true" >> $GITHUB_ENV
+        echo "AUTO_HISTORY=true" >> $GITHUB_ENV
         
-        # Ejecutar screening con gestión de historial integrada
+    - name: 1. Screening conservador mejorado con historial automático
+      run: |
+        echo "STEP 1: Screening completo 3,000+ acciones con gestión automática de historial..."
+        echo "El sistema archivará automáticamente resultados anteriores (si existen)"
+        echo "Tiempo estimado: 15-25 minutos para análisis completo"
+        
         python conservative_screener.py
         
-        echo "Verificando resultados del screening con historial..."
         if [ -f "weekly_screening_results.json" ]; then
-          echo "SUCCESS: Screening completado exitosamente con gestión de historial"
-          cat > verify_screening.py << 'EOF'
-          import json
-          with open("weekly_screening_results.json", "r") as f:
-              data = json.load(f)
-          results = data.get("detailed_results", [])
-          print(f"{len(results)} acciones pasaron filtros conservadores mejorados")
-          if results:
-              # Verificar si tiene el scoring mejorado
-              if "technical_score" in results[0]:
-                  avg_tech = sum(r.get("technical_score", 0) for r in results) / len(results)
-                  avg_final = sum(r.get("score", 0) for r in results) / len(results)
-                  avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
-                  print(f"Score técnico promedio: {avg_tech:.1f}")
-                  print(f"Score final promedio: {avg_final:.1f}")
-                  print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
-                  print("SUCCESS: SCORING MEJORADO Y GESTIÓN DE HISTORIAL DETECTADOS")
-              else:
-                  avg_rr = sum(r.get("risk_reward_ratio", 0) for r in results) / len(results)
-                  print(f"Risk/Reward promedio: {avg_rr:.1f}:1")
-              
-              top_5 = [r["symbol"] for r in results[:5]]
-              print(f"Top 5: {top_5}")
-              
-              # Verificar tipo de análisis
-              analysis_type = data.get("analysis_type", "standard")
-              print(f"Tipo de análisis: {analysis_type}")
-          EOF
-          python3 verify_screening.py
-          rm verify_screening.py
+          echo "SUCCESS: Screening completado con gestión automática de historial"
+          # Verificar que el archivo contiene datos válidos
+          python -c "import json; data=json.load(open('weekly_screening_results.json')); print(f'Resultados: {len(data.get(\"detailed_results\", []))}')"
         else
-          echo "ERROR: Error en screening - archivo de resultados no encontrado"
+          echo "ERROR: Error en screening conservador"
           exit 1
         fi
       env:
@@ -182,25 +108,7 @@ jobs:
         
         if [ -f "consistency_analysis.json" ]; then
           echo "SUCCESS: Análisis de consistencia completado con gestión de historial"
-          cat > verify_consistency.py << 'EOF'
-          import json
-          with open("consistency_analysis.json", "r") as f:
-              data = json.load(f)
-          stats = data.get("summary_stats", {})
-          sources = data.get("data_sources", {})
-          print(f"Consistent Winners: {stats.get('consistent_winners_count', 0)}")
-          print(f"Strong Candidates: {stats.get('strong_candidates_count', 0)}")
-          print(f"Emerging Opportunities: {stats.get('emerging_count', 0)}")
-          print(f"Total símbolos únicos analizados: {stats.get('total_unique_symbols', 0)}")
-          print(f"Semanas analizadas: {data.get('weeks_analyzed', 0)}")
-
-          # Mostrar fuentes de datos
-          hist_files = sources.get("historical_files", [])
-          valid_files = [f for f in hist_files if "N/A" not in f]
-          print(f"Archivos históricos válidos: {len(valid_files)}")
-          EOF
-          python3 verify_consistency.py
-          rm verify_consistency.py
+          python verify_consistency.py
         else
           echo "ERROR: Error en análisis de consistencia"
           exit 1
@@ -217,28 +125,7 @@ jobs:
         
         if [ -f "rotation_recommendations.json" ]; then
           echo "SUCCESS: Recomendaciones de rotación completadas con gestión de historial"
-          cat > verify_rotation.py << 'EOF'
-          import json
-          with open("rotation_recommendations.json", "r") as f:
-              data = json.load(f)
-          action = data.get("action_summary", {}).get("overall_action", "NO_ACTION")
-          strong_buys = len(data.get("action_summary", {}).get("strong_buys", []))
-          exits = len(data.get("action_summary", {}).get("consider_exits", [])) + len(data.get("action_summary", {}).get("urgent_exits", []))
-          holds = len(data.get("action_summary", {}).get("holds", []))
-          print(f"Acción general: {action}")
-          print(f"Compras fuertes recomendadas: {strong_buys}")
-          print(f"Salidas a considerar: {exits}")
-          print(f"Mantener posiciones: {holds}")
-
-          # Verificar si es análisis avanzado
-          analysis_type = data.get("analysis_type", "standard")
-          if "advanced" in analysis_type or "multifactor" in analysis_type:
-              print("SUCCESS: ANÁLISIS MULTIFACTORIAL AVANZADO CON HISTORIAL DETECTADO")
-          else:
-              print("Análisis estándar completado")
-          EOF
-          python3 verify_rotation.py
-          rm verify_rotation.py
+          python verify_rotation.py
         else
           echo "ERROR: Error en recomendaciones de rotación"
           exit 1
@@ -256,34 +143,7 @@ jobs:
         echo "Verificando reportes generados..."
         if [ -f "docs/data.json" ]; then
           echo "SUCCESS: Dashboard data.json generado"
-          cat > verify_dashboard.py << 'EOF'
-          import json
-          with open("docs/data.json", "r") as f:
-              data = json.load(f)
-          analysis_type = data.get("analysis_type", "standard")
-          top_picks = len(data.get("top_picks", []))
-          print(f"Tipo de análisis: {analysis_type}")
-          print(f"Top picks generados: {top_picks}")
-
-          # Verificar características avanzadas
-          features = []
-          if "trading_metrics" in data:
-              metrics = data["trading_metrics"]
-              print(f"Avg R/R: {metrics.get('avg_risk_reward', 0):.1f}:1")
-              print(f"Oportunidades alta calidad: {metrics.get('high_quality_count', 0)}")
-              features.append("Trading Metrics")
-
-          if any("take_profit" in str(pick) for pick in data.get("top_picks", [])):
-              features.append("Stop/Target Dinámicos")
-
-          if any("technical_score" in str(pick) for pick in data.get("top_picks", [])):
-              features.append("Scoring Avanzado")
-
-          if features:
-              print(f"Características detectadas: {' | '.join(features)}")
-          EOF
-          python3 verify_dashboard.py
-          rm verify_dashboard.py
+          python verify_dashboard.py
         else
           echo "ERROR: Error generando dashboard data"
           exit 1
@@ -305,365 +165,87 @@ jobs:
         
     - name: Verificar archivos generados y calidad con historial
       run: |
-        echo "=== VERIFICACIÓN FINAL DE ARCHIVOS Y GESTIÓN DE HISTORIAL ==="
+        python verify_generated_files.py
+      env:
+        PYTHONUNBUFFERED: 1
         
-        # Archivos principales
-        for file in "weekly_screening_results.json" "consistency_analysis.json" "rotation_recommendations.json" "docs/data.json"; do
-          if [ -f "$file" ]; then
-            size=$(stat -c%s "$file")
-            echo "SUCCESS: $file (${size} bytes)"
-          else
-            echo "ERROR: $file FALTANTE"
-          fi
-        done
-        
-        # Verificar estado del historial después del análisis
-        echo ""
-        echo "=== ESTADO DEL HISTORIAL DESPUÉS DEL ANÁLISIS ==="
-        
-        hist_screening=$(ls weekly_screening_results_*.json 2>/dev/null | wc -l)
-        hist_ultra=$(ls ultra_conservative_results_*.json 2>/dev/null | wc -l)
-        hist_consistency=$(ls consistency_analysis_*.json 2>/dev/null | wc -l)
-        hist_rotation=$(ls rotation_recommendations_*.json 2>/dev/null | wc -l)
-        hist_reports=$(ls *WEEKLY_REPORT*.md 2>/dev/null | wc -l)
-        
-        echo "Historial después del análisis:"
-        echo "   - Screening históricos: $hist_screening archivos"
-        echo "   - Ultra conservadores: $hist_ultra archivos"
-        echo "   - Análisis consistencia: $hist_consistency archivos"
-        echo "   - Recomendaciones: $hist_rotation archivos"
-        echo "   - Reportes: $hist_reports archivos"
-        
-        # Verificar calidad de datos
-        echo ""
-        echo "=== VERIFICACIÓN DE CALIDAD ==="
-        cat > check_quality.py << 'EOF'
-        import json
-        import os
-
-        def check_file_quality(filename, min_size=100):
-            if not os.path.exists(filename):
-                print(f'ERROR: {filename}: No existe')
-                return False
-            
-            size = os.path.getsize(filename)
-            if size < min_size:
-                print(f'WARNING: {filename}: Muy pequeño ({size} bytes)')
-                return False
-            
-            try:
-                with open(filename, 'r') as f:
-                    data = json.load(f)
-                print(f'SUCCESS: {filename}: JSON válido ({size} bytes)')
-                return True
-            except Exception as e:
-                print(f'ERROR: {filename}: JSON inválido - {e}')
-                return False
-
-        # Verificar archivos críticos
-        files_ok = 0
-        files_ok += check_file_quality('weekly_screening_results.json', 1000)
-        files_ok += check_file_quality('consistency_analysis.json', 500)
-        files_ok += check_file_quality('rotation_recommendations.json', 500)
-        files_ok += check_file_quality('docs/data.json', 1000)
-
-        print(f'\nResumen: {files_ok}/4 archivos OK')
-        if files_ok < 3:
-            print('ERROR: CALIDAD INSUFICIENTE - Revisar logs')
-            exit(1)
-        else:
-            print('SUCCESS: CALIDAD ACEPTABLE')
-        EOF
-        
-        python3 check_quality.py
-        rm check_quality.py
-        
-        # Mostrar estadísticas finales
-        echo ""
-        echo "=== ESTADÍSTICAS FINALES CON HISTORIAL ==="
-        cat > final_stats.py << 'EOF'
-        import json
-        from datetime import datetime
-
-        # Cargar datos principales
-        try:
-            with open('weekly_screening_results.json', 'r') as f:
-                screening = json.load(f)
-            with open('consistency_analysis.json', 'r') as f:
-                consistency = json.load(f)
-            with open('rotation_recommendations.json', 'r') as f:
-                rotation = json.load(f)
-                
-            # Estadísticas básicas
-            results = screening.get('detailed_results', [])
-            total_screened = len(results)
-            winners = consistency.get('summary_stats', {}).get('consistent_winners_count', 0)
-            action = rotation.get('action_summary', {}).get('overall_action', 'NO_ACTION')
-            weeks_analyzed = consistency.get('weeks_analyzed', 0)
-            
-            print(f'Total filtradas: {total_screened}')
-            print(f'Consistent winners: {winners}')
-            print(f'Acción requerida: {action}')
-            print(f'Semanas de historial analizadas: {weeks_analyzed}')
-            print(f'Análisis completado: {datetime.now().strftime("%Y-%m-%d %H:%M UTC")}')
-            
-            # Verificar mejoras aplicadas
-            analysis_type = screening.get('analysis_type', 'standard')
-            print(f'Tipo de análisis aplicado: {analysis_type}')
-            
-            # Detectar características mejoradas
-            features = []
-            if results and 'technical_score' in results[0]:
-                features.append('Scoring Avanzado')
-            if results and 'rr_bonus' in str(results[0]):
-                features.append('R/R Integrado')  
-            if 'sustainable_momentum' in analysis_type:
-                features.append('Momentum Sostenible')
-            if 'timeframe' in str(screening.get('methodology', {})):
-                features.append('Rangos por Timeframe')
-            if 'historial' in str(consistency.get('data_sources', {})):
-                features.append('Gestión de Historial')
-                
-            if features:
-                print(f'CARACTERÍSTICAS MEJORADAS: {", ".join(features)}')
-            else:
-                print('Análisis estándar realizado')
-                
-        except Exception as e:
-            print(f'WARNING: Error en estadísticas finales: {e}')
-        EOF
-        
-        python3 final_stats.py
-        rm final_stats.py
-        
-    - name: Crear resumen de commit mejorado con historial
+    - name: Configurar Git para commits automáticos
       run: |
-        echo "=== CREANDO RESUMEN DE COMMIT CON GESTIÓN DE HISTORIAL ==="
+        git config --global user.name 'Enhanced Conservative Bot'
+        git config --global user.email 'actions@github.com'
         
-        REPORT_DATE=$(date +%Y-%m-%d)
+    - name: Generar mensaje de commit inteligente
+      run: |
+        python generate_commit_message.py
         
-        # Extraer información clave
-        cat > create_commit_msg.py << 'EOF'
-        import json
-        from datetime import datetime
-        import os
-
-        try:
-            # Cargar datos
-            with open('weekly_screening_results.json', 'r') as f:
-                screening = json.load(f)
-            with open('consistency_analysis.json', 'r') as f:
-                consistency = json.load(f)
-            with open('rotation_recommendations.json', 'r') as f:
-                rotation = json.load(f)
-            
-            # Extraer información
-            results = screening.get('detailed_results', [])
-            top_symbols = [r['symbol'] for r in results[:5]]
-            winners_count = consistency.get('summary_stats', {}).get('consistent_winners_count', 0)
-            action = rotation.get('action_summary', {}).get('overall_action', 'NO_ACTION')
-            weeks_analyzed = consistency.get('weeks_analyzed', 0)
-            
-            # Métricas de trading
-            trading_metrics = ''
-            if results:
-                if 'technical_score' in results[0]:
-                    avg_tech = sum(r.get('technical_score', 0) for r in results) / len(results)
-                    avg_final = sum(r.get('score', 0) for r in results) / len(results)
-                    trading_metrics = f' | Tech: {avg_tech:.0f} Final: {avg_final:.0f}'
-                
-                avg_rr = sum(r.get('risk_reward_ratio', 0) for r in results) / len(results)
-                high_quality = len([r for r in results if r.get('risk_reward_ratio', 0) > 2.5])
-                trading_metrics += f' | R/R: {avg_rr:.1f}:1 | HQ: {high_quality}'
-            
-            # Detectar tipo de análisis
-            analysis_type = screening.get('analysis_type', 'standard')
-            if 'sustainable_momentum' in analysis_type:
-                analysis_label = 'Sustainable Momentum + Historial'
-            elif 'enhanced' in analysis_type:
-                analysis_label = 'Enhanced + Historial'
-            else:
-                analysis_label = 'Standard + Historial'
-            
-            # Obtener fecha del entorno
-            report_date = os.environ.get('REPORT_DATE', datetime.now().strftime('%Y-%m-%d'))
-            
-            # Crear mensaje
-            with open('commit_message.txt', 'w') as f:
-                f.write(f'{analysis_label} Analysis {report_date}\n\n')
-                f.write(f'Top 5: {", ".join(top_symbols) if top_symbols else "None"}\n')
-                f.write(f'Consistent Winners: {winners_count}\n')
-                f.write(f'Action: {action}\n')
-                f.write(f'Filtered: {len(results)}{trading_metrics}\n')
-                f.write(f'History: {weeks_analyzed} weeks analyzed\n\n')
-                f.write(f'Enhanced Bot v2.1 + Auto History - {datetime.now().strftime("%H:%M UTC")}\n')
-            
-            print('SUCCESS: Commit message con historial generado')
-            
-        except Exception as e:
-            print(f'ERROR: Error generando commit message: {e}')
-            # Fallback message
-            with open('commit_message.txt', 'w') as f:
-                report_date = os.environ.get('REPORT_DATE', datetime.now().strftime('%Y-%m-%d'))
-                f.write(f'Weekly Analysis + Auto History {report_date}\n\nGenerated by Enhanced Conservative Trading Bot with History Management\n')
-        EOF
-        
-        REPORT_DATE="$REPORT_DATE" python3 create_commit_msg.py
-        rm create_commit_msg.py
-        
+        # Mostrar el mensaje generado
+        echo "=== MENSAJE DE COMMIT GENERADO ==="
         cat commit_message.txt
+        echo "================================="
+      env:
+        PYTHONUNBUFFERED: 1
         
-    - name: Limpiar archivos antiguos con gestión inteligente de historial
+    - name: Commit y push de resultados con historial automático
       run: |
-        echo "Limpieza automática inteligente de historial..."
+        # Verificar si hay cambios
+        if git diff --quiet && git diff --staged --quiet; then
+          echo "Sin cambios para commitear"
+        else
+          # Añadir archivos principales
+          git add weekly_screening_results.json
+          git add consistency_analysis.json  
+          git add rotation_recommendations.json
+          git add docs/data.json
+          
+          # Añadir reportes si existen
+          git add ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null || true
+          git add WEEKLY_REPORT_*.md 2>/dev/null || true
+          
+          # Añadir historial si existe
+          git add historical_data/ 2>/dev/null || true
+          
+          # Commit con mensaje personalizado
+          if [ -f "commit_message.txt" ]; then
+            git commit -F commit_message.txt
+          else
+            git commit -m "Enhanced Weekly Analysis $(date +%Y-%m-%d) - Auto History"
+          fi
+          
+          git push
+          echo "SUCCESS: Resultados commiteados con historial automático"
+        fi
         
-        # Función para mantener solo N archivos más recientes por tipo
-        cleanup_files() {
-            local pattern=$1
-            local keep_count=$2
-            local file_type=$3
-            
-            echo "Procesando $file_type (patrón: $pattern)..."
-            
-            # Buscar archivos que coincidan con el patrón
-            files=$(ls -t $pattern 2>/dev/null || true)
-            
-            if [ -z "$files" ]; then
-                echo "   SUCCESS: No hay archivos $file_type para procesar"
-                return
-            fi
-            
-            # Contar archivos encontrados
-            file_count=$(echo "$files" | wc -l)
-            echo "   Encontrados: $file_count archivos"
-            
-            # Si hay menos o igual archivos que el límite, no hacer nada
-            if [ $file_count -le $keep_count ]; then
-                echo "   SUCCESS: No es necesario limpiar (<= $keep_count archivos)"
-                return
-            fi
-            
-            # Identificar archivos a eliminar (los más antiguos)
-            to_delete=$(echo "$files" | tail -n +$((keep_count + 1)))
-            deleted_count=0
-            
-            # Eliminar archivos antiguos
-            for file in $to_delete; do
-                if [ -f "$file" ]; then
-                    echo "   Eliminando archivo antiguo: $file"
-                    rm -f "$file"
-                    deleted_count=$((deleted_count + 1))
-                fi
-            done
-            
-            # Mostrar resumen
-            remaining=$(ls $pattern 2>/dev/null | wc -l)
-            echo "   SUCCESS: $file_type: Eliminados $deleted_count, mantenidos $remaining"
-        }
-        
-        echo ""
-        echo "Iniciando limpieza por categorías con límites optimizados..."
-        echo ""
-        
-        # Limpiar archivos históricos de screening (mantener 6 semanas)
-        cleanup_files "weekly_screening_results_*.json" 6 "Screening históricos"
-        
-        # Limpiar resultados ultra conservadores completos (mantener 6) 
-        cleanup_files "ultra_conservative_results_*.json" 6 "Resultados ultra conservadores"
-        
-        # Limpiar reportes semanales (mantener 4)
-        cleanup_files "ENHANCED_WEEKLY_REPORT*.md" 4 "Reportes semanales mejorados"
-        cleanup_files "WEEKLY_REPORT*.md" 4 "Reportes semanales estándar"
-        
-        # Limpiar análisis de consistencia históricos (mantener 4)
-        cleanup_files "consistency_analysis_*.json" 4 "Análisis de consistencia"
-        
-        # Limpiar recomendaciones de rotación históricas (mantener 4)
-        cleanup_files "rotation_recommendations_*.json" 4 "Recomendaciones de rotación"
-        
-        echo ""
-        echo "RESUMEN FINAL DE ARCHIVOS:"
-        echo "========================================================"
-        
-        # Mostrar archivos actuales (principales del workflow)
-        echo "ARCHIVOS PRINCIPALES (siempre presentes):"
-        for main_file in "weekly_screening_results.json" "consistency_analysis.json" "rotation_recommendations.json" "docs/data.json"; do
-            if [ -f "$main_file" ]; then
-                size=$(stat -c%s "$main_file" 2>/dev/null || echo "unknown")
-                echo "   SUCCESS: $main_file ($size bytes)"
-            else
-                echo "   ERROR: $main_file (faltante)"
-            fi
-        done
-        
-        echo ""
-        echo "ARCHIVOS DE HISTORIAL (gestionados automáticamente):"
-        
-        # Contar y mostrar archivos históricos
-        hist_screening=$(ls weekly_screening_results_*.json 2>/dev/null | wc -l)
-        hist_ultra=$(ls ultra_conservative_results_*.json 2>/dev/null | wc -l)
-        hist_reports=$(ls *WEEKLY_REPORT*.md 2>/dev/null | wc -l)
-        hist_consistency=$(ls consistency_analysis_*.json 2>/dev/null | wc -l)
-        hist_rotation=$(ls rotation_recommendations_*.json 2>/dev/null | wc -l)
-        
-        echo "   Screening históricos: $hist_screening archivos (máx 6)"
-        echo "   Ultra conservadores: $hist_ultra archivos (máx 6)"
-        echo "   Reportes: $hist_reports archivos (máx 4)"
-        echo "   Consistencia: $hist_consistency archivos (máx 4)"
-        echo "   Rotación: $hist_rotation archivos (máx 4)"
-        
-        # Calcular espacio total aproximado
-        total_files=$((1 + hist_screening + hist_ultra + hist_reports + hist_consistency + hist_rotation))
-        echo ""
-        echo "Total archivos en repositorio: ~$total_files"
-        echo "Espacio estimado: <50MB (GitHub limit: 1GB)"
-        echo ""
-        echo "SUCCESS: GESTIÓN DE HISTORIAL COMPLETADA"
-        echo "   - Archivos principales: Actualizados"
-        echo "   - Historial: Mantenido automáticamente"
-        echo "   - Limpieza: Aplicada según retención definida"
-        echo "   - Próxima ejecución: Sábado $(date -d '+7 days' '+%Y-%m-%d 10:00 España')"
-        echo "========================================================"
-        
-    - name: Commit resultados semanales con historial completo
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message_file: commit_message.txt
-        file_pattern: 'weekly_screening_results.json weekly_screening_results_*.json consistency_analysis.json consistency_analysis_*.json rotation_recommendations.json rotation_recommendations_*.json docs/data.json *WEEKLY_REPORT*.md ultra_conservative_results*.json'
-        
-    - name: Configurar Pages
-      uses: actions/configure-pages@v4
+    - name: Configurar GitHub Pages
+      uses: actions/configure-pages@v3
       
-    - name: Subir artefacto de Pages
-      uses: actions/upload-pages-artifact@v3
+    - name: Subir artefactos para Pages
+      uses: actions/upload-pages-artifact@v2
       with:
         path: './docs'
         
     - name: Desplegar a GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v2
       
-    - name: Resumen final con gestión de historial
+    - name: Resumen final con historial y métricas
       run: |
-        echo "================================="
-        echo "SUCCESS: ANÁLISIS CONSERVADOR MEJORADO CON HISTORIAL COMPLETADO"
-        echo "================================="
-        echo "Fecha: $(date '+%Y-%m-%d %H:%M:%S UTC')"
+        echo "🎉 ===== ANÁLISIS MEJORADO COMPLETADO CON ÉXITO ====="
+        echo "🕐 Iniciado: $ANALYSIS_START_TIME UTC"
+        echo "🕐 Finalizado: $(date -u +%H:%M) UTC"
         echo ""
-        echo "Dashboard: ${{ steps.deployment.outputs.page_url }}"
-        echo "Reportes: Guardados en repositorio con historial"
-        echo "Próximo análisis: $(date -d '+7 days' '+%Y-%m-%d 10:00 España')"
+        echo "📊 ARCHIVOS GENERADOS:"
+        ls -la *.json *.md 2>/dev/null || echo "Sin archivos markdown"
         echo ""
-        echo "CARACTERÍSTICAS APLICADAS:"
-        echo "   SUCCESS: Filtros de entrada flexibles (rebotes MA50)"
-        echo "   SUCCESS: Momentum sostenible (rangos por timeframe)"
-        echo "   SUCCESS: Scoring balanceado (técnico + R/R)"
-        echo "   SUCCESS: Stop-loss dinámico ultra conservador (<=10%)"
-        echo "   SUCCESS: Take-profit con media y rangos realistas"
-        echo "   SUCCESS: Dashboard con niveles de trading"
-        echo "   SUCCESS: GESTIÓN AUTOMÁTICA DE HISTORIAL:"
-        echo "       • Archivado automático de análisis anteriores"
-        echo "       • Limpieza inteligente (mantiene 4-6 semanas)"
-        echo "       • Compatibilidad con múltiples formatos"
-        echo "       • Análisis de consistencia con historial real"
-        echo "================================="
+        echo "🌐 DASHBOARD: ${{ steps.deployment.outputs.page_url }}"
+        echo ""
+        echo "📚 GESTIÓN DE HISTORIAL:"
+        if [ -d "historical_data" ]; then
+          echo "✅ Historial automático funcionando"
+          echo "📁 Archivos históricos: $(ls historical_data/ 2>/dev/null | wc -l)"
+        else
+          echo "ℹ️  Historial se creará en próximas ejecuciones"
+        fi
+        echo ""
+        echo "🔄 Próxima ejecución: Sábados 10:00 AM España"
+        echo "⚡ Ejecución manual disponible en Actions tab"
+        echo "=============================================="

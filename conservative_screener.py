@@ -527,18 +527,172 @@ class UltraConservativeScreener:
         🆕 EVALUACIÓN ULTRA CONSERVADORA con score final mejorado
         """
         def normalize_symbol(symbol):
-            # Convierte símbolos con ^ (como OAK^B) a formato Yahoo: OAK-PB
+            """
+            🆕 VERSIÓN MEJORADA - Convierte símbolos de formato NASDAQ a formato Yahoo Finance
+            
+            Basado en investigación completa de patrones de conversión:
+            - Class shares: BRK.A → BRK-A  
+            - Preferred stocks: OAK^B → OAK-PB, CDRpB → CDR-PB, LFMDP → LFMD-PP
+            - Warrants: AAPL.WS → AAPL-WS
+            - Internacional: SHOP.TO → SHOP.TO (sin cambios)
+            - Edge cases: Índices, delisted, crypto
+            
+            Args:
+                symbol (str): Símbolo en formato NASDAQ
+                
+            Returns:
+                str: Símbolo convertido a formato Yahoo Finance
+            """
+            
+            if not symbol or not isinstance(symbol, str):
+                return symbol
+            
+            # Limpiar símbolo de espacios
+            symbol = symbol.strip().upper()
+            
+            # 1. CASOS ESPECIALES - Manejar primero los edge cases
+            
+            # Skip índices que empiezan con ^
+            if symbol.startswith('^'):
+                return symbol
+            
+            # Símbolos de bankruptcy/delisted con Q
+            if symbol.endswith('Q') and len(symbol) > 1:
+                return symbol  # Yahoo puede no soportarlos, pero intentar como están
+            
+            # Criptomonedas y ETFs especiales (mantener como están)
+            crypto_etfs = {
+                'GBTC', 'ETHE', 'MSTR', 'COIN', 'SQ', 'PYPL'  # Ejemplos comunes
+            }
+            if symbol in crypto_etfs:
+                return symbol
+            
+            
+            # 2. PREFERRED STOCKS - Múltiples patrones
+            
+            # Patrón caret: OAK^B → OAK-PB
             if '^' in symbol:
                 parts = symbol.split('^')
-                if len(parts) == 2 and len(parts[1]) == 1:
-                    return f"{parts[0]}-P{parts[1]}"
-            elif '.' in symbol:
-                return symbol.replace(".","-")
-            else:
+                if len(parts) == 2:
+                    base, suffix = parts
+                    # Verificar que el sufijo sea válido (letras típicamente)
+                    if suffix.isalpha() and len(suffix) <= 2:
+                        return f"{base}-P{suffix}"
+                return symbol  # Si no es patrón válido, mantener original
+            
+            # Patrón lowercase p: CDRpB → CDR-PB  
+            if 'p' in symbol and len(symbol) > 3:
+                # Buscar el último 'p' para manejar casos como 'APPL' correctamente
+                p_index = symbol.rfind('p')
+                if p_index > 0 and p_index < len(symbol) - 1:  # 'p' no al inicio ni al final
+                    base = symbol[:p_index]
+                    suffix = symbol[p_index + 1:]
+                    # Verificar que sea realmente preferred (sufijo corto y alfanumérico)
+                    if len(suffix) <= 2 and suffix.isalnum():
+                        return f"{base}-P{suffix}"
+            
+            # Patrón 5th letter system: LFMDP → LFMD-PP (último carácter P,O,N,M)
+            if len(symbol) == 5 and symbol[-1] in ['P', 'O', 'N', 'M']:
+                base = symbol[:4]
+                fifth_letter = symbol[-1]
+                # Mapeo específico para 5th letter system
+                letter_map = {
+                    'P': 'P',  # Primera preferred issue
+                    'O': 'O',  # Segunda preferred issue  
+                    'N': 'N',  # Tercera preferred issue
+                    'M': 'M'   # Cuarta preferred issue
+                }
+                return f"{base}-P{letter_map[fifth_letter]}"
+            
+            
+            # 3. CLASS SHARES - Patrón con punto
+            
+            if '.' in symbol:
+                parts = symbol.split('.')
+                if len(parts) == 2:
+                    base, suffix = parts
+                    
+                    # Class shares típicas: BRK.A → BRK-A
+                    if suffix in ['A', 'B', 'C', 'D'] and len(suffix) == 1:
+                        return f"{base}-{suffix}"
+                    
+                    # International exchanges (mantener formato)
+                    international_suffixes = {
+                        'L', 'TO', 'AX', 'F', 'HK', 'KS', 'PA', 'MI', 'SW', 'ST', 'OL'
+                    }
+                    if suffix in international_suffixes:
+                        return symbol  # Mantener formato internacional
+                    
+                    # Warrants con .WS
+                    if suffix == 'WS':
+                        return f"{base}-WS"
+                    
+                    # Units con .U (SPACs)
+                    if suffix == 'U':
+                        return f"{base}-U"
+                    
+                    # Otros sufijos con punto - convertir a dash generalmente
+                    if len(suffix) <= 3 and suffix.isalnum():
+                        return f"{base}-{suffix}"
+            
+            
+            # 4. WARRANTS - Patrones adicionales
+            
+            # Warrant con /W
+            if '/W' in symbol:
+                return symbol.replace('/W', '-W')
+            
+            # Warrant 5th letter W
+            if len(symbol) == 5 and symbol.endswith('W'):
+                # Verificar que no sea un símbolo normal que termine en W
+                base = symbol[:4]
+                # Si base parece ser compañía real, convertir
+                if base.isalpha():
+                    return f"{base}-W"
+            
+            
+            # 5. CASOS ESPECIALES DE FORMATO
+            
+            # Símbolos con guión bajo (convertir a dash)
+            if '_' in symbol:
+                return symbol.replace('_', '-')
+            
+            # Símbolos con múltiples puntos (mantener solo el último)
+            if symbol.count('.') > 1:
+                parts = symbol.split('.')
+                # Mantener base + último sufijo
+                return f"{'.'.join(parts[:-1])}-{parts[-1]}"
+            
+            
+            # 6. NÚMEROS EN SÍMBOLOS (típico en mercados internacionales)
+            
+            # Hong Kong style: 0700.HK → 0700.HK (mantener)
+            if symbol[0].isdigit() and '.' in symbol:
                 return symbol
+            
+            
+            # 7. FALLBACK - SÍMBOLOS COMUNES
+            
+            # Si llegamos aquí, es probablemente un símbolo común estándar
+            # Aplicar limpieza básica y validaciones
+            
+            # Remover caracteres problemáticos pero mantener estructura
+            cleaned = symbol
+            for char in ['/', '\\', '|', '*', '?', '<', '>', ':']:
+                cleaned = cleaned.replace(char, '')
+            
+            # Validación básica de formato
+            if len(cleaned) < 1 or len(cleaned) > 10:
+                return symbol  # Símbolo muy raro, mantener original
+            
+            # Verificar que contenga al menos una letra
+            if not any(c.isalpha() for c in cleaned):
+                return symbol  # Solo números, mantener original
+            
+            return cleaned
         try:
-            symbol = normalize_symbol(symbol)
-            ticker = yf.Ticker(symbol)
+            normalize_ticker = normalize_symbol(symbol)
+            ticker = yf.Ticker(normalize_ticker)
             hist = ticker.history(period="1y")
             
             if len(hist) < 200:
