@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Rotation Recommender Mejorado - Criterios avanzados más allá de la frecuencia
-Incluye análisis de momentum, risk-adjusted returns, y scoring multifactorial
+Aggressive Rotation Recommender - Optimizado para momentum trading con rotación mensual
+Recomendaciones más agresivas + menor tiempo de consistencia + detección de oportunidades emergentes
+🎯 Filosofía: Rotar agresivamente hacia mejores oportunidades de momentum
+🔄 Target: ~1 mes por posición con rotación activa hacia mejores opciones
 🆕 INCLUYE GESTIÓN AUTOMÁTICA DE HISTORIAL
 """
 
@@ -11,11 +13,17 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 import math
 
-class AdvancedRotationRecommender:
+class AggressiveRotationRecommender:
     def __init__(self):
         self.current_portfolio = None
         self.consistency_analysis = None
         self.screening_data = None
+        
+        # 🆕 PARÁMETROS PARA ROTACIÓN AGRESIVA
+        self.rotation_threshold = 0.20      # 20% score superior para recomendar rotación
+        self.min_consistency_weeks = 2      # Solo 2 semanas vs 5 (más agresivo)
+        self.emerging_opportunity_weight = 1.5  # Peso extra a momentum emergente
+        self.momentum_decay_threshold = 0.15    # 15% caída en score para considerar salida
         
     def load_current_portfolio(self):
         """Carga la cartera actual del usuario"""
@@ -90,112 +98,140 @@ class AdvancedRotationRecommender:
             print(f"❌ Error cargando datos de screening: {e}")
             return False
     
-    def calculate_advanced_score(self, symbol_info, screening_detail=None):
+    def calculate_momentum_strength_score(self, symbol_info, screening_detail=None):
         """
-        Calcula un score avanzado que va más allá de la frecuencia de aparición
-        Incluye: momentum, risk-adjusted returns, technical strength, fundamentals
+        🆕 SCORE DE FUERZA DE MOMENTUM para rotación agresiva
+        Enfoque en momentum reciente y acceleration
         """
         score = 0
         factors = {}
         
-        # 1. FACTOR DE CONSISTENCIA (base - max 100 pts)
+        # 1. FACTOR DE MOMENTUM RECIENTE (peso principal - 40%)
         frequency = symbol_info.get('frequency', 0)
-        consistency_score = (frequency / 5) * 100
-        score += consistency_score
-        factors['consistency'] = consistency_score
-        
-        # 2. FACTOR DE MOMENTUM Y TRENDING (max 100 pts)
         weeks_appeared = symbol_info.get('weeks_appeared', [])
+        appeared_this_week = symbol_info.get('appeared_this_week', False)
+        
+        # 🆕 BONUS AGRESIVO por aparición reciente
+        if appeared_this_week:
+            recent_momentum_score = frequency * 25  # 25 pts por semana aparecida
+            if frequency >= 3:  # 3+ semanas = momentum establecido
+                recent_momentum_score += 20  # Bonus por consistencia
+            elif frequency >= 2:  # 2 semanas = momentum emergente
+                recent_momentum_score += 15  # Bonus menor pero significativo
+        else:
+            # Penalización por no aparecer esta semana
+            recent_momentum_score = max(frequency * 15 - 20, 0)
+        
+        score += recent_momentum_score
+        factors['recent_momentum'] = recent_momentum_score
+        
+        # 2. FACTOR DE ACCELERATION (peso 30%)
         if len(weeks_appeared) >= 2:
-            # Bonus por apariciones consecutivas recientes
-            recent_consecutive = 0
-            for i in range(len(weeks_appeared) - 1, 0, -1):
-                if weeks_appeared[i] == weeks_appeared[i-1] + 1:
-                    recent_consecutive += 1
-                else:
-                    break
+            # Detectar momentum building vs fading
+            recent_weeks = [w for w in weeks_appeared if w >= 3]  # Últimas 3 semanas
+            acceleration_score = 0
             
-            momentum_score = min(recent_consecutive * 25, 100)  # 25 pts por semana consecutiva
+            if len(recent_weeks) >= 2:
+                # Momentum building: apariciones en semanas consecutivas recientes
+                consecutive_recent = 1
+                for i in range(len(recent_weeks) - 1, 0, -1):
+                    if recent_weeks[i] == recent_weeks[i-1] + 1:
+                        consecutive_recent += 1
+                    else:
+                        break
+                
+                acceleration_score = consecutive_recent * 15  # 15 pts por semana consecutiva
+                
+                # 🆕 BONUS ESPECIAL para "emerging momentum"
+                if 5 in weeks_appeared and 4 in weeks_appeared:
+                    acceleration_score += 25  # Fuerte momentum en últimas 2 semanas
+                elif appeared_this_week and frequency == 1:
+                    acceleration_score += 20  # Nueva aparición prometedora
             
-            # Bonus si aparece en la semana más reciente
-            if 5 in weeks_appeared:
-                momentum_score += 20
-            
-            score += momentum_score
-            factors['momentum'] = momentum_score
+            score += acceleration_score
+            factors['acceleration'] = acceleration_score
         
-        # 3. FACTOR DE SCREENING QUALITY (max 150 pts)
+        # 3. FACTOR DE CALIDAD TÉCNICA (peso 30%)
         if screening_detail:
-            # Score del screener (normalizado)
             raw_score = screening_detail.get('score', 0)
-            normalized_score = min((raw_score / 400) * 100, 100)  # Normalizar a 100
+            technical_quality = min(raw_score / 200 * 100, 100)  # Normalizar a 100
             
-            # Risk-adjusted return
-            risk_pct = screening_detail.get('risk_pct', 15)
-            outperformance_60d = screening_detail.get('outperformance_60d', 0)
+            # 🆕 BONUS por risk/reward excepcional
+            rr_ratio = screening_detail.get('risk_reward_ratio', 0)
+            if rr_ratio > 4.0:
+                technical_quality += 20  # R/R excepcional
+            elif rr_ratio > 3.0:
+                technical_quality += 10  # R/R muy bueno
             
-            if risk_pct > 0:
-                risk_adjusted_return = (outperformance_60d / risk_pct) * 10
-                risk_adjusted_return = min(risk_adjusted_return, 50)  # Max 50 pts
-            else:
-                risk_adjusted_return = 0
+            # 🆕 BONUS por momentum 20d fuerte
+            momentum_20d = screening_detail.get('outperformance_20d', 0)
+            if momentum_20d > 15:
+                technical_quality += 15  # Momentum 20d excepcional
+            elif momentum_20d > 10:
+                technical_quality += 8   # Momentum 20d fuerte
             
-            screening_quality = normalized_score + risk_adjusted_return
-            score += screening_quality
-            factors['screening_quality'] = screening_quality
-        
-        # 4. FACTOR FUNDAMENTAL (max 50 pts)
-        fundamental_score = screening_detail.get('fundamental_score', 0) if screening_detail else 0
-        # Normalizar fundamental score (0-100 -> 0-50)
-        normalized_fundamental = min(fundamental_score * 0.5, 50)
-        score += normalized_fundamental
-        factors['fundamentals'] = normalized_fundamental
-        
-        # 5. FACTOR DE MARKET STRENGTH (max 50 pts)
-        if screening_detail:
-            outperformance_20d = screening_detail.get('outperformance_20d', 0)
-            outperformance_90d = screening_detail.get('outperformance_90d', 0)
-            
-            # Media ponderada de outperformances (más peso a 60d)
-            weighted_outperf = (outperformance_20d * 0.3 + 
-                               screening_detail.get('outperformance_60d', 0) * 0.5 +
-                               outperformance_90d * 0.2)
-            
-            market_strength = min(weighted_outperf / 2, 50)  # Normalizar a 50 pts max
-            score += market_strength
-            factors['market_strength'] = market_strength
+            score += technical_quality
+            factors['technical_quality'] = technical_quality
         
         return {
             'total_score': score,
             'factors': factors,
-            'max_possible': 450  # Máximo teórico
+            'max_possible': 300,  # Máximo teórico
+            'momentum_category': self.categorize_momentum_strength(score)
         }
     
-    def calculate_position_health(self, symbol, position_data, consistency_info, screening_detail):
+    def categorize_momentum_strength(self, score):
+        """Categoriza la fuerza del momentum para decisiones"""
+        if score > 200:
+            return 'EXCEPTIONAL'  # Rotar inmediatamente
+        elif score > 150:
+            return 'STRONG'       # Considerar rotación agresiva
+        elif score > 100:
+            return 'MODERATE'     # Vigilar de cerca
+        elif score > 50:
+            return 'WEAK'         # No rotar aún
+        else:
+            return 'POOR'         # Considerar salida
+    
+    def calculate_position_momentum_health(self, symbol, position_data, consistency_info, screening_detail):
         """
-        Calcula la 'salud' de una posición existente
-        Considera: consistencia reciente, performance vs entrada, deterioro técnico
+        🆕 SALUD DE MOMENTUM para posiciones existentes
+        Optimizado para detectar deterioro temprano
         """
-        health_score = 100  # Empezar con salud perfecta
+        health_score = 100
         warnings = []
+        momentum_signals = {}
         
-        # 1. Deterioro de consistencia
+        # 1. DETERIORO DE MOMENTUM RECIENTE (crítico)
         weeks_appeared = consistency_info.get('weeks_appeared', [])
         appeared_this_week = consistency_info.get('appeared_this_week', False)
         
         if not appeared_this_week:
             weeks_absent = 5 - max(weeks_appeared) if weeks_appeared else 5
-            if weeks_absent >= 3:
-                health_score -= 50
-                warnings.append(f"Ausente {weeks_absent} semanas consecutivas")
-            elif weeks_absent >= 2:
+            if weeks_absent >= 2:  # Más agresivo: 2 semanas vs 3
+                health_score -= 60  # Penalización severa
+                warnings.append(f"Sin momentum {weeks_absent} semanas - CRÍTICO")
+            elif weeks_absent >= 1:
                 health_score -= 30
-                warnings.append(f"Ausente {weeks_absent} semanas - vigilar")
-            else:
-                health_score -= 15
-                warnings.append("No aparece esta semana")
+                warnings.append(f"Sin momentum esta semana - VIGILAR")
         
-        # 2. Performance vs precio de entrada
+        # 2. MOMENTUM ACCELERATION (nuevo criterio)
+        if screening_detail:
+            current_score = screening_detail.get('score', 0)
+            momentum_20d = screening_detail.get('outperformance_20d', 0)
+            
+            # 🆕 Detectar debilitamiento del momentum
+            if momentum_20d < 3:  # Momentum débil
+                health_score -= 25
+                warnings.append(f"Momentum 20d débil ({momentum_20d:+.1f}%)")
+            
+            # 🆕 Detectar problemas técnicos
+            rr_ratio = screening_detail.get('risk_reward_ratio', 0)
+            if rr_ratio < 2.0:  # R/R deteriorado
+                health_score -= 20
+                warnings.append(f"R/R deteriorado ({rr_ratio:.1f}:1)")
+        
+        # 3. PERFORMANCE vs ENTRADA (agresivo)
         if screening_detail and position_data:
             current_price = screening_detail.get('current_price', 0)
             entry_price = position_data.get('entry_price', 0)
@@ -203,94 +239,147 @@ class AdvancedRotationRecommender:
             if current_price > 0 and entry_price > 0:
                 performance = ((current_price / entry_price) - 1) * 100
                 
-                if performance < -15:  # Pérdida > 15%
+                if performance < -8:  # Más agresivo: -8% vs -15%
                     health_score -= 40
-                    warnings.append(f"Pérdida del {performance:.1f}% vs entrada")
-                elif performance < -8:  # Pérdida > 8%
+                    warnings.append(f"Pérdida {performance:.1f}% vs entrada - STOP LOSS cerca")
+                elif performance < -5:
                     health_score -= 20
-                    warnings.append(f"Pérdida del {performance:.1f}% vs entrada")
-                elif performance > 25:  # Ganancia > 25%
-                    warnings.append(f"Ganancia del {performance:.1f}% - considerar take profit parcial")
+                    warnings.append(f"Pérdida {performance:.1f}% vs entrada")
+                elif performance > 30:  # Take profit zone
+                    warnings.append(f"Ganancia {performance:.1f}% - considerar take profit parcial")
         
-        # 3. Deterioro técnico
-        if screening_detail:
-            risk_pct = screening_detail.get('risk_pct', 0)
-            if risk_pct > 12:  # Riesgo alto
-                health_score -= 25
-                warnings.append(f"Riesgo elevado ({risk_pct:.1f}%)")
-            
-            outperformance_20d = screening_detail.get('outperformance_20d', 0)
-            if outperformance_20d < 0:  # Underperformance reciente
-                health_score -= 15
-                warnings.append(f"Underperformance reciente ({outperformance_20d:.1f}%)")
+        # 4. MOMENTUM RANKING DETERIORATION (nuevo)
+        if consistency_info.get('frequency', 0) < 2:  # Menos de 2 apariciones
+            health_score -= 30
+            warnings.append("Consistencia insuficiente (<2 semanas)")
         
         return {
             'health_score': max(health_score, 0),
             'warnings': warnings,
-            'status': 'HEALTHY' if health_score > 70 else 'WARNING' if health_score > 40 else 'CRITICAL'
+            'status': 'HEALTHY' if health_score > 70 else 'WARNING' if health_score > 40 else 'CRITICAL',
+            'momentum_signals': momentum_signals,
+            'action_urgency': 'HIGH' if health_score < 40 else 'MEDIUM' if health_score < 70 else 'LOW'
         }
     
-    def calculate_take_profit_target(self, screening_detail):
+    def identify_rotation_opportunities_aggressive(self):
         """
-        Calcula target de take profit más sofisticado
-        Basado en: volatilidad, momentum, resistencias técnicas, risk/reward
+        🆕 IDENTIFICA OPORTUNIDADES DE ROTACIÓN AGRESIVA
+        Enfoque: Score 20% superior + momentum emergente
         """
-        if not screening_detail:
-            return None
+        if not self.consistency_analysis or not self.screening_data:
+            return []
         
-        current_price = screening_detail.get('current_price', 0)
-        if current_price <= 0:
-            return None
+        current_positions = set(self.current_portfolio.get('positions', {}).keys()) if self.current_portfolio else set()
+        rotation_opportunities = []
         
-        # Método 1: Basado en outperformance histórica proyectada
-        outperf_60d = screening_detail.get('outperformance_60d', 0)
+        # Obtener scores de posiciones actuales
+        current_position_scores = {}
+        screening_details = {}
+        for result in self.screening_data.get('detailed_results', []):
+            screening_details[result['symbol']] = result
+            if result['symbol'] in current_positions:
+                current_position_scores[result['symbol']] = result.get('score', 0)
         
-        if outperf_60d > 80:  # Performance excepcional
-            base_target = current_price * 1.35  # 35% target
-        elif outperf_60d > 50:  # Performance muy buena
-            base_target = current_price * 1.25  # 25% target
-        elif outperf_60d > 25:  # Performance buena
-            base_target = current_price * 1.18  # 18% target
-        else:  # Performance moderada
-            base_target = current_price * 1.12  # 12% target conservador
+        # Calcular score promedio de posiciones actuales
+        avg_current_score = sum(current_position_scores.values()) / len(current_position_scores) if current_position_scores else 0
+        min_score_for_rotation = avg_current_score * (1 + self.rotation_threshold)  # 20% superior
         
-        # Método 2: Basado en volatilidad (ATR implícito)
-        risk_pct = screening_detail.get('risk_pct', 8)
-        implied_atr = current_price * (risk_pct / 100) / 2  # Aproximar ATR
-        volatility_target = current_price + (implied_atr * 4)  # 4x ATR
+        print(f"📊 Score promedio posiciones actuales: {avg_current_score:.1f}")
+        print(f"🎯 Score mínimo para rotación: {min_score_for_rotation:.1f} (+{self.rotation_threshold*100:.0f}%)")
         
-        # Método 3: Basado en scoring del sistema
-        score = screening_detail.get('score', 0)
-        if score > 350:
-            score_multiplier = 1.08  # 8% extra para scores altos
-        elif score > 250:
-            score_multiplier = 1.05  # 5% extra
-        else:
-            score_multiplier = 1.02  # 2% extra básico
+        # Analizar oportunidades por categoría
+        consistency_data = self.consistency_analysis['consistency_analysis']
         
-        # Combinar métodos (más conservador gana)
-        combined_target = min(base_target, volatility_target) * score_multiplier
+        # 🆕 PRIORIZAR CATEGORÍAS más agresivamente
+        priority_categories = [
+            ('consistent_winners', 1.0),    # Prioridad máxima
+            ('strong_candidates', 0.9),     # Alta prioridad  
+            ('emerging_opportunities', 1.2)  # 🆕 BONUS para emergentes
+        ]
         
-        # Asegurar risk/reward mínimo de 2:1
-        stop_loss = screening_detail.get('stop_loss', current_price * 0.85)
-        min_target_for_2to1 = current_price + (2 * (current_price - stop_loss))
+        for category, weight_multiplier in priority_categories:
+            for symbol_info in consistency_data.get(category, []):
+                symbol = symbol_info['symbol']
+                
+                if symbol not in current_positions:  # Solo nuevas oportunidades
+                    screening_detail = screening_details.get(symbol)
+                    
+                    if screening_detail:
+                        current_score = screening_detail.get('score', 0)
+                        adjusted_score = current_score * weight_multiplier
+                        
+                        # 🆕 CRITERIOS AGRESIVOS DE ROTACIÓN
+                        momentum_strength = self.calculate_momentum_strength_score(symbol_info, screening_detail)
+                        
+                        should_rotate = False
+                        rotation_reason = ""
+                        
+                        # Criterio 1: Score 20% superior
+                        if adjusted_score >= min_score_for_rotation:
+                            should_rotate = True
+                            rotation_reason = f"Score {adjusted_score:.1f} es {((adjusted_score/avg_current_score-1)*100):+.1f}% superior"
+                        
+                        # 🆕 Criterio 2: Momentum excepcional emergente (aunque score sea menor)
+                        elif (momentum_strength['momentum_category'] == 'EXCEPTIONAL' and 
+                              symbol_info.get('frequency', 0) >= self.min_consistency_weeks):
+                            should_rotate = True
+                            rotation_reason = f"Momentum excepcional emergente (score momentum: {momentum_strength['total_score']:.0f})"
+                        
+                        # 🆕 Criterio 3: Momentum muy fuerte + consistencia mínima
+                        elif (momentum_strength['momentum_category'] == 'STRONG' and 
+                              symbol_info.get('frequency', 0) >= self.min_consistency_weeks and
+                              adjusted_score >= avg_current_score * 0.9):  # Al menos 90% del score actual
+                            should_rotate = True
+                            rotation_reason = f"Momentum fuerte + score competitivo ({adjusted_score:.1f})"
+                        
+                        if should_rotate:
+                            # Determinar urgencia de rotación
+                            urgency = 'HIGH'
+                            if momentum_strength['momentum_category'] == 'EXCEPTIONAL':
+                                urgency = 'URGENT'
+                            elif momentum_strength['momentum_category'] in ['STRONG', 'MODERATE']:
+                                urgency = 'HIGH'
+                            else:
+                                urgency = 'MEDIUM'
+                            
+                            # Identificar qué posición reemplazar
+                            worst_position = None
+                            if current_position_scores:
+                                worst_symbol = min(current_position_scores, key=current_position_scores.get)
+                                worst_score = current_position_scores[worst_symbol]
+                                if adjusted_score > worst_score * 1.1:  # 10% mejor que la peor
+                                    worst_position = worst_symbol
+                            
+                            opportunity = {
+                                'symbol': symbol,
+                                'category': category,
+                                'current_score': current_score,
+                                'adjusted_score': adjusted_score,
+                                'weight_multiplier': weight_multiplier,
+                                'momentum_strength': momentum_strength,
+                                'rotation_reason': rotation_reason,
+                                'urgency': urgency,
+                                'replace_position': worst_position,
+                                'consistency_weeks': symbol_info.get('frequency', 0),
+                                'appeared_this_week': symbol_info.get('appeared_this_week', False),
+                                'screening_detail': screening_detail,
+                                'target_hold': '~1 mes (rotación agresiva)',
+                                'min_consistency_met': symbol_info.get('frequency', 0) >= self.min_consistency_weeks
+                            }
+                            
+                            rotation_opportunities.append(opportunity)
         
-        final_target = max(combined_target, min_target_for_2to1)
+        # Ordenar por score ajustado y urgencia
+        rotation_opportunities.sort(key=lambda x: (
+            x['urgency'] == 'URGENT',
+            x['urgency'] == 'HIGH', 
+            x['adjusted_score']
+        ), reverse=True)
         
-        return {
-            'target_price': final_target,
-            'upside_pct': ((final_target / current_price) - 1) * 100,
-            'risk_reward_ratio': (final_target - current_price) / (current_price - stop_loss),
-            'method_breakdown': {
-                'base_target': base_target,
-                'volatility_target': volatility_target,
-                'score_adjusted': combined_target,
-                'min_2to1': min_target_for_2to1
-            }
-        }
+        return rotation_opportunities
     
-    def analyze_current_positions_advanced(self):
-        """Análisis avanzado de posiciones actuales"""
+    def analyze_current_positions_aggressive(self):
+        """Análisis agresivo de posiciones actuales"""
         if not self.current_portfolio or not self.consistency_analysis:
             return {}
         
@@ -315,196 +404,89 @@ class AdvancedRotationRecommender:
                     'info': symbol_info
                 }
         
-        # Analizar cada posición
+        # Analizar cada posición con criterios agresivos
         for symbol, position_data in current_positions.items():
             screening_detail = screening_details.get(symbol)
             consistency_info = all_analyzed_symbols.get(symbol, {}).get('info', {})
             
             if symbol in all_analyzed_symbols:
-                # Calcular score avanzado
-                advanced_score = self.calculate_advanced_score(consistency_info, screening_detail)
+                # Calcular momentum strength
+                momentum_strength = self.calculate_momentum_strength_score(consistency_info, screening_detail)
                 
-                # Calcular salud de la posición
-                position_health = self.calculate_position_health(
+                # Calcular salud del momentum
+                momentum_health = self.calculate_position_momentum_health(
                     symbol, position_data, consistency_info, screening_detail
                 )
                 
-                # Calcular take profit target
-                take_profit = self.calculate_take_profit_target(screening_detail)
+                # 🆕 RECOMENDACIÓN AGRESIVA basada en momentum health
+                recommendation = self.get_aggressive_position_recommendation(
+                    momentum_strength, momentum_health, consistency_info
+                )
                 
                 position_analysis[symbol] = {
                     'status': 'analyzed',
                     'category': all_analyzed_symbols[symbol]['category'],
-                    'advanced_score': advanced_score,
-                    'position_health': position_health,
-                    'take_profit_analysis': take_profit,
+                    'momentum_strength': momentum_strength,
+                    'momentum_health': momentum_health,
                     'screening_detail': screening_detail,
-                    'recommendation': self.get_advanced_position_recommendation(
-                        advanced_score, position_health, consistency_info
-                    )
+                    'recommendation': recommendation,
+                    'action_urgency': momentum_health.get('action_urgency', 'LOW')
                 }
             else:
-                # Posición no aparece en screening reciente
+                # Posición crítica: no aparece en screening
                 position_analysis[symbol] = {
-                    'status': 'not_in_screening',
+                    'status': 'critical_not_in_screening',
                     'category': 'disappeared',
-                    'advanced_score': {'total_score': 0, 'factors': {}},
-                    'position_health': {
-                        'health_score': 20,
-                        'warnings': ['No aparece en screening reciente'],
+                    'momentum_strength': {'total_score': 0, 'momentum_category': 'POOR'},
+                    'momentum_health': {
+                        'health_score': 0,
+                        'warnings': ['No aparece en screening reciente - MOMENTUM PERDIDO'],
                         'status': 'CRITICAL'
                     },
-                    'recommendation': 'URGENT_EXIT - No aparece en análisis reciente'
+                    'recommendation': 'URGENT_EXIT - Momentum perdido completamente',
+                    'action_urgency': 'URGENT'
                 }
         
         return position_analysis
     
-    def get_advanced_position_recommendation(self, advanced_score, position_health, consistency_info):
-        """Recomendación basada en análisis avanzado"""
-        total_score = advanced_score['total_score']
-        health_score = position_health['health_score']
+    def get_aggressive_position_recommendation(self, momentum_strength, momentum_health, consistency_info):
+        """Recomendación agresiva basada en momentum health"""
+        momentum_score = momentum_strength['total_score']
+        health_score = momentum_health['health_score']
+        momentum_category = momentum_strength['momentum_category']
         appeared_this_week = consistency_info.get('appeared_this_week', False)
         
-        # Crear recomendación detallada
-        if health_score < 40:
+        # Lógica agresiva de recomendaciones
+        if health_score < 30 or momentum_category == 'POOR':
             action = "URGENT_EXIT"
-            reason = f"Salud crítica ({health_score:.0f}/100). " + "; ".join(position_health['warnings'])
-        elif health_score < 70:
-            if total_score > 200:
-                action = "WATCH_CAREFULLY"
-                reason = f"Salud en alerta ({health_score:.0f}/100) pero score alto ({total_score:.0f}). Vigilar evolución semanal."
-            else:
-                action = "CONSIDER_EXIT"
-                reason = f"Salud deteriorada ({health_score:.0f}/100) y score bajo ({total_score:.0f})."
+            reason = f"Momentum crítico (health: {health_score:.0f}, categoria: {momentum_category})"
+            
+        elif health_score < 50 or not appeared_this_week:
+            action = "CONSIDER_EXIT"
+            reason = f"Momentum debilitándose (health: {health_score:.0f}, esta semana: {appeared_this_week})"
+            
+        elif health_score < 70 or momentum_category == 'WEAK':
+            action = "WATCH_CAREFULLY"
+            reason = f"Momentum en alerta (health: {health_score:.0f}, categoria: {momentum_category})"
+            
+        elif momentum_category in ['STRONG', 'EXCEPTIONAL']:
+            action = "STRONG_HOLD"
+            reason = f"Momentum excelente (health: {health_score:.0f}, categoria: {momentum_category})"
+            
         else:
-            if total_score > 300:
-                action = "STRONG_HOLD"
-                reason = f"Excelente salud ({health_score:.0f}/100) y score superior ({total_score:.0f}). Mantener con confianza."
-            elif total_score > 200:
-                action = "HOLD"
-                reason = f"Buena salud ({health_score:.0f}/100) y score sólido ({total_score:.0f}). Mantener posición."
-            else:
-                action = "WATCH_CAREFULLY"
-                reason = f"Salud aceptable ({health_score:.0f}/100) pero score moderado ({total_score:.0f}). Monitorear."
+            action = "HOLD"
+            reason = f"Momentum aceptable (health: {health_score:.0f}, categoria: {momentum_category})"
         
-        # Añadir factores específicos
-        factors = advanced_score.get('factors', {})
-        if factors.get('momentum', 0) > 80:
-            reason += " Momentum fuerte."
-        elif factors.get('momentum', 0) < 30:
-            reason += " Momentum débil."
-        
-        if not appeared_this_week and action in ['HOLD', 'STRONG_HOLD']:
-            reason += " ATENCIÓN: No aparece esta semana."
+        # Añadir warnings específicos
+        warnings = momentum_health.get('warnings', [])
+        if warnings:
+            reason += " | " + "; ".join(warnings[:2])  # Solo primeros 2 warnings
         
         return f"{action} - {reason}"
     
-    def identify_new_opportunities_advanced(self):
-        """Identifica oportunidades con scoring avanzado"""
-        if not self.consistency_analysis or not self.screening_data:
-            return []
-        
-        current_positions = set(self.current_portfolio.get('positions', {}).keys()) if self.current_portfolio else set()
-        new_opportunities = []
-        
-        # Crear mapping de screening details
-        screening_details = {}
-        for result in self.screening_data.get('detailed_results', []):
-            screening_details[result['symbol']] = result
-        
-        # Analizar todas las categorías, no solo winners/candidates
-        consistency_data = self.consistency_analysis['consistency_analysis']
-        all_categories = ['consistent_winners', 'strong_candidates', 'emerging_opportunities']
-        
-        for category in all_categories:
-            for symbol_info in consistency_data.get(category, []):
-                symbol = symbol_info['symbol']
-                
-                # Solo recomendar si no la tenemos ya
-                if symbol not in current_positions:
-                    screening_detail = screening_details.get(symbol)
-                    
-                    # Calcular score avanzado
-                    advanced_score = self.calculate_advanced_score(symbol_info, screening_detail)
-                    
-                    # Calcular take profit
-                    take_profit = self.calculate_take_profit_target(screening_detail)
-                    
-                    # Determinar nivel de confianza basado en score total
-                    total_score = advanced_score['total_score']
-                    if total_score > 350:
-                        confidence = 'VERY_HIGH'
-                    elif total_score > 250:
-                        confidence = 'HIGH'
-                    elif total_score > 150:
-                        confidence = 'MEDIUM'
-                    else:
-                        confidence = 'LOW'
-                    
-                    # Solo recomendar compras de MEDIUM o superior
-                    if confidence in ['VERY_HIGH', 'HIGH', 'MEDIUM']:
-                        opportunity = {
-                            'symbol': symbol,
-                            'category': category,
-                            'confidence': confidence,
-                            'advanced_score': advanced_score,
-                            'take_profit_analysis': take_profit,
-                            'screening_detail': screening_detail,
-                            'reason': self.generate_opportunity_reason(symbol_info, advanced_score, screening_detail),
-                            'appeared_this_week': symbol_info.get('appeared_this_week', False),
-                            'target_hold': '2-3 meses'
-                        }
-                        
-                        new_opportunities.append(opportunity)
-        
-        # Ordenar por score avanzado
-        new_opportunities.sort(key=lambda x: x['advanced_score']['total_score'], reverse=True)
-        
-        return new_opportunities
-    
-    def generate_opportunity_reason(self, symbol_info, advanced_score, screening_detail):
-        """Genera razón detallada para una oportunidad"""
-        reasons = []
-        
-        # Consistencia
-        frequency = symbol_info.get('frequency', 0)
-        if frequency >= 4:
-            reasons.append(f"Consistencia excepcional ({frequency}/5 semanas)")
-        elif frequency >= 3:
-            reasons.append(f"Consistencia sólida ({frequency}/5 semanas)")
-        
-        # Factors del scoring
-        factors = advanced_score.get('factors', {})
-        
-        if factors.get('momentum', 0) > 80:
-            reasons.append("momentum fuerte (apariciones consecutivas recientes)")
-        
-        if factors.get('screening_quality', 0) > 100:
-            reasons.append("calidad técnica superior")
-        
-        if screening_detail:
-            outperf = screening_detail.get('outperformance_60d', 0)
-            if outperf > 50:
-                reasons.append(f"outperformance excepcional vs SPY ({outperf:.1f}%)")
-            elif outperf > 25:
-                reasons.append(f"sólida outperformance vs SPY ({outperf:.1f}%)")
-            
-            risk = screening_detail.get('risk_pct', 0)
-            if risk < 8:
-                reasons.append(f"riesgo bajo ({risk:.1f}%)")
-            
-            fund_score = screening_detail.get('fundamental_score', 0)
-            if fund_score > 40:
-                reasons.append("fundamentales sólidos")
-        
-        if not reasons:
-            reasons.append(f"Score avanzado: {advanced_score['total_score']:.0f}/450")
-        
-        return ". ".join(reasons).capitalize()
-    
-    def generate_rotation_recommendations(self):
-        """Genera recomendaciones completas con análisis avanzado y gestión de historial"""
-        print("🎯 Generando recomendaciones avanzadas de rotación...")
+    def generate_aggressive_rotation_recommendations(self):
+        """Genera recomendaciones completas con rotación agresiva"""
+        print("🎯 Generando recomendaciones AGRESIVAS de rotación para momentum trading...")
         
         # Cargar todos los datos necesarios
         if not self.load_consistency_analysis():
@@ -518,7 +500,6 @@ class AdvancedRotationRecommender:
         # 🆕 Archivar archivo anterior si existe
         if os.path.exists('rotation_recommendations.json'):
             try:
-                # Leer fecha del archivo anterior
                 with open('rotation_recommendations.json', 'r') as f:
                     prev_data = json.load(f)
                     prev_date = prev_data.get('analysis_date', '')[:10].replace('-', '')
@@ -529,21 +510,26 @@ class AdvancedRotationRecommender:
             except Exception as e:
                 print(f"⚠️ Error archivando recomendaciones anteriores: {e}")
         
-        # Análisis avanzado
-        position_analysis = self.analyze_current_positions_advanced()
-        new_opportunities = self.identify_new_opportunities_advanced()
-        watchlist = self.generate_advanced_watchlist()
+        # Análisis agresivo
+        position_analysis = self.analyze_current_positions_aggressive()
+        rotation_opportunities = self.identify_rotation_opportunities_aggressive()
         
         # Generar reporte completo
         recommendations = {
             'analysis_date': datetime.now().isoformat(),
             'portfolio_status': 'loaded' if portfolio_loaded else 'example_created',
-            'analysis_type': 'advanced_multifactor',
+            'analysis_type': 'aggressive_momentum_responsive',
+            'rotation_philosophy': 'swing_for_fences_monthly_rotation',
+            'aggressive_parameters': {
+                'rotation_threshold': f"{self.rotation_threshold*100:.0f}% score superior",
+                'min_consistency_weeks': self.min_consistency_weeks,
+                'emerging_opportunity_weight': self.emerging_opportunity_weight,
+                'momentum_decay_threshold': f"{self.momentum_decay_threshold*100:.0f}%"
+            },
             'current_positions_count': len(position_analysis),
             'position_analysis': position_analysis,
-            'new_opportunities': new_opportunities[:10],
-            'watchlist': watchlist[:15],
-            'action_summary': self.create_advanced_action_summary(position_analysis, new_opportunities),
+            'rotation_opportunities': rotation_opportunities[:15],  # Top 15 oportunidades
+            'action_summary': self.create_aggressive_action_summary(position_analysis, rotation_opportunities),
             'weekly_context': {
                 'analysis_weeks': self.consistency_analysis.get('weeks_analyzed', 0),
                 'total_symbols_analyzed': self.consistency_analysis['summary_stats']['total_unique_symbols'],
@@ -551,252 +537,200 @@ class AdvancedRotationRecommender:
                 'strong_candidates': self.consistency_analysis['summary_stats']['strong_candidates_count']
             },
             'methodology_notes': {
-                'scoring_factors': 'Consistencia (100pts) + Momentum (100pts) + Calidad técnica (150pts) + Fundamentales (50pts) + Fuerza mercado (50pts)',
-                'position_health': 'Basado en consistencia reciente, performance vs entrada, deterioro técnico',
-                'take_profit': 'Calculado via outperformance proyectada, volatilidad (ATR), y risk/reward mínimo 2:1'
+                'philosophy': 'Momentum trading agresivo con rotación mensual hacia mejores oportunidades',
+                'rotation_criteria': 'Score 20% superior OR momentum excepcional emergente',
+                'consistency_required': f'Mínimo {self.min_consistency_weeks} semanas (vs 5 conservador)',
+                'exit_criteria': 'Momentum health <70 OR ausencia 1+ semanas OR deterioro técnico'
             }
         }
         
-        # Guardar recomendaciones (archivo actual)
+        # Guardar recomendaciones
         with open('rotation_recommendations.json', 'w') as f:
             json.dump(recommendations, f, indent=2, default=str)
         
-        print("✅ Recomendaciones avanzadas guardadas: rotation_recommendations.json")
+        print("✅ Recomendaciones agresivas guardadas: rotation_recommendations.json")
         print("📁 Historial de recomendaciones gestionado automáticamente")
         return recommendations
     
-    def create_advanced_action_summary(self, position_analysis, new_opportunities):
-        """Crea resumen avanzado de acciones"""
+    def create_aggressive_action_summary(self, position_analysis, rotation_opportunities):
+        """Crea resumen de acciones para rotación agresiva"""
         actions = {
             'holds': [],
             'consider_exits': [],
             'urgent_exits': [],
-            'strong_buys': [],
-            'watch_buys': [],
+            'aggressive_rotations': [],  # 🆕 Nueva categoría
+            'emerging_opportunities': [],  # 🆕 Nueva categoría
             'overall_action': 'NO_ACTION',
-            'detailed_recommendations': []  # Nuevo: recomendaciones detalladas
+            'detailed_recommendations': []
         }
         
-        # Analizar posiciones actuales
+        # Analizar posiciones actuales con criterios agresivos
+        urgent_actions = 0
         for symbol, analysis in position_analysis.items():
             recommendation = analysis['recommendation']
-            health = analysis.get('position_health', {})
-            take_profit = analysis.get('take_profit_analysis')
-            screening = analysis.get('screening_detail')
+            health = analysis.get('momentum_health', {})
+            urgency = analysis.get('action_urgency', 'LOW')
             
-            if 'STRONG_HOLD' in recommendation:
-                actions['holds'].append({
+            if 'URGENT_EXIT' in recommendation:
+                actions['urgent_exits'].append({
                     'symbol': symbol,
-                    'reason': recommendation
+                    'reason': recommendation,
+                    'urgency': urgency
                 })
+                urgent_actions += 1
                 
                 # Añadir recomendación detallada
-                detailed = {
+                actions['detailed_recommendations'].append({
                     'symbol': symbol,
-                    'action': 'STRONG_HOLD',
-                    'reason': recommendation.split(' - ')[1] if ' - ' in recommendation else recommendation
-                }
-                if take_profit:
-                    detailed.update({
-                        'current_price': screening.get('current_price') if screening else None,
-                        'take_profit': take_profit['target_price'],
-                        'stop_loss': screening.get('stop_loss') if screening else None
-                    })
-                actions['detailed_recommendations'].append(detailed)
-                
-            elif 'HOLD' in recommendation and 'STRONG_HOLD' not in recommendation:
-                actions['holds'].append({
-                    'symbol': symbol,
-                    'reason': recommendation
+                    'action': 'URGENT_EXIT',
+                    'reason': recommendation.split(' - ')[1] if ' - ' in recommendation else recommendation,
+                    'urgency': urgency,
+                    'momentum_category': analysis.get('momentum_strength', {}).get('momentum_category', 'UNKNOWN')
                 })
                 
             elif 'CONSIDER_EXIT' in recommendation or 'WATCH_CAREFULLY' in recommendation:
                 actions['consider_exits'].append({
                     'symbol': symbol,
-                    'reason': recommendation
+                    'reason': recommendation,
+                    'urgency': urgency
                 })
                 
-                actions['detailed_recommendations'].append({
-                    'symbol': symbol,
-                    'action': 'CONSIDER_EXIT',
-                    'reason': recommendation.split(' - ')[1] if ' - ' in recommendation else recommendation
-                })
-                
-            elif 'URGENT_EXIT' in recommendation:
-                actions['urgent_exits'].append({
+            elif 'STRONG_HOLD' in recommendation or 'HOLD' in recommendation:
+                actions['holds'].append({
                     'symbol': symbol,
                     'reason': recommendation
-                })
-                
-                actions['detailed_recommendations'].append({
-                    'symbol': symbol,
-                    'action': 'URGENT_EXIT',
-                    'reason': recommendation.split(' - ')[1] if ' - ' in recommendation else recommendation
                 })
         
-        # Analizar nuevas oportunidades
-        for opp in new_opportunities:
-            take_profit = opp.get('take_profit_analysis')
-            screening = opp.get('screening_detail')
+        # 🆕 Analizar oportunidades de rotación por urgencia
+        for opp in rotation_opportunities:
+            urgency = opp.get('urgency', 'MEDIUM')
             
-            if opp['confidence'] == 'VERY_HIGH':
-                actions['strong_buys'].append({
+            if urgency in ['URGENT', 'HIGH']:
+                actions['aggressive_rotations'].append({
                     'symbol': opp['symbol'],
-                    'reason': opp['reason'],
-                    'price': screening.get('current_price') if screening else None,
-                    'risk': screening.get('risk_pct') if screening else None
+                    'reason': opp['rotation_reason'],
+                    'urgency': urgency,
+                    'replace_position': opp.get('replace_position'),
+                    'momentum_category': opp['momentum_strength']['momentum_category'],
+                    'consistency_weeks': opp['consistency_weeks']
                 })
+                urgent_actions += 1
                 
-                detailed = {
+                # Añadir recomendación detallada
+                actions['detailed_recommendations'].append({
                     'symbol': opp['symbol'],
-                    'action': 'STRONG_BUY',
-                    'reason': opp['reason']
-                }
-                if take_profit and screening:
-                    detailed.update({
-                        'price': screening.get('current_price'),
-                        'stop_loss': screening.get('stop_loss'),
-                        'take_profit': take_profit['target_price'],
-                        'risk_reward': f"{take_profit['risk_reward_ratio']:.1f}:1"
-                    })
-                actions['detailed_recommendations'].append(detailed)
-                
-            elif opp['confidence'] in ['HIGH', 'MEDIUM']:
-                actions['watch_buys'].append({
+                    'action': f"AGGRESSIVE_ROTATION_{urgency}",
+                    'reason': opp['rotation_reason'],
+                    'urgency': urgency,
+                    'replace': opp.get('replace_position'),
+                    'momentum_category': opp['momentum_strength']['momentum_category'],
+                    'score': opp['current_score'],
+                    'target_upside': opp['screening_detail'].get('upside_pct', 0) if opp.get('screening_detail') else 0
+                })
+            
+            elif opp['category'] == 'emerging_opportunities':
+                actions['emerging_opportunities'].append({
                     'symbol': opp['symbol'],
-                    'reason': opp['reason'],
-                    'price': screening.get('current_price') if screening else None,
-                    'risk': screening.get('risk_pct') if screening else None
+                    'reason': opp['rotation_reason'],
+                    'momentum_category': opp['momentum_strength']['momentum_category'],
+                    'consistency_weeks': opp['consistency_weeks']
                 })
         
-        # Determinar acción general
-        if actions['urgent_exits'] or len(actions['strong_buys']) > 0:
-            actions['overall_action'] = 'ACTION_REQUIRED'
-        elif actions['consider_exits'] or len(actions['watch_buys']) > 0:
-            actions['overall_action'] = 'EVALUATE_CHANGES'
+        # 🆕 Determinar acción general agresiva
+        if urgent_actions >= 3:
+            actions['overall_action'] = 'URGENT_PORTFOLIO_ROTATION'
+        elif urgent_actions >= 1 or len(actions['aggressive_rotations']) > 0:
+            actions['overall_action'] = 'AGGRESSIVE_ROTATION_REQUIRED'
+        elif len(actions['consider_exits']) > 0 or len(actions['emerging_opportunities']) > 0:
+            actions['overall_action'] = 'EVALUATE_MOMENTUM_OPPORTUNITIES'
         else:
-            actions['overall_action'] = 'MAINTAIN_CURRENT'
+            actions['overall_action'] = 'MAINTAIN_WITH_VIGILANCE'
         
         return actions
     
-    def generate_advanced_watchlist(self):
-        """Lista de vigilancia con criterios avanzados"""
-        if not self.consistency_analysis:
-            return []
-        
-        current_positions = set(self.current_portfolio.get('positions', {}).keys()) if self.current_portfolio else set()
-        watchlist = []
-        
-        # Screening details
-        screening_details = {}
-        if self.screening_data:
-            for result in self.screening_data.get('detailed_results', []):
-                screening_details[result['symbol']] = result
-        
-        consistency_data = self.consistency_analysis['consistency_analysis']
-        
-        # Emerging opportunities con potencial
-        for symbol_info in consistency_data.get('emerging_opportunities', []):
-            symbol = symbol_info['symbol']
-            
-            if symbol not in current_positions:
-                screening_detail = screening_details.get(symbol)
-                advanced_score = self.calculate_advanced_score(symbol_info, screening_detail)
-                
-                # Solo incluir si tiene score decente
-                if advanced_score['total_score'] > 100:
-                    watchlist.append({
-                        'symbol': symbol,
-                        'reason': f"Emergiendo con score {advanced_score['total_score']:.0f}/450",
-                        'frequency': f"{symbol_info['frequency']}/5 semanas",
-                        'appeared_this_week': symbol_info.get('appeared_this_week', False),
-                        'action': 'Si aparece próxima semana con score >200 → Considerar compra',
-                        'advanced_score': advanced_score['total_score'],
-                        'current_price': screening_detail.get('current_price') if screening_detail else None
-                    })
-        
-        # Nuevos símbolos prometedores
-        trend_changes = self.consistency_analysis.get('trend_changes', {})
-        for symbol in trend_changes.get('newly_emerged', []):
-            if symbol not in current_positions:
-                screening_detail = screening_details.get(symbol)
-                if screening_detail:
-                    # Score rápido para nuevos
-                    quick_score = screening_detail.get('score', 0) + screening_detail.get('outperformance_60d', 0)
-                    
-                    if quick_score > 150:  # Solo prometedores
-                        watchlist.append({
-                            'symbol': symbol,
-                            'reason': f"Nueva aparición prometedora (score {quick_score:.0f})",
-                            'frequency': '1/5 semanas (nuevo)',
-                            'appeared_this_week': True,
-                            'action': 'Vigilar 2-3 semanas para confirmar consistencia',
-                            'advanced_score': quick_score,
-                            'current_price': screening_detail.get('current_price')
-                        })
-        
-        # Ordenar por score avanzado
-        watchlist.sort(key=lambda x: x['advanced_score'], reverse=True)
-        
-        return watchlist
-    
-    def print_advanced_summary(self, recommendations):
-        """Imprime resumen avanzado"""
+    def print_aggressive_summary(self, recommendations):
+        """Imprime resumen de recomendaciones agresivas"""
         if not recommendations:
             return
         
-        print(f"\n=== RECOMENDACIONES AVANZADAS DE ROTACIÓN ===")
+        print(f"\n=== RECOMENDACIONES AGRESIVAS DE MOMENTUM TRADING ===")
         print(f"Análisis: {recommendations['analysis_date'][:10]}")
-        print(f"Tipo: {recommendations['analysis_type']}")
+        print(f"Filosofía: {recommendations['rotation_philosophy']}")
         print(f"Posiciones actuales: {recommendations['current_positions_count']}")
         
         action_summary = recommendations['action_summary']
-        print(f"Acción general: {action_summary['overall_action']}")
+        overall_action = action_summary['overall_action']
         
-        # Mostrar recomendaciones detalladas
-        detailed_recs = action_summary.get('detailed_recommendations', [])
-        if detailed_recs:
-            print(f"\n📋 RECOMENDACIONES DETALLADAS:")
-            for rec in detailed_recs[:5]:
-                print(f"\n🔹 {rec['symbol']} - {rec['action']}")
-                print(f"   Razón: {rec['reason']}")
-                if rec.get('price'):
-                    print(f"   Precio: ${rec['price']:.2f}", end="")
-                    if rec.get('stop_loss'):
-                        print(f" | Stop: ${rec['stop_loss']:.2f}", end="")
-                    if rec.get('take_profit'):
-                        print(f" | Target: ${rec['take_profit']:.2f}", end="")
-                    if rec.get('risk_reward'):
-                        print(f" | R/R: {rec['risk_reward']}")
-                    else:
-                        print()
+        # Mostrar acción general con emoji
+        action_emojis = {
+            'URGENT_PORTFOLIO_ROTATION': '🚨',
+            'AGGRESSIVE_ROTATION_REQUIRED': '⚡',
+            'EVALUATE_MOMENTUM_OPPORTUNITIES': '🔍',
+            'MAINTAIN_WITH_VIGILANCE': '👀'
+        }
         
-        # Nuevas oportunidades por scoring
-        new_opps = recommendations.get('new_opportunities', [])
-        if new_opps:
-            print(f"\n🎯 TOP OPORTUNIDADES (por score avanzado):")
-            for opp in new_opps[:3]:
-                score = opp['advanced_score']['total_score']
-                print(f"   {opp['symbol']} - Score: {score:.0f}/450 - {opp['confidence']} - {opp['reason']}")
+        print(f"Acción general: {action_emojis.get(overall_action, '📊')} {overall_action}")
+        
+        # Mostrar rotaciones agresivas
+        aggressive_rotations = action_summary.get('aggressive_rotations', [])
+        if aggressive_rotations:
+            print(f"\n⚡ ROTACIONES AGRESIVAS RECOMENDADAS:")
+            for rot in aggressive_rotations[:3]:
+                replace_text = f" (reemplazar {rot['replace_position']})" if rot.get('replace_position') else ""
+                print(f"   🔥 {rot['symbol']} - {rot['urgency']} - {rot['reason']}{replace_text}")
+        
+        # Mostrar salidas urgentes
+        urgent_exits = action_summary.get('urgent_exits', [])
+        if urgent_exits:
+            print(f"\n🚨 SALIDAS URGENTES:")
+            for exit in urgent_exits:
+                print(f"   ❌ {exit['symbol']} - {exit['reason']}")
+        
+        # Mostrar oportunidades emergentes
+        emerging = action_summary.get('emerging_opportunities', [])
+        if emerging:
+            print(f"\n🌱 OPORTUNIDADES EMERGENTES (vigilar):")
+            for opp in emerging[:3]:
+                print(f"   👁️ {opp['symbol']} - {opp['momentum_category']} - {opp['consistency_weeks']} semanas")
+        
+        # Mostrar parámetros agresivos
+        params = recommendations['aggressive_parameters']
+        print(f"\n📊 PARÁMETROS AGRESIVOS:")
+        print(f"   - Rotación si score {params['rotation_threshold']} superior")
+        print(f"   - Consistencia mínima: {params['min_consistency_weeks']} semanas")
+        print(f"   - Peso emergentes: {params['emerging_opportunity_weight']}x")
 
 def main():
-    """Función principal"""
-    recommender = AdvancedRotationRecommender()
+    """Función principal para rotación agresiva"""
+    recommender = AggressiveRotationRecommender()
     
-    # Generar análisis avanzado completo
-    recommendations = recommender.generate_rotation_recommendations()
+    # Generar análisis agresivo completo
+    recommendations = recommender.generate_aggressive_rotation_recommendations()
     
     if recommendations:
-        recommender.print_advanced_summary(recommendations)
-        print("\n✅ Recomendaciones avanzadas completadas")
+        recommender.print_aggressive_summary(recommendations)
+        print("\n✅ Recomendaciones agresivas de momentum completadas")
         
-        # Mostrar metodología
+        # Mostrar metodología agresiva
         methodology = recommendations.get('methodology_notes', {})
-        print(f"\n📊 METODOLOGÍA:")
+        print(f"\n🎯 METODOLOGÍA AGRESIVA:")
         for key, value in methodology.items():
             print(f"   {key}: {value}")
+            
+        # Estadísticas de agresividad
+        action_summary = recommendations.get('action_summary', {})
+        total_rotations = len(action_summary.get('aggressive_rotations', []))
+        total_exits = len(action_summary.get('urgent_exits', []))
+        total_emerging = len(action_summary.get('emerging_opportunities', []))
+        
+        print(f"\n📈 ESTADÍSTICAS DE AGRESIVIDAD:")
+        print(f"   - Rotaciones agresivas: {total_rotations}")
+        print(f"   - Salidas urgentes: {total_exits}")
+        print(f"   - Oportunidades emergentes: {total_emerging}")
+        print(f"   - Acciones totales sugeridas: {total_rotations + total_exits}")
+        
     else:
-        print("\n❌ No se pudieron generar recomendaciones avanzadas")
+        print("\n❌ No se pudieron generar recomendaciones agresivas")
 
 if __name__ == "__main__":
     main()

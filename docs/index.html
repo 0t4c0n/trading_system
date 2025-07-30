@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conservative Trading Bot - Análisis Semanal</title>
+    <title>Aggressive Momentum Trading Bot - Análisis Semanal</title>
     <style>
         * {
             margin: 0;
@@ -12,11 +12,11 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
             min-height: 100vh;
             padding: 10px;
-            color: #333;
+            color: #1f2937;
         }
         
         .container {
@@ -25,15 +25,16 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, #1f2937, #374151);
             color: white;
             padding: 20px;
             text-align: center;
+            border-bottom: 3px solid #3b82f6;
         }
         
         .header-content {
@@ -49,13 +50,15 @@
         }
         
         .header h1 {
-            font-size: 1.5em;
+            font-size: 1.6em;
             margin-bottom: 5px;
+            font-weight: bold;
         }
         
         .header .subtitle {
-            opacity: 0.9;
-            font-size: 0.9em;
+            opacity: 0.95;
+            font-size: 0.95em;
+            font-weight: 500;
         }
         
         .creator-section {
@@ -78,6 +81,7 @@
             border: 3px solid rgba(255, 255, 255, 0.4);
             background: rgba(255, 255, 255, 0.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            /* Preparado para imagen manual */
         }
         
         .creator-avatar img {
@@ -107,13 +111,13 @@
         
         .summary {
             padding: 15px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-bottom: 1px solid #cbd5e1;
         }
         
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 15px;
             text-align: center;
         }
@@ -121,31 +125,82 @@
         .summary-item {
             background: white;
             padding: 12px 8px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #3b82f6;
+            border-top: 1px solid #e2e8f0;
         }
         
         .summary-number {
-            font-size: 1.8em;
-            font-weight: bold;
+            font-size: 1.9em;
+            font-weight: 700;
         }
         
-        .summary-number.success {
-            color: #27ae60;
+        .summary-number.momentum {
+            color: #2563eb;
         }
         
-        .summary-number.warning {
-            color: #f39c12;
+        .summary-number.aggressive {
+            color: #059669;
         }
         
-        .summary-number.info {
-            color: #3498db;
+        .summary-number.rotation {
+            color: #7c3aed;
+        }
+        
+        .summary-number.targeting {
+            color: #dc2626;
         }
         
         .summary-label {
             font-size: 0.8em;
             color: #666;
             margin-top: 5px;
+            font-weight: 500;
+        }
+        
+        .momentum-philosophy {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            padding: 15px 20px;
+            border-left: 5px solid #3b82f6;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .momentum-philosophy h3 {
+            color: #1e40af;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .momentum-weights {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .weight-item {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .weight-value {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #1d4ed8;
+        }
+        
+        .weight-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 3px;
         }
         
         .analysis-sections {
@@ -170,42 +225,43 @@
         }
         
         .section-title::before {
-            content: "📊";
+            content: "🚀";
             margin-right: 8px;
         }
         
         .section-title.picks::before {
-            content: "🎯";
+            content: "⚡";
         }
         
-        .section-title.consistency::before {
-            content: "🏆";
+        .section-title.momentum::before {
+            content: "🔥";
         }
         
         .section-title.rotation::before {
-            content: "🔄";
+            content: "🎯";
         }
         
         .analysis-card {
             background: white;
             border-radius: 15px;
             padding: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border-left: 4px solid #27ae60;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: 4px solid #3b82f6;
+            border-top: 1px solid #e5e7eb;
         }
         
-        /* NUEVA SECCIÓN: TOP PICKS CON TRADING LEVELS */
         .top-picks-grid {
             display: grid;
             gap: 15px;
         }
         
         .pick-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border-radius: 12px;
             padding: 15px;
-            border-left: 4px solid #27ae60;
+            border-left: 4px solid #3b82f6;
             position: relative;
+            border: 1px solid #e5e7eb;
         }
         
         .pick-header {
@@ -217,8 +273,8 @@
         
         .pick-symbol {
             font-size: 1.4em;
-            font-weight: bold;
-            color: #27ae60;
+            font-weight: 700;
+            color: #1e40af;
         }
         
         .pick-price {
@@ -233,6 +289,41 @@
             margin-bottom: 10px;
         }
         
+        .momentum-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .momentum-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .momentum-badge.exceptional {
+            background: #dc2626;
+        }
+        
+        .momentum-badge.strong {
+            background: #059669;
+        }
+        
+        .momentum-badge.moderate {
+            background: #7c3aed;
+        }
+        
+        .momentum-badge.weak {
+            background: #6b7280;
+        }
+        
         .trading-levels {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -245,24 +336,31 @@
             padding: 8px;
             border-radius: 8px;
             text-align: center;
-            border: 1px solid #e9ecef;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         
         .level-value {
-            font-weight: bold;
+            font-weight: 600;
             font-size: 0.9em;
         }
         
         .level-value.stop-loss {
-            color: #e74c3c;
+            color: #dc2626;
         }
         
         .level-value.take-profit {
-            color: #27ae60;
+            color: #059669;
         }
         
         .level-value.current {
-            color: #3498db;
+            color: #2563eb;
+        }
+        
+        .level-value.aggressive {
+            color: #7c3aed;
+            font-size: 1.0em;
+            font-weight: 700;
         }
         
         .level-label {
@@ -279,7 +377,7 @@
         }
         
         .metric-item {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             padding: 6px;
             border-radius: 6px;
             text-align: center;
@@ -296,47 +394,48 @@
         }
         
         .pick-reasoning {
-            background: rgba(39, 174, 96, 0.1);
-            border: 1px solid rgba(39, 174, 96, 0.2);
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 8px;
             padding: 10px;
             margin-top: 10px;
         }
         
         .reasoning-title {
-            font-weight: bold;
-            color: #27ae60;
+            font-weight: 600;
+            color: #1e40af;
             font-size: 0.8em;
             margin-bottom: 5px;
         }
         
         .reasoning-text {
             font-size: 0.8em;
-            color: #2c3e50;
+            color: #374151;
             line-height: 1.3;
         }
         
-        .consistency-grid {
+        .momentum-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             margin-top: 10px;
         }
         
-        .consistency-item {
-            background: #f8f9fa;
+        .momentum-item {
+            background: #f8fafc;
             padding: 10px;
             border-radius: 8px;
             text-align: center;
+            border: 1px solid #e2e8f0;
         }
         
-        .consistency-number {
+        .momentum-number {
             font-size: 1.5em;
-            font-weight: bold;
-            color: #27ae60;
+            font-weight: 700;
+            color: #2563eb;
         }
         
-        .consistency-label {
+        .momentum-label {
             font-size: 0.8em;
             color: #666;
             margin-top: 5px;
@@ -350,20 +449,26 @@
         }
         
         .symbol-badge {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 0.8em;
-            font-weight: bold;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
         }
         
-        .symbol-badge.candidate {
-            background: linear-gradient(135deg, #3498db, #5dade2);
+        .symbol-badge.exceptional {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+        
+        .symbol-badge.strong {
+            background: linear-gradient(135deg, #059669, #047857);
         }
         
         .symbol-badge.emerging {
-            background: linear-gradient(135deg, #f39c12, #f7dc6f);
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
         }
         
         .rotation-section {
@@ -377,18 +482,23 @@
             align-items: center;
         }
         
+        .rotation-title.urgent::before {
+            content: "🚨";
+            margin-right: 8px;
+        }
+        
+        .rotation-title.aggressive::before {
+            content: "⚡";
+            margin-right: 8px;
+        }
+        
+        .rotation-title.emerging::before {
+            content: "🌱";
+            margin-right: 8px;
+        }
+        
         .rotation-title.hold::before {
             content: "✅";
-            margin-right: 8px;
-        }
-        
-        .rotation-title.buy::before {
-            content: "🔥";
-            margin-right: 8px;
-        }
-        
-        .rotation-title.exit::before {
-            content: "⚠️";
             margin-right: 8px;
         }
         
@@ -398,18 +508,29 @@
         }
         
         .recommendation-item {
-            background: #f8f9fa;
+            background: #f8fafc;
             border-radius: 10px;
             padding: 12px;
-            border-left: 4px solid #27ae60;
+            border-left: 4px solid #3b82f6;
+            border: 1px solid #e5e7eb;
         }
         
-        .recommendation-item.exit {
-            border-left-color: #f39c12;
+        .recommendation-item.urgent {
+            border-left-color: #dc2626;
+            background: #fef2f2;
+            border-color: #fecaca;
         }
         
-        .recommendation-item.urgent-exit {
-            border-left-color: #e74c3c;
+        .recommendation-item.aggressive {
+            border-left-color: #059669;
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        
+        .recommendation-item.emerging {
+            border-left-color: #7c3aed;
+            background: #faf5ff;
+            border-color: #e9d5ff;
         }
         
         .recommendation-header {
@@ -420,25 +541,31 @@
         }
         
         .recommendation-symbol {
-            font-weight: bold;
-            color: #2c3e50;
+            font-weight: 600;
+            color: #1f2937;
         }
         
         .recommendation-action {
             font-size: 0.8em;
-            font-weight: bold;
+            font-weight: 600;
             padding: 3px 8px;
             border-radius: 10px;
-            background: #27ae60;
+            background: #3b82f6;
             color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
         }
         
-        .recommendation-action.exit {
-            background: #f39c12;
+        .recommendation-action.urgent {
+            background: #dc2626;
         }
         
-        .recommendation-action.urgent-exit {
-            background: #e74c3c;
+        .recommendation-action.aggressive {
+            background: #059669;
+        }
+        
+        .recommendation-action.emerging {
+            background: #7c3aed;
         }
         
         .recommendation-reason {
@@ -452,35 +579,55 @@
             padding: 6px 12px;
             border-radius: 15px;
             font-size: 0.9em;
-            font-weight: bold;
+            font-weight: 600;
             margin: 4px 8px 4px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
         }
         
-        .action-badge.no-action {
-            background: #ecf0f1;
-            color: #7f8c8d;
+        .action-badge.maintain {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
         }
         
         .action-badge.evaluate {
-            background: #fff3cd;
-            color: #856404;
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
         }
         
-        .action-badge.action-required {
-            background: #f8d7da;
-            color: #721c24;
+        .action-badge.rotation-required {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .action-badge.urgent-rotation {
+            background: #faf5ff;
+            color: #7c3aed;
+            border: 1px solid #e9d5ff;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
         .market-context {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             border-radius: 15px;
             padding: 15px;
             margin-top: 15px;
+            border: 1px solid #e2e8f0;
         }
         
         .market-context h4 {
             margin-bottom: 10px;
-            color: #495057;
+            color: #1e40af;
+            font-weight: 600;
         }
         
         .spy-metrics {
@@ -494,19 +641,21 @@
             padding: 8px;
             border-radius: 8px;
             text-align: center;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         
         .spy-value {
-            font-weight: bold;
+            font-weight: 600;
             font-size: 1.1em;
         }
         
         .spy-value.positive {
-            color: #27ae60;
+            color: #059669;
         }
         
         .spy-value.negative {
-            color: #e74c3c;
+            color: #dc2626;
         }
         
         .spy-label {
@@ -519,48 +668,50 @@
             text-align: center;
             padding: 15px;
             font-size: 0.8em;
-            color: #666;
-            background: #f8f9fa;
+            color: #6b7280;
+            background: #f8fafc;
+            border-top: 1px solid #e5e7eb;
         }
         
         .signature {
             margin-top: 8px;
             padding-top: 8px;
-            border-top: 1px solid #e9ecef;
-            background: linear-gradient(135deg, #2c3e50, #3498db);
+            border-top: 1px solid #d1d5db;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 500;
+            font-weight: 600;
         }
         
         .loading {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #6b7280;
         }
         
         .error {
-            background: #ffebee;
-            color: #c62828;
+            background: #fef2f2;
+            color: #dc2626;
             padding: 15px;
             border-radius: 8px;
             margin: 20px;
             text-align: center;
+            border: 1px solid #fecaca;
         }
         
         .refresh-btn {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #27ae60;
+            background: #3b82f6;
             color: white;
             border: none;
             width: 50px;
             height: 50px;
             border-radius: 50%;
             font-size: 1.2em;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             cursor: pointer;
             transition: transform 0.2s;
         }
@@ -596,7 +747,7 @@
             }
             
             .summary-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
             }
             
@@ -615,12 +766,12 @@
         <div class="header">
             <div class="header-content">
                 <div class="title-section">
-                    <h1>📈 Conservative Trading Bot</h1>
-                    <div class="subtitle">Análisis Semanal con Stop-Loss y Take Profit</div>
+                    <h1>📊 Professional Momentum Analytics</h1>
+                    <div class="subtitle">Advanced Trading Intelligence - Dynamic Rotation</div>
                 </div>
                 <div class="creator-section">
                     <div class="creator-avatar">
-                        <img src="data:image/jpeg;base64,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">
+                        <!-- Avatar preparado para inserción manual -->
                     </div>
                     <div class="creator-info">
                         <div class="creator-name">0t4c0n</div>
@@ -630,9 +781,26 @@
             </div>
         </div>
         
+        <div class="momentum-philosophy">
+            <h3>🎯 Investment Philosophy: Dynamic Momentum Allocation</h3>
+            <div style="font-size: 0.9em; margin-bottom: 10px;">
+                Systematic momentum detection with monthly rotation optimization. Targeting institutional-grade risk-adjusted returns through data-driven position management.
+            </div>
+            <div class="momentum-weights">
+                <div class="weight-item">
+                    <div class="weight-value">70%</div>
+                    <div class="weight-label">Momentum 20d</div>
+                </div>
+                <div class="weight-item">
+                    <div class="weight-value">30%</div>
+                    <div class="weight-label">Momentum 60d</div>
+                </div>
+            </div>
+        </div>
+        
         <div id="content">
             <div class="loading">
-                <div>🔄 Cargando análisis conservador con niveles de trading...</div>
+                <div>📊 Loading professional momentum analytics with dynamic rotation models...</div>
             </div>
         </div>
     </div>
@@ -664,87 +832,101 @@
             });
         }
         
-        function calculateTradingLevels(stock) {
+        function calculateAggressiveTradingLevels(stock) {
             const currentPrice = stock.price || stock.current_price || 0;
-            const stopLoss = stock.stop_loss || (currentPrice * 0.85); // 15% default
+            const stopLoss = stock.stop_loss || (currentPrice * 0.90); // 10% default para momentum
             
-            // Cálculo de Take Profit mejorado
+            // Take Profit más agresivo basado en momentum category
             let takeProfit = currentPrice;
+            const momentumCategory = stock.momentum_category || 'MODERATE';
             
-            // Método 1: Basado en outperformance histórica
-            const outperf60d = stock.metrics?.outperformance_60d || 0;
-            if (outperf60d > 50) {
-                takeProfit = currentPrice * 1.30; // 30% si performance excepcional
-            } else if (outperf60d > 20) {
-                takeProfit = currentPrice * 1.20; // 20% si buena performance
+            // Sistema agresivo basado en categoría de momentum
+            if (momentumCategory === 'EXCEPTIONAL') {
+                takeProfit = currentPrice * 1.45; // 45% target agresivo
+            } else if (momentumCategory === 'STRONG') {
+                takeProfit = currentPrice * 1.35; // 35% target
+            } else if (momentumCategory === 'MODERATE') {
+                takeProfit = currentPrice * 1.25; // 25% target
             } else {
-                takeProfit = currentPrice * 1.15; // 15% conservador
+                takeProfit = currentPrice * 1.18; // 18% conservador
             }
             
-            // Método 2: Basado en volatilidad (ATR)
-            const atr = stock.atr || (currentPrice * 0.03); // 3% default ATR
-            const atrBasedTarget = currentPrice + (atr * 3); // 3x ATR
+            // Aplicar sistema ATR si está disponible
+            const atr = stock.atr || (currentPrice * 0.04); // 4% default ATR para momentum
+            const atrBasedTarget = currentPrice + (atr * getATRMultiplier(stock.score || 0));
             
-            // Usar el más conservador de ambos métodos
-            takeProfit = Math.min(takeProfit, atrBasedTarget);
-            
-            // Ajuste por scoring del sistema
-            const score = stock.score || 0;
-            if (score > 300) {
-                takeProfit *= 1.05; // 5% extra para scores altos
-            }
+            // Usar el más agresivo para momentum trading
+            takeProfit = Math.max(takeProfit, atrBasedTarget);
             
             return {
                 current: currentPrice,
                 stopLoss: stopLoss,
                 takeProfit: takeProfit,
-                riskReward: ((takeProfit - currentPrice) / (currentPrice - stopLoss)).toFixed(2)
+                riskReward: ((takeProfit - currentPrice) / (currentPrice - stopLoss)).toFixed(2),
+                targetMethod: 'aggressive_momentum'
             };
         }
         
-        function generateReasoningText(stock, consistency) {
+        function getATRMultiplier(score) {
+            // Multiplicadores ATR más agresivos
+            if (score > 100) return 3.5; // Era 3.0
+            if (score >= 60) return 2.8;  // Era 2.5
+            return 2.3; // Era 2.0
+        }
+        
+        function getMomentumCategory(stock) {
+            // Determinar categoría de momentum basada en datos disponibles
+            const score = stock.score || 0;
+            const momentum20d = stock.metrics?.outperformance_20d || 0;
+            const momentum60d = stock.metrics?.outperformance_60d || 0;
+            
+            if (score > 200 || momentum20d > 25) return 'EXCEPTIONAL';
+            if (score > 150 || momentum20d > 15) return 'STRONG';
+            if (score > 100 || momentum20d > 8) return 'MODERATE';
+            if (score > 50) return 'WEAK';
+            return 'POOR';
+        }
+        
+        function generateAggressiveReasoningText(stock, momentum) {
             let reasoning = [];
             
-            // Análisis técnico
-            const outperf = stock.metrics?.outperformance_60d || 0;
-            if (outperf > 50) {
-                reasoning.push(`Outperformance excepcional del ${outperf.toFixed(1)}% vs SPY en 60 días`);
-            } else if (outperf > 20) {
-                reasoning.push(`Sólida outperformance del ${outperf.toFixed(1)}% vs mercado`);
+            // Análisis de momentum
+            const momentumCategory = getMomentumCategory(stock);
+            if (momentumCategory === 'EXCEPTIONAL') {
+                reasoning.push(`Momentum EXCEPCIONAL detectado - rotación urgente recomendada`);
+            } else if (momentumCategory === 'STRONG') {
+                reasoning.push(`Momentum FUERTE - candidato para rotación agresiva`);
             }
             
-            // Análisis de consistencia
-            const frequency = consistency?.frequency || 0;
-            if (frequency >= 4) {
-                reasoning.push(`Consistencia alta: aparece ${frequency}/5 semanas consecutivas`);
-            } else if (frequency === 3) {
-                reasoning.push(`Consistencia media: aparece ${frequency}/5 semanas`);
+            // Momentum 20d (peso 70%)
+            const momentum20d = stock.metrics?.outperformance_20d || 0;
+            if (momentum20d > 20) {
+                reasoning.push(`Momentum 20d excepcional: +${momentum20d.toFixed(1)}% (peso 70%)`);
+            } else if (momentum20d > 10) {
+                reasoning.push(`Momentum 20d fuerte: +${momentum20d.toFixed(1)}% (peso 70%)`);
             }
             
-            // Análisis de riesgo
+            // Risk/Reward agresivo
             const risk = stock.metrics?.risk_pct || 0;
-            if (risk < 8) {
-                reasoning.push(`Riesgo bajo (${risk.toFixed(1)}%) con stop-loss conservador`);
-            } else if (risk < 12) {
-                reasoning.push(`Riesgo moderado (${risk.toFixed(1)}%) dentro de parámetros`);
+            const rr = stock.metrics?.risk_reward_ratio || 0;
+            if (rr > 3.0) {
+                reasoning.push(`R/R excepcional: ${rr.toFixed(1)}:1 con riesgo ${risk.toFixed(1)}%`);
             }
             
-            // Análisis fundamental
-            const fundamentalScore = stock.metrics?.fundamental_score || 0;
-            if (fundamentalScore > 40) {
-                reasoning.push(`Fundamentales sólidos (${fundamentalScore} pts): crecimiento y ROE positivos`);
-            } else if (fundamentalScore > 20) {
-                reasoning.push(`Fundamentales aceptables (${fundamentalScore} pts)`);
+            // Score breakdown
+            const technicalScore = stock.technical_score || 0;
+            const rrBonus = stock.rr_bonus || 0;
+            if (rrBonus > 20) {
+                reasoning.push(`Score técnico ${technicalScore.toFixed(0)} + bonus R/R ${rrBonus.toFixed(0)}`);
             }
             
-            // Momentum
-            const volumeSurge = stock.metrics?.volume_surge || 0;
-            if (volumeSurge > 30) {
-                reasoning.push(`Momentum fuerte: volumen aumentó ${volumeSurge.toFixed(1)}%`);
+            // Acceleration signals
+            if (stock.appeared_this_week && stock.frequency >= 2) {
+                reasoning.push(`Acceleration: aparece esta semana + ${stock.frequency} semanas consistencia`);
             }
             
             if (reasoning.length === 0) {
-                reasoning.push("Análisis basado en filtros técnicos y de consistencia del sistema");
+                reasoning.push(`Análisis momentum: categoría ${momentumCategory}, target ~1 mes rotación`);
             }
             
             return reasoning.join(". ");
@@ -756,114 +938,115 @@
                 if (!response.ok) throw new Error('No se pudieron cargar los datos');
                 
                 const data = await response.json();
-                renderImprovedDashboard(data);
+                renderAggressiveMomentumDashboard(data);
                 
             } catch (error) {
                 console.error('Error loading data:', error);
                 
-                // Fallback con datos de ejemplo más completos
+                // Fallback con datos de ejemplo agresivos
                 const fallbackData = {
                     "timestamp": new Date().toISOString(),
                     "market_date": new Date().toISOString().split('T')[0],
                     "summary": {
-                        "analysis_type": "Conservative Long-term",
-                        "total_analyzed": 150,
-                        "passed_filters": 12,
-                        "consistent_winners": 5,
-                        "strong_candidates": 3,
-                        "message": "Testing local - Datos de ejemplo con niveles de trading"
+                        "analysis_type": "Aggressive Momentum Responsive",
+                        "total_analyzed": 180,
+                        "passed_filters": 15,
+                        "exceptional_momentum": 3,
+                        "strong_momentum": 6,
+                        "rotation_opportunities": 8,
+                        "message": "Testing local - Datos agresivos con momentum responsivo"
                     },
                     "top_picks": [
                         {
                             "rank": 1,
-                            "symbol": "NVDA",
-                            "company": "NVIDIA Corporation",
-                            "sector": "Technology",
-                            "price": 789.80,
-                            "current_price": 789.80,
-                            "stop_loss": 671.33,
-                            "score": 387.5,
+                            "symbol": "TTMI",
+                            "company": "TTM Technologies Inc",
+                            "sector": "Technology Hardware",
+                            "price": 198.50,
+                            "score": 387.2,
+                            "technical_score": 342.1,
+                            "rr_bonus": 45.1,
+                            "stop_loss": 178.65,
+                            "take_profit": 287.75,
+                            "momentum_category": "EXCEPTIONAL",
                             "metrics": {
-                                "risk_pct": 7.5,
-                                "outperformance_60d": 85.2,
-                                "volume_surge": 45.3,
-                                "fundamental_score": 65
+                                "risk_pct": 9.8,
+                                "upside_pct": 45.0,
+                                "risk_reward_ratio": 4.6,
+                                "outperformance_20d": 28.5,
+                                "outperformance_60d": 65.2,
+                                "volume_surge": 67.3,
+                                "momentum_strength": 95
                             },
-                            "ma_levels": {
-                                "ma_21": 760.20,
-                                "ma_50": 720.15,
-                                "ma_200": 650.80
-                            },
-                            "target_hold": "2-3 meses"
+                            "target_hold": "~1 mes (rotación agresiva)",
+                            "rotation_urgency": "URGENT"
                         },
                         {
                             "rank": 2,
-                            "symbol": "GOOGL",
-                            "company": "Alphabet Inc Class A",
-                            "sector": "Technology",
-                            "price": 140.50,
-                            "current_price": 140.50,
-                            "stop_loss": 125.25,
-                            "score": 342.1,
+                            "symbol": "NVDA",
+                            "company": "NVIDIA Corporation",
+                            "sector": "Semiconductors",
+                            "price": 845.20,
+                            "score": 356.8,
+                            "technical_score": 312.4,
+                            "rr_bonus": 44.4,
+                            "stop_loss": 760.68,
+                            "take_profit": 1141.02,
+                            "momentum_category": "STRONG",
                             "metrics": {
-                                "risk_pct": 10.8,
-                                "outperformance_60d": 42.1,
-                                "volume_surge": 23.7,
-                                "fundamental_score": 55
+                                "risk_pct": 10.0,
+                                "upside_pct": 35.0,
+                                "risk_reward_ratio": 3.5,
+                                "outperformance_20d": 22.1,
+                                "outperformance_60d": 78.4,
+                                "volume_surge": 45.2,
+                                "momentum_strength": 88
                             },
-                            "ma_levels": {
-                                "ma_21": 138.90,
-                                "ma_50": 135.20,
-                                "ma_200": 128.50
-                            },
-                            "target_hold": "2-3 meses"
+                            "target_hold": "~1 mes (rotación agresiva)",
+                            "rotation_urgency": "HIGH"
                         }
                     ],
-                    "consistency_analysis": {
-                        "weeks_analyzed": 5,
-                        "consistent_winners": ["NVDA", "GOOGL", "AAPL", "MSFT", "META"],
-                        "strong_candidates": ["TSLA", "AMZN", "CRM"],
-                        "newly_emerged": ["ASML", "NOW"]
+                    "momentum_analysis": {
+                        "philosophy": "swing_for_fences_monthly_rotation",
+                        "momentum_weights": {
+                            "momentum_20d": 0.70,
+                            "momentum_60d": 0.30
+                        },
+                        "exceptional_momentum": ["TTMI", "NVDA", "QGEN"],
+                        "strong_momentum": ["SOFI", "ADNT", "META"],
+                        "emerging_momentum": ["ASML", "NOW", "CRM"]
                     },
                     "rotation_recommendations": {
-                        "overall_action": "ACTION_REQUIRED",
-                        "strong_buys": ["NVDA", "GOOGL"],
-                        "consider_exits": ["AMD"],
-                        "urgent_exits": [],
-                        "holds": ["AAPL", "MSFT"],
+                        "overall_action": "URGENT_PORTFOLIO_ROTATION",
+                        "aggressive_rotations": ["TTMI", "NVDA"],
+                        "urgent_exits": ["PLAY"],
+                        "emerging_opportunities": ["QGEN", "ASML"],
                         "detailed_recommendations": [
                             {
-                                "symbol": "NVDA",
-                                "action": "STRONG_BUY",
-                                "reason": "Consistent winner 5/5 semanas. Outperformance excepcional del 85% vs SPY. Fundamentales sólidos con crecimiento AI. Risk/Reward ratio 2.8:1.",
-                                "price": 789.80,
-                                "stop_loss": 671.33,
-                                "take_profit": 987.25
-                            },
-                            {
-                                "symbol": "AMD",
-                                "action": "CONSIDER_EXIT",
-                                "reason": "Perdiendo consistencia: solo 1/5 últimas semanas. Underperformance del -12% vs SPY en 60 días. Presión competitiva de NVDA.",
-                                "current_position": "15% de cartera"
+                                "symbol": "TTMI",
+                                "action": "URGENT_ROTATION",
+                                "reason": "Momentum excepcional (95/100) + acceleration signals + R/R 4.6:1",
+                                "urgency": "URGENT",
+                                "momentum_category": "EXCEPTIONAL"
                             }
                         ]
                     },
                     "market_context": {
-                        "spy_20d": 2.3,
-                        "spy_60d": 8.7,
-                        "spy_90d": 12.4
+                        "spy_20d": 1.8,
+                        "spy_60d": 6.2,
+                        "spy_90d": 11.1
                     }
                 };
                 
-                console.log('Usando datos de fallback mejorados para testing local');
-                renderImprovedDashboard(fallbackData);
+                console.log('Usando datos de fallback agresivos para testing local');
+                renderAggressiveMomentumDashboard(fallbackData);
                 
                 const errorInfo = document.createElement('div');
                 errorInfo.innerHTML = `
-                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px; color: #856404;">
-                        <strong>⚠️ Modo Testing Local - Datos de Ejemplo</strong><br>
+                    <div style="background: #fff3e0; border: 1px solid #ffb74d; border-radius: 8px; padding: 15px; margin: 20px; color: #ef6c00;">
+                        <strong>⚡ Modo Testing Agresivo - Datos de Ejemplo</strong><br>
                         <small>
-                            Se muestran datos de ejemplo con niveles de trading completos.<br>
+                            Se muestran datos de ejemplo con momentum agresivo y rotación mensual.<br>
                             Para datos reales, ejecuta desde servidor HTTP con archivos del bot.<br>
                         </small>
                     </div>
@@ -872,28 +1055,28 @@
             }
         }
         
-        function renderImprovedDashboard(data) {
+        function renderAggressiveMomentumDashboard(data) {
             const contentEl = document.getElementById('content');
             
-            // Resumen mejorado
+            // Resumen agresivo
             const summaryHtml = `
                 <div class="summary">
                     <div class="summary-grid">
                         <div class="summary-item">
-                            <div class="summary-number info">${data.summary.passed_filters}</div>
-                            <div class="summary-label">Filtradas</div>
+                            <div class="summary-number momentum">${data.summary.exceptional_momentum || 0}</div>
+                            <div class="summary-label">Momentum Excepcional</div>
                         </div>
                         <div class="summary-item">
-                            <div class="summary-number success">${data.summary.consistent_winners}</div>
-                            <div class="summary-label">Winners</div>
+                            <div class="summary-number aggressive">${data.summary.strong_momentum || 0}</div>
+                            <div class="summary-label">Momentum Fuerte</div>
                         </div>
                         <div class="summary-item">
-                            <div class="summary-number warning">${data.summary.strong_candidates}</div>
-                            <div class="summary-label">Candidates</div>
+                            <div class="summary-number rotation">${data.summary.rotation_opportunities || 0}</div>
+                            <div class="summary-label">Oportunidades Rotación</div>
                         </div>
                         <div class="summary-item">
-                            <div class="summary-number info">${data.top_picks ? data.top_picks.length : 0}</div>
-                            <div class="summary-label">Top Picks</div>
+                            <div class="summary-number targeting">${data.top_picks ? data.top_picks.length : 0}</div>
+                            <div class="summary-label">Targets Agresivos</div>
                         </div>
                     </div>
                 </div>
@@ -901,23 +1084,18 @@
             
             let analysisHtml = `<div class="analysis-sections">`;
             
-            // TOP PICKS con niveles de trading
+            // TOP PICKS con momentum agresivo
             if (data.top_picks && data.top_picks.length > 0) {
                 analysisHtml += `
                     <div class="analysis-card">
-                        <div class="section-title picks">Top Picks con Niveles de Trading</div>
+                        <div class="section-title picks">Top Momentum Picks - Targets Agresivos</div>
                         <div class="top-picks-grid">
                 `;
                 
                 data.top_picks.slice(0, 8).forEach(stock => {
-                    const levels = calculateTradingLevels(stock);
-                    const consistency = data.consistency_analysis ? 
-                        (data.consistency_analysis.consistent_winners.includes(stock.symbol) ? 
-                            {frequency: 5, category: 'consistent_winner'} :
-                            {frequency: 3, category: 'strong_candidate'}) :
-                        {frequency: 2, category: 'emerging'};
-                    
-                    const reasoning = generateReasoningText(stock, consistency);
+                    const levels = calculateAggressiveTradingLevels(stock);
+                    const momentumCategory = getMomentumCategory(stock);
+                    const reasoning = generateAggressiveReasoningText(stock, {});
                     
                     analysisHtml += `
                         <div class="pick-card">
@@ -926,6 +1104,12 @@
                                 <div class="pick-price">$${levels.current.toFixed(2)}</div>
                             </div>
                             <div class="pick-company">${stock.company || 'N/A'} • ${stock.sector || 'N/A'}</div>
+                            
+                            <div class="momentum-indicators">
+                                <div class="momentum-badge ${momentumCategory.toLowerCase()}">${momentumCategory}</div>
+                                <div class="momentum-badge">${stock.rotation_urgency || 'MEDIUM'}</div>
+                                <div class="momentum-badge">~1 mes</div>
+                            </div>
                             
                             <div class="trading-levels">
                                 <div class="level-item">
@@ -937,8 +1121,8 @@
                                     <div class="level-label">Stop Loss</div>
                                 </div>
                                 <div class="level-item">
-                                    <div class="level-value take-profit">$${levels.takeProfit.toFixed(2)}</div>
-                                    <div class="level-label">Take Profit</div>
+                                    <div class="level-value aggressive">$${levels.takeProfit.toFixed(2)}</div>
+                                    <div class="level-label">Target Agresivo</div>
                                 </div>
                                 <div class="level-item">
                                     <div class="level-value">${levels.riskReward}:1</div>
@@ -949,24 +1133,32 @@
                             <div class="pick-metrics">
                                 <div class="metric-item">
                                     <div class="metric-value">${((levels.takeProfit - levels.current) / levels.current * 100).toFixed(1)}%</div>
-                                    <div class="metric-label">Upside</div>
+                                    <div class="metric-label">Upside Agresivo</div>
                                 </div>
                                 <div class="metric-item">
                                     <div class="metric-value">${stock.metrics?.risk_pct?.toFixed(1) || 'N/A'}%</div>
                                     <div class="metric-label">Risk</div>
                                 </div>
                                 <div class="metric-item">
-                                    <div class="metric-value">+${stock.metrics?.outperformance_60d?.toFixed(1) || 'N/A'}%</div>
-                                    <div class="metric-label">vs SPY 60d</div>
+                                    <div class="metric-value">+${stock.metrics?.outperformance_20d?.toFixed(1) || 'N/A'}%</div>
+                                    <div class="metric-label">Momentum 20d (70%)</div>
                                 </div>
                                 <div class="metric-item">
                                     <div class="metric-value">${stock.score?.toFixed(0) || 'N/A'}</div>
-                                    <div class="metric-label">Score</div>
+                                    <div class="metric-label">Score Final</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">${stock.technical_score?.toFixed(0) || 'N/A'}</div>
+                                    <div class="metric-label">Score Técnico</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">+${stock.rr_bonus?.toFixed(0) || 'N/A'}</div>
+                                    <div class="metric-label">Bonus R/R</div>
                                 </div>
                             </div>
                             
                             <div class="pick-reasoning">
-                                <div class="reasoning-title">📋 Por qué esta recomendación:</div>
+                                <div class="reasoning-title">⚡ Razón para momentum agresivo:</div>
                                 <div class="reasoning-text">${reasoning}</div>
                             </div>
                         </div>
@@ -979,49 +1171,49 @@
                 `;
             }
             
-            // Layout de dos columnas para el resto
+            // Layout de dos columnas
             analysisHtml += `<div class="two-column">`;
             
-            // Análisis de consistencia
-            if (data.consistency_analysis) {
+            // Análisis de momentum
+            if (data.momentum_analysis) {
                 analysisHtml += `
                     <div class="analysis-card">
-                        <div class="section-title consistency">Análisis de Consistencia (${data.consistency_analysis.weeks_analyzed} semanas)</div>
+                        <div class="section-title momentum">Análisis de Momentum Agresivo</div>
                         
-                        <div class="consistency-grid">
-                            <div class="consistency-item">
-                                <div class="consistency-number">${data.consistency_analysis.consistent_winners.length}</div>
-                                <div class="consistency-label">Consistent Winners</div>
+                        <div class="momentum-grid">
+                            <div class="momentum-item">
+                                <div class="momentum-number">${data.momentum_analysis.exceptional_momentum?.length || 0}</div>
+                                <div class="momentum-label">Momentum Excepcional</div>
                             </div>
-                            <div class="consistency-item">
-                                <div class="consistency-number">${data.consistency_analysis.strong_candidates.length}</div>
-                                <div class="consistency-label">Strong Candidates</div>
+                            <div class="momentum-item">
+                                <div class="momentum-number">${data.momentum_analysis.strong_momentum?.length || 0}</div>
+                                <div class="momentum-label">Momentum Fuerte</div>
                             </div>
                         </div>
                         
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">🏆 Consistent Winners (4-5 semanas):</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">🔥 Momentum EXCEPCIONAL (rotación urgente):</div>
                             <div class="symbol-list">
-                                ${data.consistency_analysis.consistent_winners.map(symbol => 
-                                    `<span class="symbol-badge">${symbol}</span>`
+                                ${(data.momentum_analysis.exceptional_momentum || []).map(symbol => 
+                                    `<span class="symbol-badge exceptional">${symbol}</span>`
                                 ).join('')}
                             </div>
                         </div>
                         
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">💎 Strong Candidates (3 semanas):</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">⚡ Momentum FUERTE (rotación agresiva):</div>
                             <div class="symbol-list">
-                                ${data.consistency_analysis.strong_candidates.map(symbol => 
-                                    `<span class="symbol-badge candidate">${symbol}</span>`
+                                ${(data.momentum_analysis.strong_momentum || []).map(symbol => 
+                                    `<span class="symbol-badge strong">${symbol}</span>`
                                 ).join('')}
                             </div>
                         </div>
                         
-                        ${data.consistency_analysis.newly_emerged.length > 0 ? `
+                        ${data.momentum_analysis.emerging_momentum?.length > 0 ? `
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">🆕 Newly Emerged (vigilar):</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">🌱 Momentum EMERGENTE (vigilar):</div>
                             <div class="symbol-list">
-                                ${data.consistency_analysis.newly_emerged.map(symbol => 
+                                ${data.momentum_analysis.emerging_momentum.map(symbol => 
                                     `<span class="symbol-badge emerging">${symbol}</span>`
                                 ).join('')}
                             </div>
@@ -1031,23 +1223,26 @@
                 `;
             }
             
-            // Recomendaciones de rotación mejoradas
+            // Recomendaciones de rotación agresiva
             if (data.rotation_recommendations) {
                 const overallAction = data.rotation_recommendations.overall_action;
-                let actionBadgeClass = 'no-action';
-                let actionText = 'Sin acción requerida';
+                let actionBadgeClass = 'maintain';
+                let actionText = 'Mantener con vigilancia';
                 
-                if (overallAction === 'ACTION_REQUIRED') {
-                    actionBadgeClass = 'action-required';
-                    actionText = 'Acción requerida';
-                } else if (overallAction === 'EVALUATE_CHANGES') {
+                if (overallAction === 'URGENT_PORTFOLIO_ROTATION') {
+                    actionBadgeClass = 'urgent-rotation';
+                    actionText = 'Rotación urgente de cartera';
+                } else if (overallAction === 'AGGRESSIVE_ROTATION_REQUIRED') {
+                    actionBadgeClass = 'rotation-required';
+                    actionText = 'Rotación agresiva requerida';
+                } else if (overallAction === 'EVALUATE_MOMENTUM_OPPORTUNITIES') {
                     actionBadgeClass = 'evaluate';
-                    actionText = 'Evaluar cambios';
+                    actionText = 'Evaluar oportunidades momentum';
                 }
                 
                 analysisHtml += `
                     <div class="analysis-card">
-                        <div class="section-title rotation">Recomendaciones de Rotación</div>
+                        <div class="section-title rotation">Rotación Agresiva de Momentum</div>
                         
                         <div style="margin-bottom: 15px;">
                             <span class="action-badge ${actionBadgeClass}">${actionText}</span>
@@ -1056,45 +1251,64 @@
                         <div class="rotation-recommendations">
                 `;
                 
-                // Usar recomendaciones detalladas si están disponibles
-                if (data.rotation_recommendations.detailed_recommendations) {
-                    data.rotation_recommendations.detailed_recommendations.forEach(rec => {
-                        let actionClass = 'hold';
-                        if (rec.action.includes('EXIT')) actionClass = rec.action.includes('URGENT') ? 'urgent-exit' : 'exit';
-                        else if (rec.action.includes('BUY')) actionClass = 'buy';
-                        
+                // Rotaciones urgentes
+                if (data.rotation_recommendations.aggressive_rotations?.length > 0) {
+                    analysisHtml += `
+                        <div class="rotation-section">
+                            <div class="rotation-title urgent">Rotaciones Urgentes</div>
+                    `;
+                    data.rotation_recommendations.aggressive_rotations.forEach(rotation => {
                         analysisHtml += `
-                            <div class="recommendation-item ${actionClass}">
+                            <div class="recommendation-item urgent">
                                 <div class="recommendation-header">
-                                    <span class="recommendation-symbol">${rec.symbol}</span>
-                                    <span class="recommendation-action ${actionClass}">${rec.action.replace('_', ' ')}</span>
+                                    <span class="recommendation-symbol">${rotation.symbol || rotation}</span>
+                                    <span class="recommendation-action urgent">ROTAR AHORA</span>
                                 </div>
-                                <div class="recommendation-reason">${rec.reason}</div>
-                                ${rec.price ? `
-                                    <div style="margin-top: 8px; font-size: 0.8em; color: #666;">
-                                        Precio: $${rec.price} 
-                                        ${rec.stop_loss ? `| Stop: $${rec.stop_loss}` : ''}
-                                        ${rec.take_profit ? `| Target: $${rec.take_profit}` : ''}
-                                    </div>
-                                ` : ''}
+                                <div class="recommendation-reason">${rotation.reason || 'Momentum excepcional detectado'}</div>
                             </div>
                         `;
                     });
-                } else {
-                    // Fallback a formato original
-                    if (data.rotation_recommendations.holds.length > 0) {
-                        data.rotation_recommendations.holds.forEach(symbol => {
-                            analysisHtml += `
-                                <div class="recommendation-item">
-                                    <div class="recommendation-header">
-                                        <span class="recommendation-symbol">${symbol}</span>
-                                        <span class="recommendation-action">MANTENER</span>
-                                    </div>
-                                    <div class="recommendation-reason">Mantiene fuerza consistente en el análisis semanal</div>
+                    analysisHtml += `</div>`;
+                }
+                
+                // Salidas urgentes
+                if (data.rotation_recommendations.urgent_exits?.length > 0) {
+                    analysisHtml += `
+                        <div class="rotation-section">
+                            <div class="rotation-title urgent">Salidas Urgentes</div>
+                    `;
+                    data.rotation_recommendations.urgent_exits.forEach(exit => {
+                        analysisHtml += `
+                            <div class="recommendation-item urgent">
+                                <div class="recommendation-header">
+                                    <span class="recommendation-symbol">${exit.symbol || exit}</span>
+                                    <span class="recommendation-action urgent">SALIR</span>
                                 </div>
-                            `;
-                        });
-                    }
+                                <div class="recommendation-reason">${exit.reason || 'Momentum perdido'}</div>
+                            </div>
+                        `;
+                    });
+                    analysisHtml += `</div>`;
+                }
+                
+                // Oportunidades emergentes
+                if (data.rotation_recommendations.emerging_opportunities?.length > 0) {
+                    analysisHtml += `
+                        <div class="rotation-section">
+                            <div class="rotation-title emerging">Oportunidades Emergentes</div>
+                    `;
+                    data.rotation_recommendations.emerging_opportunities.forEach(opp => {
+                        analysisHtml += `
+                            <div class="recommendation-item emerging">
+                                <div class="recommendation-header">
+                                    <span class="recommendation-symbol">${opp.symbol || opp}</span>
+                                    <span class="recommendation-action emerging">VIGILAR</span>
+                                </div>
+                                <div class="recommendation-reason">${opp.reason || 'Momentum emergente prometedor'}</div>
+                            </div>
+                        `;
+                    });
+                    analysisHtml += `</div>`;
                 }
                 
                 analysisHtml += `
@@ -1109,7 +1323,7 @@
             if (data.market_context) {
                 analysisHtml += `
                     <div class="market-context">
-                        <h4>📊 Contexto SPY & Gestión Activa</h4>
+                        <h4>📊 Contexto SPY & Momentum Responsivo</h4>
                         <div class="spy-metrics">
                             <div class="spy-metric">
                                 <div class="spy-value ${data.market_context.spy_20d >= 0 ? 'positive' : 'negative'}">
@@ -1130,8 +1344,8 @@
                                 <div class="spy-label">SPY 90 días</div>
                             </div>
                         </div>
-                        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 8px; font-size: 0.85em; color: #666;">
-                            <strong>💡 Gestión Activa:</strong> Los take profit son orientativos. Revisa semanalmente: si una acción pierde consistencia (no aparece 2+ semanas consecutivas), considera salida gradual independientemente del precio target.
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.8); border-radius: 8px; font-size: 0.85em; color: #666;">
+                            <strong>⚡ Momentum Responsivo:</strong> Targets son agresivos pero adaptativos. Si momentum se debilita (no aparece 1+ semanas), salir independientemente del target. Rotación mensual activa hacia mejores oportunidades.
                         </div>
                     </div>
                 `;
@@ -1148,7 +1362,7 @@
                     ⏰ Próximo análisis: ${getNextUpdateTime()}<br>
                     📅 Ejecución automática: Sábados 10 AM España<br>
                     <div class="signature">
-                        <small>🚀 Conservative Trading Bot con Niveles de Trading by <strong>0t4c0n</strong></small>
+                        <small>📊 Professional Momentum Analytics Platform by <strong>0t4c0n</strong></small>
                     </div>
                 </div>
             `;
