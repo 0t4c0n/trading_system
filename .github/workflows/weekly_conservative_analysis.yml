@@ -225,7 +225,7 @@ jobs:
         
     - name: Desplegar a GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v1
+      uses: actions/deploy-pages@v3
       
     - name: Resumen final con historial y métricas
       run: |
