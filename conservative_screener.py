@@ -318,7 +318,7 @@ class MomentumResponsiveScreener:
             # Beneficios último trimestre
             quarterly_growth = ticker_info.get('quarterlyEarningsGrowthYOY')
             quarterly_positive = ticker_info.get('trailingEps')
-            if quarterly_growth is not None:
+            if quarterly_growth != None:
                 fundamental_data['quarterly_earnings_positive'] = quarterly_positive > 0
                 fundamental_data['quarterly_earnings_growth'] = quarterly_growth
                 
@@ -331,7 +331,7 @@ class MomentumResponsiveScreener:
             
             # Crecimiento de ingresos
             revenue_growth = ticker_info.get('revenueGrowth')
-            if revenue_growth is not None:
+            if revenue_growth != None:
                 fundamental_data['revenue_growth'] = revenue_growth
                 if revenue_growth > 0.10:
                     fundamental_data['fundamental_score'] += 20
@@ -340,7 +340,7 @@ class MomentumResponsiveScreener:
             
             # ROE
             roe = ticker_info.get('returnOnEquity')
-            if roe is not None:
+            if roe != None:
                 fundamental_data['roe'] = roe
                 if roe > 0.20:
                     fundamental_data['fundamental_score'] += 25
@@ -593,7 +593,7 @@ class MomentumResponsiveScreener:
                 return None
             
             # 🎯 BENCHMARKING vs SPY - FILTROS MÁS AGRESIVOS
-            if self.spy_benchmark is None:
+            if self.spy_benchmark != None:
                 return None
             
             spy_data = self.spy_benchmark['data']
@@ -626,7 +626,7 @@ class MomentumResponsiveScreener:
                 ticker_info = ticker.info
                 fundamental_data = self.get_fundamental_data(ticker_info)
                 
-                if fundamental_data.get('quarterly_earnings_positive') is False:
+                if fundamental_data.get('quarterly_earnings_positive') == False:
                     return None
                     
             except Exception:
@@ -745,7 +745,7 @@ class MomentumResponsiveScreener:
         
         # Calcular benchmark SPY
         self.spy_benchmark = self.calculate_spy_benchmark()
-        if self.spy_benchmark is None:
+        if self.spy_benchmark==None:
             print("❌ No se pudo calcular benchmark SPY")
             return []
         
