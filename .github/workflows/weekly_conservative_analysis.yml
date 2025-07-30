@@ -219,13 +219,13 @@ jobs:
       uses: actions/configure-pages@v5
       
     - name: Subir artefactos para Pages
-      uses: actions/upload-pages-artifact@v1
+      uses: actions/upload-pages-artifact@v3
       with:
         path: './docs'
         
     - name: Desplegar a GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v3
+      uses: actions/deploy-pages@v4
       
     - name: Resumen final con historial y métricas
       run: |
