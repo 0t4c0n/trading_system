@@ -5,6 +5,7 @@ Recomendaciones más agresivas + menor tiempo de consistencia + detección de op
 🎯 Filosofía: Rotar agresivamente hacia mejores oportunidades de momentum
 🔄 Target: ~1 mes por posición con rotación activa hacia mejores opciones
 🆕 INCLUYE GESTIÓN AUTOMÁTICA DE HISTORIAL
+🛠️ CORREGIDO: Manejo de casos donde posiciones actuales no aparecen en screening
 """
 
 import json
@@ -24,6 +25,10 @@ class AggressiveRotationRecommender:
         self.min_consistency_weeks = 2      # Solo 2 semanas vs 5 (más agresivo)
         self.emerging_opportunity_weight = 1.5  # Peso extra a momentum emergente
         self.momentum_decay_threshold = 0.15    # 15% caída en score para considerar salida
+        
+        # 🛠️ NUEVO: Fallback cuando no hay posiciones en screening
+        self.fallback_avg_score = 100.0    # Score promedio asumido
+        self.min_viable_score = 50.0       # Score mínimo para considerar oportunidad
         
     def load_current_portfolio(self):
         """Carga la cartera actual del usuario"""
@@ -264,7 +269,7 @@ class AggressiveRotationRecommender:
     def identify_rotation_opportunities_aggressive(self):
         """
         🆕 IDENTIFICA OPORTUNIDADES DE ROTACIÓN AGRESIVA
-        Enfoque: Score 20% superior + momentum emergente
+        🛠️ CORREGIDO: Manejo robusto cuando posiciones actuales no están en screening
         """
         if not self.consistency_analysis or not self.screening_data:
             return []
@@ -280,12 +285,28 @@ class AggressiveRotationRecommender:
             if result['symbol'] in current_positions:
                 current_position_scores[result['symbol']] = result.get('score', 0)
         
-        # Calcular score promedio de posiciones actuales
-        avg_current_score = sum(current_position_scores.values()) / len(current_position_scores) if current_position_scores else 0
-        min_score_for_rotation = avg_current_score * (1 + self.rotation_threshold)  # 20% superior
+        # 🛠️ CORREGIDO: Manejo cuando no hay posiciones actuales en screening
+        if current_position_scores:
+            avg_current_score = sum(current_position_scores.values()) / len(current_position_scores)
+            portfolio_status = "SCREENING_MATCHED"
+            print(f"📊 Score promedio posiciones actuales: {avg_current_score:.1f}")
+        else:
+            # TODAS las posiciones perdieron momentum - usar fallback
+            avg_current_score = self.fallback_avg_score
+            portfolio_status = "MOMENTUM_LOST_ALL_POSITIONS"
+            print(f"🚨 CRÍTICO: Ninguna posición actual aparece en screening")
+            print(f"📊 Usando score fallback: {avg_current_score:.1f}")
+            print(f"🎯 Esto indica que TODAS las posiciones han perdido momentum")
         
-        print(f"📊 Score promedio posiciones actuales: {avg_current_score:.1f}")
+        # Calcular threshold de rotación
+        min_score_for_rotation = avg_current_score * (1 + self.rotation_threshold)  # 20% superior
         print(f"🎯 Score mínimo para rotación: {min_score_for_rotation:.1f} (+{self.rotation_threshold*100:.0f}%)")
+        
+        # 🛠️ NUEVO: Ajustar criterios según estado del portfolio
+        if portfolio_status == "MOMENTUM_LOST_ALL_POSITIONS":
+            # Criterios más flexibles cuando todas las posiciones perdieron momentum
+            min_score_for_rotation = max(min_score_for_rotation, self.min_viable_score)
+            print(f"🔧 Ajuste por pérdida de momentum: score mínimo = {min_score_for_rotation:.1f}")
         
         # Analizar oportunidades por categoría
         consistency_data = self.consistency_analysis['consistency_analysis']
@@ -314,23 +335,41 @@ class AggressiveRotationRecommender:
                         should_rotate = False
                         rotation_reason = ""
                         
-                        # Criterio 1: Score 20% superior
-                        if adjusted_score >= min_score_for_rotation:
-                            should_rotate = True
-                            rotation_reason = f"Score {adjusted_score:.1f} es {((adjusted_score/avg_current_score-1)*100):+.1f}% superior"
+                        # 🛠️ CORREGIDO: Prevenir división por cero
+                        try:
+                            # Criterio 1: Score superior
+                            if adjusted_score >= min_score_for_rotation:
+                                should_rotate = True
+                                if avg_current_score > 0:
+                                    percentage_superior = ((adjusted_score/avg_current_score-1)*100)
+                                    rotation_reason = f"Score {adjusted_score:.1f} es {percentage_superior:+.1f}% superior"
+                                else:
+                                    rotation_reason = f"Score {adjusted_score:.1f} vs portfolio sin momentum"
+                        except ZeroDivisionError:
+                            # Fallback si hay algún problema
+                            if adjusted_score >= self.min_viable_score:
+                                should_rotate = True
+                                rotation_reason = f"Score viable {adjusted_score:.1f} (portfolio sin momentum)"
                         
                         # 🆕 Criterio 2: Momentum excepcional emergente (aunque score sea menor)
-                        elif (momentum_strength['momentum_category'] == 'EXCEPTIONAL' and 
+                        if not should_rotate and (momentum_strength['momentum_category'] == 'EXCEPTIONAL' and 
                               symbol_info.get('frequency', 0) >= self.min_consistency_weeks):
                             should_rotate = True
                             rotation_reason = f"Momentum excepcional emergente (score momentum: {momentum_strength['total_score']:.0f})"
                         
                         # 🆕 Criterio 3: Momentum muy fuerte + consistencia mínima
-                        elif (momentum_strength['momentum_category'] == 'STRONG' and 
+                        if not should_rotate and (momentum_strength['momentum_category'] == 'STRONG' and 
                               symbol_info.get('frequency', 0) >= self.min_consistency_weeks and
                               adjusted_score >= avg_current_score * 0.9):  # Al menos 90% del score actual
                             should_rotate = True
                             rotation_reason = f"Momentum fuerte + score competitivo ({adjusted_score:.1f})"
+                        
+                        # 🛠️ NUEVO: Criterio especial cuando portfolio perdió momentum
+                        if not should_rotate and portfolio_status == "MOMENTUM_LOST_ALL_POSITIONS":
+                            if (adjusted_score >= self.min_viable_score and 
+                                symbol_info.get('frequency', 0) >= self.min_consistency_weeks):
+                                should_rotate = True
+                                rotation_reason = f"Portfolio reset - Score viable {adjusted_score:.1f}"
                         
                         if should_rotate:
                             # Determinar urgencia de rotación
@@ -342,13 +381,16 @@ class AggressiveRotationRecommender:
                             else:
                                 urgency = 'MEDIUM'
                             
-                            # Identificar qué posición reemplazar
+                            # 🛠️ MEJORADO: Identificar qué posición reemplazar
                             worst_position = None
                             if current_position_scores:
                                 worst_symbol = min(current_position_scores, key=current_position_scores.get)
                                 worst_score = current_position_scores[worst_symbol]
                                 if adjusted_score > worst_score * 1.1:  # 10% mejor que la peor
                                     worst_position = worst_symbol
+                            elif portfolio_status == "MOMENTUM_LOST_ALL_POSITIONS" and current_positions:
+                                # Si todas perdieron momentum, recomendar reemplazar cualquiera
+                                worst_position = list(current_positions)[0]  # Primera posición como ejemplo
                             
                             opportunity = {
                                 'symbol': symbol,
@@ -364,7 +406,8 @@ class AggressiveRotationRecommender:
                                 'appeared_this_week': symbol_info.get('appeared_this_week', False),
                                 'screening_detail': screening_detail,
                                 'target_hold': '~1 mes (rotación agresiva)',
-                                'min_consistency_met': symbol_info.get('frequency', 0) >= self.min_consistency_weeks
+                                'min_consistency_met': symbol_info.get('frequency', 0) >= self.min_consistency_weeks,
+                                'portfolio_status': portfolio_status
                             }
                             
                             rotation_opportunities.append(opportunity)
@@ -375,6 +418,12 @@ class AggressiveRotationRecommender:
             x['urgency'] == 'HIGH', 
             x['adjusted_score']
         ), reverse=True)
+        
+        # 🛠️ NUEVO: Logging mejorado del estado
+        print(f"📈 Estado del portfolio: {portfolio_status}")
+        print(f"🎯 Oportunidades identificadas: {len(rotation_opportunities)}")
+        if portfolio_status == "MOMENTUM_LOST_ALL_POSITIONS":
+            print(f"🚨 RECOMENDACIÓN: Considerar rotación completa del portfolio")
         
         return rotation_opportunities
     
@@ -524,7 +573,9 @@ class AggressiveRotationRecommender:
                 'rotation_threshold': f"{self.rotation_threshold*100:.0f}% score superior",
                 'min_consistency_weeks': self.min_consistency_weeks,
                 'emerging_opportunity_weight': self.emerging_opportunity_weight,
-                'momentum_decay_threshold': f"{self.momentum_decay_threshold*100:.0f}%"
+                'momentum_decay_threshold': f"{self.momentum_decay_threshold*100:.0f}%",
+                'fallback_avg_score': self.fallback_avg_score,
+                'min_viable_score': self.min_viable_score
             },
             'current_positions_count': len(position_analysis),
             'position_analysis': position_analysis,
@@ -538,9 +589,10 @@ class AggressiveRotationRecommender:
             },
             'methodology_notes': {
                 'philosophy': 'Momentum trading agresivo con rotación mensual hacia mejores oportunidades',
-                'rotation_criteria': 'Score 20% superior OR momentum excepcional emergente',
+                'rotation_criteria': 'Score 20% superior OR momentum excepcional emergente OR portfolio reset',
                 'consistency_required': f'Mínimo {self.min_consistency_weeks} semanas (vs 5 conservador)',
-                'exit_criteria': 'Momentum health <70 OR ausencia 1+ semanas OR deterioro técnico'
+                'exit_criteria': 'Momentum health <70 OR ausencia 1+ semanas OR deterioro técnico',
+                'zero_division_protection': 'Implementado manejo robusto cuando posiciones pierden momentum'
             }
         }
         
@@ -636,8 +688,14 @@ class AggressiveRotationRecommender:
                     'consistency_weeks': opp['consistency_weeks']
                 })
         
-        # 🆕 Determinar acción general agresiva
-        if urgent_actions >= 3:
+        # 🛠️ MEJORADO: Determinar acción general agresiva considerando pérdida de momentum
+        positions_lost_momentum = len([p for p in position_analysis.values() 
+                                     if p.get('status') == 'critical_not_in_screening'])
+        total_positions = len(position_analysis)
+        
+        if positions_lost_momentum >= total_positions and total_positions > 0:
+            actions['overall_action'] = 'URGENT_PORTFOLIO_ROTATION'
+        elif urgent_actions >= 3:
             actions['overall_action'] = 'URGENT_PORTFOLIO_ROTATION'
         elif urgent_actions >= 1 or len(actions['aggressive_rotations']) > 0:
             actions['overall_action'] = 'AGGRESSIVE_ROTATION_REQUIRED'
@@ -699,6 +757,7 @@ class AggressiveRotationRecommender:
         print(f"   - Rotación si score {params['rotation_threshold']} superior")
         print(f"   - Consistencia mínima: {params['min_consistency_weeks']} semanas")
         print(f"   - Peso emergentes: {params['emerging_opportunity_weight']}x")
+        print(f"   - Protección división por cero: Activada")
 
 def main():
     """Función principal para rotación agresiva"""
