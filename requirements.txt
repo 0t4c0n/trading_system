@@ -2,7 +2,7 @@
 # Versión 2.0.0 con niveles de trading dinámicos
 
 # Core financial data and analysis
-yfinance==0.2.60                # Yahoo Finance API para datos históricos
+yfinance==0.2.65                # Yahoo Finance API para datos históricos
 pandas==2.2.3                   # Análisis y manipulación de datos
 numpy==1.24.3                   # Computación numérica para cálculos técnicos
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aggressive Momentum Trading Bot - Análisis Semanal</title>
+    <title>Aggressive Momentum Trading Bot - Weekly ATR Optimized</title>
     <style>
         * {
             margin: 0;
@@ -81,7 +81,6 @@
             border: 3px solid rgba(255, 255, 255, 0.4);
             background: rgba(255, 255, 255, 0.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            /* Preparado para imagen manual */
         }
         
         .creator-avatar img {
@@ -109,6 +108,49 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         
+        /* Optimization Banner */
+        .optimization-banner {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
+        }
+        
+        .optimization-banner .banner-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .optimization-banner .banner-subtitle {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .optimization-features {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .optimization-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
         .summary {
             padding: 15px 20px;
             background: linear-gradient(135deg, #f8fafc, #e2e8f0);
@@ -129,6 +171,25 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             border-left: 4px solid #3b82f6;
             border-top: 1px solid #e2e8f0;
+            position: relative;
+        }
+        
+        .summary-item.optimized {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+        }
+        
+        .summary-item.optimized::after {
+            content: "OPT";
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 0.6em;
+            background: #10b981;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: bold;
         }
         
         .summary-number {
@@ -150,6 +211,10 @@
         
         .summary-number.targeting {
             color: #dc2626;
+        }
+        
+        .summary-number.optimized {
+            color: #10b981;
         }
         
         .summary-label {
@@ -203,6 +268,50 @@
             margin-top: 3px;
         }
         
+        /* ATR Comparison Section */
+        .atr-comparison {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 15px 20px;
+            border-left: 5px solid #f59e0b;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .atr-comparison h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .atr-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .atr-metric {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #f59e0b;
+        }
+        
+        .atr-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #92400e;
+        }
+        
+        .atr-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 3px;
+        }
+        
         .analysis-sections {
             padding: 20px;
             display: grid;
@@ -241,6 +350,10 @@
             content: "🎯";
         }
         
+        .section-title.optimized::before {
+            content: "🔧";
+        }
+        
         .analysis-card {
             background: white;
             border-radius: 15px;
@@ -248,6 +361,11 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             border-left: 4px solid #3b82f6;
             border-top: 1px solid #e5e7eb;
+        }
+        
+        .analysis-card.optimized {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
         }
         
         .top-picks-grid {
@@ -262,6 +380,24 @@
             border-left: 4px solid #3b82f6;
             position: relative;
             border: 1px solid #e5e7eb;
+        }
+        
+        .pick-card.optimized {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
+        }
+        
+        .pick-card.optimized::after {
+            content: "OPTIMIZED";
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.6em;
+            background: #10b981;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
         }
         
         .pick-header {
@@ -324,6 +460,44 @@
             background: #6b7280;
         }
         
+        .momentum-badge.optimized {
+            background: #10b981;
+        }
+        
+        /* ATR Indicators */
+        .atr-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(251, 191, 36, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        .atr-badge {
+            background: #f59e0b;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 8px;
+            font-size: 0.65em;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .atr-badge.weekly {
+            background: #dc2626;
+        }
+        
+        .atr-badge.daily {
+            background: #6b7280;
+        }
+        
+        .atr-badge.ratio {
+            background: #7c3aed;
+        }
+        
         .trading-levels {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -338,6 +512,11 @@
             text-align: center;
             border: 1px solid #d1d5db;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .level-item.optimized {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
         }
         
         .level-value {
@@ -363,6 +542,11 @@
             font-weight: 700;
         }
         
+        .level-value.optimized {
+            color: #10b981;
+            font-weight: 700;
+        }
+        
         .level-label {
             font-size: 0.7em;
             color: #666;
@@ -383,9 +567,19 @@
             text-align: center;
         }
         
+        .metric-item.optimized {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
         .metric-value {
             font-weight: bold;
             font-size: 0.8em;
+        }
+        
+        .metric-value.optimized {
+            color: #10b981;
+            font-weight: 700;
         }
         
         .metric-label {
@@ -401,6 +595,11 @@
             margin-top: 10px;
         }
         
+        .pick-reasoning.optimized {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        
         .reasoning-title {
             font-weight: 600;
             color: #1e40af;
@@ -408,10 +607,53 @@
             margin-bottom: 5px;
         }
         
+        .reasoning-title.optimized {
+            color: #065f46;
+        }
+        
         .reasoning-text {
             font-size: 0.8em;
             color: #374151;
             line-height: 1.3;
+        }
+        
+        .optimization-metrics {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .optimization-title {
+            font-weight: 600;
+            color: #065f46;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+        
+        .optimization-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 6px;
+        }
+        
+        .optimization-detail {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 4px 6px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .optimization-detail-value {
+            font-weight: bold;
+            font-size: 0.7em;
+            color: #10b981;
+        }
+        
+        .optimization-detail-label {
+            font-size: 0.6em;
+            color: #666;
         }
         
         .momentum-grid {
@@ -664,6 +906,46 @@
             margin-top: 2px;
         }
         
+        .optimization-summary {
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border: 2px solid #10b981;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .optimization-summary h4 {
+            color: #065f46;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .optimization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .optimization-stat {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .optimization-stat-value {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #10b981;
+        }
+        
+        .optimization-stat-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 2px;
+        }
+        
         .last-update {
             text-align: center;
             padding: 15px;
@@ -738,6 +1020,10 @@
             .title-section {
                 text-align: center;
             }
+            
+            .optimization-features {
+                gap: 10px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -758,6 +1044,11 @@
             .trading-levels {
                 grid-template-columns: 1fr;
             }
+            
+            .optimization-features {
+                flex-direction: column;
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -767,7 +1058,7 @@
             <div class="header-content">
                 <div class="title-section">
                     <h1>📊 Professional Momentum Analytics</h1>
-                    <div class="subtitle">Advanced Trading Intelligence - Dynamic Rotation</div>
+                    <div class="subtitle">Advanced Trading Intelligence - Weekly ATR Optimized</div>
                 </div>
                 <div class="creator-section">
                     <div class="creator-avatar">
@@ -781,10 +1072,23 @@
             </div>
         </div>
         
+        <!-- Optimization Banner -->
+        <div class="optimization-banner">
+            <div class="banner-title">🔧 OPTIMIZATION STACK APPLIED</div>
+            <div class="banner-subtitle">Weekly ATR + Restrictive Stop Loss + Strict Fundamentals</div>
+            <div class="optimization-features">
+                <div class="optimization-badge">📊 Weekly ATR</div>
+                <div class="optimization-badge">🛡️ Min Stop Loss</div>
+                <div class="optimization-badge">📈 Earnings+</div>
+                <div class="optimization-badge">🎯 1-Month Aligned</div>
+            </div>
+        </div>
+        
         <div class="momentum-philosophy">
-            <h3>🎯 Investment Philosophy: Dynamic Momentum Allocation</h3>
+            <h3>🎯 Investment Philosophy: Dynamic Momentum Allocation - OPTIMIZED</h3>
             <div style="font-size: 0.9em; margin-bottom: 10px;">
-                Systematic momentum detection with monthly rotation optimization. Targeting institutional-grade risk-adjusted returns through data-driven position management.
+                Systematic momentum detection with monthly rotation optimization and technical enhancements. 
+                Targeting institutional-grade risk-adjusted returns through data-driven position management with Weekly ATR alignment.
             </div>
             <div class="momentum-weights">
                 <div class="weight-item">
@@ -800,7 +1104,10 @@
         
         <div id="content">
             <div class="loading">
-                <div>📊 Loading professional momentum analytics with dynamic rotation models...</div>
+                <div>📊 Loading professional momentum analytics with Weekly ATR optimization and enhanced filtering...</div>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #888;">
+                    🔧 Applying optimization stack: Weekly ATR + Min Stop Loss + Strict Fundamentals
+                </div>
             </div>
         </div>
     </div>
@@ -851,9 +1158,12 @@
                 takeProfit = currentPrice * 1.18; // 18% conservador
             }
             
-            // Aplicar sistema ATR si está disponible
-            const atr = stock.atr || (currentPrice * 0.04); // 4% default ATR para momentum
-            const atrBasedTarget = currentPrice + (atr * getATRMultiplier(stock.score || 0));
+            // Aplicar sistema ATR si está disponible (priorizar Weekly ATR)
+            const weeklyATR = stock.optimizations?.weekly_atr || 0;
+            const dailyATR = stock.atr || (currentPrice * 0.04);
+            const atr = weeklyATR > 0 ? weeklyATR : dailyATR; // Usar Weekly ATR si disponible
+            
+            const atrBasedTarget = currentPrice + (atr * getATRMultiplier(stock.score || 0, weeklyATR > 0));
             
             // Usar el más agresivo para momentum trading
             takeProfit = Math.max(takeProfit, atrBasedTarget);
@@ -863,15 +1173,20 @@
                 stopLoss: stopLoss,
                 takeProfit: takeProfit,
                 riskReward: ((takeProfit - currentPrice) / (currentPrice - stopLoss)).toFixed(2),
-                targetMethod: 'aggressive_momentum'
+                targetMethod: weeklyATR > 0 ? 'weekly_atr_optimized' : 'aggressive_momentum',
+                isOptimized: weeklyATR > 0
             };
         }
         
-        function getATRMultiplier(score) {
-            // Multiplicadores ATR más agresivos
-            if (score > 100) return 3.5; // Era 3.0
-            if (score >= 60) return 2.8;  // Era 2.5
-            return 2.3; // Era 2.0
+        function getATRMultiplier(score, isWeeklyATR) {
+            // Multiplicadores ajustados para Weekly ATR (más conservadores)
+            const baseMultipliers = isWeeklyATR ? 
+                { high: 3.0, med: 2.5, low: 2.0 } : 
+                { high: 3.5, med: 2.8, low: 2.3 };
+            
+            if (score > 100) return baseMultipliers.high;
+            if (score >= 60) return baseMultipliers.med;
+            return baseMultipliers.low;
         }
         
         function getMomentumCategory(stock) {
@@ -906,6 +1221,17 @@
                 reasoning.push(`Momentum 20d fuerte: +${momentum20d.toFixed(1)}% (peso 70%)`);
             }
             
+            // Optimizations insights
+            const optimizations = stock.optimizations || {};
+            if (optimizations.weekly_atr > 0) {
+                const ratio = optimizations.atr_ratio || 0;
+                reasoning.push(`Weekly ATR optimization: ${optimizations.weekly_atr.toFixed(2)} (${ratio.toFixed(1)}x vs daily)`);
+            }
+            
+            if (optimizations.earnings_positive) {
+                reasoning.push(`Earnings positivos confirmados - calidad fundamental`);
+            }
+            
             // Risk/Reward agresivo
             const risk = stock.metrics?.risk_pct || 0;
             const rr = stock.metrics?.risk_reward_ratio || 0;
@@ -926,7 +1252,7 @@
             }
             
             if (reasoning.length === 0) {
-                reasoning.push(`Análisis momentum: categoría ${momentumCategory}, target ~1 mes rotación`);
+                reasoning.push(`Análisis momentum optimizado: categoría ${momentumCategory}, target ~1 mes rotación`);
             }
             
             return reasoning.join(". ");
@@ -938,23 +1264,31 @@
                 if (!response.ok) throw new Error('No se pudieron cargar los datos');
                 
                 const data = await response.json();
-                renderAggressiveMomentumDashboard(data);
+                renderOptimizedMomentumDashboard(data);
                 
             } catch (error) {
                 console.error('Error loading data:', error);
                 
-                // Fallback con datos de ejemplo agresivos
+                // Fallback con datos de ejemplo optimizados
                 const fallbackData = {
                     "timestamp": new Date().toISOString(),
                     "market_date": new Date().toISOString().split('T')[0],
+                    "analysis_type": "aggressive_momentum_responsive_weekly_atr_optimized",
+                    "optimization_stack": {
+                        "weekly_atr_take_profit": true,
+                        "min_stop_loss_restrictive": true,
+                        "fundamental_strict_filtering": true,
+                        "timeframe_alignment": "1_month_swing_trading"
+                    },
                     "summary": {
-                        "analysis_type": "Aggressive Momentum Responsive",
+                        "analysis_type": "Aggressive Momentum Responsive - Weekly ATR Optimized",
                         "total_analyzed": 180,
                         "passed_filters": 15,
                         "exceptional_momentum": 3,
                         "strong_momentum": 6,
                         "rotation_opportunities": 8,
-                        "message": "Testing local - Datos agresivos con momentum responsivo"
+                        "optimization_applied": true,
+                        "message": "Testing local - Datos optimizados con Weekly ATR y filtros estrictos"
                     },
                     "top_picks": [
                         {
@@ -978,7 +1312,16 @@
                                 "volume_surge": 67.3,
                                 "momentum_strength": 95
                             },
-                            "target_hold": "~1 mes (rotación agresiva)",
+                            "optimizations": {
+                                "weekly_atr": 12.45,
+                                "daily_atr": 5.23,
+                                "atr_ratio": 2.4,
+                                "earnings_positive": true,
+                                "stop_method": "ma50_priority",
+                                "take_profit_method": "weekly_atr_swing_for_fences",
+                                "weekly_atr_optimized": true
+                            },
+                            "target_hold": "~1 mes (rotación agresiva optimizada)",
                             "rotation_urgency": "URGENT"
                         },
                         {
@@ -1002,12 +1345,21 @@
                                 "volume_surge": 45.2,
                                 "momentum_strength": 88
                             },
-                            "target_hold": "~1 mes (rotación agresiva)",
+                            "optimizations": {
+                                "weekly_atr": 28.67,
+                                "daily_atr": 15.12,
+                                "atr_ratio": 1.9,
+                                "earnings_positive": true,
+                                "stop_method": "ma21_priority",
+                                "take_profit_method": "weekly_atr_swing_for_fences",
+                                "weekly_atr_optimized": true
+                            },
+                            "target_hold": "~1 mes (rotación agresiva optimizada)",
                             "rotation_urgency": "HIGH"
                         }
                     ],
                     "momentum_analysis": {
-                        "philosophy": "swing_for_fences_monthly_rotation",
+                        "philosophy": "swing_for_fences_monthly_rotation_optimized",
                         "momentum_weights": {
                             "momentum_20d": 0.70,
                             "momentum_60d": 0.30
@@ -1025,7 +1377,7 @@
                             {
                                 "symbol": "TTMI",
                                 "action": "URGENT_ROTATION",
-                                "reason": "Momentum excepcional (95/100) + acceleration signals + R/R 4.6:1",
+                                "reason": "Momentum excepcional (95/100) + Weekly ATR optimization + R/R 4.6:1",
                                 "urgency": "URGENT",
                                 "momentum_category": "EXCEPTIONAL"
                             }
@@ -1035,19 +1387,27 @@
                         "spy_20d": 1.8,
                         "spy_60d": 6.2,
                         "spy_90d": 11.1
+                    },
+                    "optimization_metrics": {
+                        "weekly_atr_implemented": true,
+                        "avg_weekly_atr": 18.34,
+                        "avg_daily_atr": 9.12,
+                        "atr_ratio": 2.0,
+                        "positive_earnings_count": 15,
+                        "positive_earnings_percentage": 100
                     }
                 };
                 
-                console.log('Usando datos de fallback agresivos para testing local');
-                renderAggressiveMomentumDashboard(fallbackData);
+                console.log('Usando datos de fallback optimizados para testing local');
+                renderOptimizedMomentumDashboard(fallbackData);
                 
                 const errorInfo = document.createElement('div');
                 errorInfo.innerHTML = `
-                    <div style="background: #fff3e0; border: 1px solid #ffb74d; border-radius: 8px; padding: 15px; margin: 20px; color: #ef6c00;">
-                        <strong>⚡ Modo Testing Agresivo - Datos de Ejemplo</strong><br>
+                    <div style="background: #f0fdf4; border: 1px solid #10b981; border-radius: 8px; padding: 15px; margin: 20px; color: #065f46;">
+                        <strong>🔧 Modo Testing - Weekly ATR Optimized</strong><br>
                         <small>
-                            Se muestran datos de ejemplo con momentum agresivo y rotación mensual.<br>
-                            Para datos reales, ejecuta desde servidor HTTP con archivos del bot.<br>
+                            Se muestran datos de ejemplo con stack de optimizaciones aplicado.<br>
+                            Para datos reales, ejecuta desde servidor HTTP con archivos del bot optimizado.<br>
                         </small>
                     </div>
                 `;
@@ -1055,28 +1415,33 @@
             }
         }
         
-        function renderAggressiveMomentumDashboard(data) {
+        function renderOptimizedMomentumDashboard(data) {
             const contentEl = document.getElementById('content');
             
-            // Resumen agresivo
+            // Detectar optimizaciones aplicadas
+            const optimizationStack = data.optimization_stack || {};
+            const optimizationMetrics = data.optimization_metrics || {};
+            const isOptimized = optimizationStack.weekly_atr_take_profit || optimizationMetrics.weekly_atr_implemented;
+            
+            // Resumen optimizado
             const summaryHtml = `
                 <div class="summary">
                     <div class="summary-grid">
-                        <div class="summary-item">
+                        <div class="summary-item ${isOptimized ? 'optimized' : ''}">
                             <div class="summary-number momentum">${data.summary.exceptional_momentum || 0}</div>
                             <div class="summary-label">Momentum Excepcional</div>
                         </div>
-                        <div class="summary-item">
+                        <div class="summary-item ${isOptimized ? 'optimized' : ''}">
                             <div class="summary-number aggressive">${data.summary.strong_momentum || 0}</div>
                             <div class="summary-label">Momentum Fuerte</div>
                         </div>
-                        <div class="summary-item">
+                        <div class="summary-item ${isOptimized ? 'optimized' : ''}">
                             <div class="summary-number rotation">${data.summary.rotation_opportunities || 0}</div>
                             <div class="summary-label">Oportunidades Rotación</div>
                         </div>
-                        <div class="summary-item">
-                            <div class="summary-number targeting">${data.top_picks ? data.top_picks.length : 0}</div>
-                            <div class="summary-label">Targets Agresivos</div>
+                        <div class="summary-item ${isOptimized ? 'optimized' : ''}">
+                            <div class="summary-number ${isOptimized ? 'optimized' : 'targeting'}">${data.top_picks ? data.top_picks.length : 0}</div>
+                            <div class="summary-label">Targets ${isOptimized ? 'Optimizados' : 'Agresivos'}</div>
                         </div>
                     </div>
                 </div>
@@ -1084,11 +1449,38 @@
             
             let analysisHtml = `<div class="analysis-sections">`;
             
-            // TOP PICKS con momentum agresivo
+            // ATR Comparison Section (si hay datos de optimización)
+            if (optimizationMetrics.weekly_atr_implemented && optimizationMetrics.avg_weekly_atr > 0) {
+                analysisHtml += `
+                    <div class="atr-comparison">
+                        <h3>📊 Weekly ATR vs Daily ATR - Optimization Impact</h3>
+                        <div class="atr-metrics">
+                            <div class="atr-metric">
+                                <div class="atr-value">${optimizationMetrics.avg_weekly_atr.toFixed(2)}</div>
+                                <div class="atr-label">Weekly ATR</div>
+                            </div>
+                            <div class="atr-metric">
+                                <div class="atr-value">${optimizationMetrics.avg_daily_atr.toFixed(2)}</div>
+                                <div class="atr-label">Daily ATR</div>
+                            </div>
+                            <div class="atr-metric">
+                                <div class="atr-value">${optimizationMetrics.atr_ratio.toFixed(1)}x</div>
+                                <div class="atr-label">Ratio W/D</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.85em; color: #92400e;">
+                            <strong>Impact:</strong> Weekly ATR provides better alignment with ~1 month holding periods. 
+                            Higher ratio justifies more conservative multipliers for improved hit rates.
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // TOP PICKS con optimizaciones
             if (data.top_picks && data.top_picks.length > 0) {
                 analysisHtml += `
-                    <div class="analysis-card">
-                        <div class="section-title picks">Top Momentum Picks - Targets Agresivos</div>
+                    <div class="analysis-card ${isOptimized ? 'optimized' : ''}">
+                        <div class="section-title picks ${isOptimized ? 'optimized' : ''}">Top Momentum Picks - ${isOptimized ? 'Weekly ATR Optimized' : 'Targets Agresivos'}</div>
                         <div class="top-picks-grid">
                 `;
                 
@@ -1096,9 +1488,11 @@
                     const levels = calculateAggressiveTradingLevels(stock);
                     const momentumCategory = getMomentumCategory(stock);
                     const reasoning = generateAggressiveReasoningText(stock, {});
+                    const optimizations = stock.optimizations || {};
+                    const hasOptimizations = optimizations.weekly_atr_optimized || false;
                     
                     analysisHtml += `
-                        <div class="pick-card">
+                        <div class="pick-card ${hasOptimizations ? 'optimized' : ''}">
                             <div class="pick-header">
                                 <div class="pick-symbol">${stock.symbol}</div>
                                 <div class="pick-price">$${levels.current.toFixed(2)}</div>
@@ -1106,59 +1500,97 @@
                             <div class="pick-company">${stock.company || 'N/A'} • ${stock.sector || 'N/A'}</div>
                             
                             <div class="momentum-indicators">
-                                <div class="momentum-badge ${momentumCategory.toLowerCase()}">${momentumCategory}</div>
-                                <div class="momentum-badge">${stock.rotation_urgency || 'MEDIUM'}</div>
-                                <div class="momentum-badge">~1 mes</div>
+                                <div class="momentum-badge ${momentumCategory.toLowerCase()} ${hasOptimizations ? 'optimized' : ''}">${momentumCategory}</div>
+                                <div class="momentum-badge ${hasOptimizations ? 'optimized' : ''}">${stock.rotation_urgency || 'MEDIUM'}</div>
+                                <div class="momentum-badge ${hasOptimizations ? 'optimized' : ''}">~1 mes</div>
+                                ${hasOptimizations ? '<div class="momentum-badge optimized">OPTIMIZED</div>' : ''}
                             </div>
                             
+                            ${hasOptimizations && optimizations.weekly_atr > 0 ? `
+                            <div class="atr-indicators">
+                                <div class="atr-badge weekly">W: ${optimizations.weekly_atr.toFixed(2)}</div>
+                                <div class="atr-badge daily">D: ${optimizations.daily_atr.toFixed(2)}</div>
+                                <div class="atr-badge ratio">${optimizations.atr_ratio.toFixed(1)}x</div>
+                                <div class="atr-badge">${optimizations.stop_method}</div>
+                            </div>
+                            ` : ''}
+                            
                             <div class="trading-levels">
-                                <div class="level-item">
+                                <div class="level-item ${hasOptimizations ? 'optimized' : ''}">
                                     <div class="level-value current">$${levels.current.toFixed(2)}</div>
                                     <div class="level-label">Precio Actual</div>
                                 </div>
-                                <div class="level-item">
+                                <div class="level-item ${hasOptimizations ? 'optimized' : ''}">
                                     <div class="level-value stop-loss">$${levels.stopLoss.toFixed(2)}</div>
                                     <div class="level-label">Stop Loss</div>
                                 </div>
-                                <div class="level-item">
-                                    <div class="level-value aggressive">$${levels.takeProfit.toFixed(2)}</div>
-                                    <div class="level-label">Target Agresivo</div>
+                                <div class="level-item ${hasOptimizations ? 'optimized' : ''}">
+                                    <div class="level-value ${hasOptimizations ? 'optimized' : 'aggressive'}">$${levels.takeProfit.toFixed(2)}</div>
+                                    <div class="level-label">${hasOptimizations ? 'Weekly ATR Target' : 'Target Agresivo'}</div>
                                 </div>
-                                <div class="level-item">
-                                    <div class="level-value">${levels.riskReward}:1</div>
+                                <div class="level-item ${hasOptimizations ? 'optimized' : ''}">
+                                    <div class="level-value ${hasOptimizations ? 'optimized' : ''}">${levels.riskReward}:1</div>
                                     <div class="level-label">Risk/Reward</div>
                                 </div>
                             </div>
                             
                             <div class="pick-metrics">
-                                <div class="metric-item">
-                                    <div class="metric-value">${((levels.takeProfit - levels.current) / levels.current * 100).toFixed(1)}%</div>
-                                    <div class="metric-label">Upside Agresivo</div>
+                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
+                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">
+                                        ${((levels.takeProfit - levels.current) / levels.current * 100).toFixed(1)}%
+                                    </div>
+                                    <div class="metric-label">${hasOptimizations ? 'Upside Optimizado' : 'Upside Agresivo'}</div>
                                 </div>
-                                <div class="metric-item">
-                                    <div class="metric-value">${stock.metrics?.risk_pct?.toFixed(1) || 'N/A'}%</div>
+                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
+                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">${stock.metrics?.risk_pct?.toFixed(1) || 'N/A'}%</div>
                                     <div class="metric-label">Risk</div>
                                 </div>
-                                <div class="metric-item">
-                                    <div class="metric-value">+${stock.metrics?.outperformance_20d?.toFixed(1) || 'N/A'}%</div>
+                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
+                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">
+                                        +${stock.metrics?.outperformance_20d?.toFixed(1) || 'N/A'}%
+                                    </div>
                                     <div class="metric-label">Momentum 20d (70%)</div>
                                 </div>
-                                <div class="metric-item">
-                                    <div class="metric-value">${stock.score?.toFixed(0) || 'N/A'}</div>
+                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
+                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">${stock.score?.toFixed(0) || 'N/A'}</div>
                                     <div class="metric-label">Score Final</div>
                                 </div>
-                                <div class="metric-item">
-                                    <div class="metric-value">${stock.technical_score?.toFixed(0) || 'N/A'}</div>
+                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
+                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">${stock.technical_score?.toFixed(0) || 'N/A'}</div>
                                     <div class="metric-label">Score Técnico</div>
                                 </div>
-                                <div class="metric-item">
-                                    <div class="metric-value">+${stock.rr_bonus?.toFixed(0) || 'N/A'}</div>
-                                    <div class="metric-label">Bonus R/R</div>
+                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
+                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">
+                                        ${optimizations.earnings_positive ? '✅' : '❌'}
+                                    </div>
+                                    <div class="metric-label">Earnings</div>
                                 </div>
                             </div>
                             
-                            <div class="pick-reasoning">
-                                <div class="reasoning-title">⚡ Razón para momentum agresivo:</div>
+                            ${hasOptimizations ? `
+                            <div class="optimization-metrics">
+                                <div class="optimization-title">🔧 Optimizations Applied:</div>
+                                <div class="optimization-details">
+                                    <div class="optimization-detail">
+                                        <div class="optimization-detail-value">${optimizations.take_profit_method.includes('weekly') ? 'Weekly' : 'Daily'}</div>
+                                        <div class="optimization-detail-label">ATR Method</div>
+                                    </div>
+                                    <div class="optimization-detail">
+                                        <div class="optimization-detail-value">${optimizations.stop_method.replace('_', ' ')}</div>
+                                        <div class="optimization-detail-label">Stop Method</div>
+                                    </div>
+                                    <div class="optimization-detail">
+                                        <div class="optimization-detail-value">${optimizations.earnings_positive ? 'Verified' : 'Missing'}</div>
+                                        <div class="optimization-detail-label">Fundamentals</div>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <div class="pick-reasoning ${hasOptimizations ? 'optimized' : ''}">
+                                <div class="reasoning-title ${hasOptimizations ? 'optimized' : ''}">
+                                    ${hasOptimizations ? '🔧 Razón optimizada:' : '⚡ Razón para momentum agresivo:'}
+                                </div>
                                 <div class="reasoning-text">${reasoning}</div>
                             </div>
                         </div>
@@ -1177,8 +1609,10 @@
             // Análisis de momentum
             if (data.momentum_analysis) {
                 analysisHtml += `
-                    <div class="analysis-card">
-                        <div class="section-title momentum">Análisis de Momentum Agresivo</div>
+                    <div class="analysis-card ${isOptimized ? 'optimized' : ''}">
+                        <div class="section-title momentum ${isOptimized ? 'optimized' : ''}">
+                            ${isOptimized ? 'Análisis Momentum Optimizado' : 'Análisis de Momentum Agresivo'}
+                        </div>
                         
                         <div class="momentum-grid">
                             <div class="momentum-item">
@@ -1192,7 +1626,7 @@
                         </div>
                         
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">🔥 Momentum EXCEPCIONAL (rotación urgente):</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">🔥 Momentum EXCEPCIONAL ${isOptimized ? '(Weekly ATR 3.0x)' : '(rotación urgente)'}:</div>
                             <div class="symbol-list">
                                 ${(data.momentum_analysis.exceptional_momentum || []).map(symbol => 
                                     `<span class="symbol-badge exceptional">${symbol}</span>`
@@ -1201,7 +1635,7 @@
                         </div>
                         
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">⚡ Momentum FUERTE (rotación agresiva):</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">⚡ Momentum FUERTE ${isOptimized ? '(Weekly ATR 2.5x)' : '(rotación agresiva)'}:</div>
                             <div class="symbol-list">
                                 ${(data.momentum_analysis.strong_momentum || []).map(symbol => 
                                     `<span class="symbol-badge strong">${symbol}</span>`
@@ -1211,7 +1645,7 @@
                         
                         ${data.momentum_analysis.emerging_momentum?.length > 0 ? `
                         <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">🌱 Momentum EMERGENTE (vigilar):</div>
+                            <div style="font-weight: bold; margin-bottom: 8px;">🌱 Momentum EMERGENTE ${isOptimized ? '(Weekly ATR 2.0x)' : '(vigilar)'}:</div>
                             <div class="symbol-list">
                                 ${data.momentum_analysis.emerging_momentum.map(symbol => 
                                     `<span class="symbol-badge emerging">${symbol}</span>`
@@ -1223,7 +1657,7 @@
                 `;
             }
             
-            // Recomendaciones de rotación agresiva
+            // Recomendaciones de rotación optimizada
             if (data.rotation_recommendations) {
                 const overallAction = data.rotation_recommendations.overall_action;
                 let actionBadgeClass = 'maintain';
@@ -1241,30 +1675,36 @@
                 }
                 
                 analysisHtml += `
-                    <div class="analysis-card">
-                        <div class="section-title rotation">Rotación Agresiva de Momentum</div>
+                    <div class="analysis-card ${isOptimized ? 'optimized' : ''}">
+                        <div class="section-title rotation ${isOptimized ? 'optimized' : ''}">
+                            ${isOptimized ? 'Rotación Optimizada de Momentum' : 'Rotación Agresiva de Momentum'}
+                        </div>
                         
                         <div style="margin-bottom: 15px;">
                             <span class="action-badge ${actionBadgeClass}">${actionText}</span>
+                            ${isOptimized ? '<span class="action-badge maintain" style="background: #10b981; color: white;">OPTIMIZED</span>' : ''}
                         </div>
                         
                         <div class="rotation-recommendations">
                 `;
                 
-                // Rotaciones urgentes
+                // Rotaciones agresivas
                 if (data.rotation_recommendations.aggressive_rotations?.length > 0) {
                     analysisHtml += `
                         <div class="rotation-section">
-                            <div class="rotation-title urgent">Rotaciones Urgentes</div>
+                            <div class="rotation-title urgent">${isOptimized ? 'Rotaciones Optimizadas' : 'Rotaciones Urgentes'}</div>
                     `;
                     data.rotation_recommendations.aggressive_rotations.forEach(rotation => {
                         analysisHtml += `
                             <div class="recommendation-item urgent">
                                 <div class="recommendation-header">
                                     <span class="recommendation-symbol">${rotation.symbol || rotation}</span>
-                                    <span class="recommendation-action urgent">ROTAR AHORA</span>
+                                    <span class="recommendation-action urgent">${isOptimized ? 'ROTAR OPT' : 'ROTAR AHORA'}</span>
                                 </div>
-                                <div class="recommendation-reason">${rotation.reason || 'Momentum excepcional detectado'}</div>
+                                <div class="recommendation-reason">
+                                    ${rotation.reason || 'Momentum superior detectado'}
+                                    ${isOptimized ? ' - Weekly ATR optimized' : ''}
+                                </div>
                             </div>
                         `;
                     });
@@ -1304,7 +1744,10 @@
                                     <span class="recommendation-symbol">${opp.symbol || opp}</span>
                                     <span class="recommendation-action emerging">VIGILAR</span>
                                 </div>
-                                <div class="recommendation-reason">${opp.reason || 'Momentum emergente prometedor'}</div>
+                                <div class="recommendation-reason">
+                                    ${opp.reason || 'Momentum emergente prometedor'}
+                                    ${isOptimized ? ' - Weekly ATR tracking' : ''}
+                                </div>
                             </div>
                         `;
                     });
@@ -1319,11 +1762,11 @@
             
             analysisHtml += `</div>`; // Cerrar two-column
             
-            // Contexto de mercado
+            // Contexto de mercado con optimizaciones
             if (data.market_context) {
                 analysisHtml += `
                     <div class="market-context">
-                        <h4>📊 Contexto SPY & Momentum Responsivo</h4>
+                        <h4>📊 Contexto SPY & ${isOptimized ? 'Momentum Optimizado' : 'Momentum Responsivo'}</h4>
                         <div class="spy-metrics">
                             <div class="spy-metric">
                                 <div class="spy-value ${data.market_context.spy_20d >= 0 ? 'positive' : 'negative'}">
@@ -1345,7 +1788,41 @@
                             </div>
                         </div>
                         <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.8); border-radius: 8px; font-size: 0.85em; color: #666;">
-                            <strong>⚡ Momentum Responsivo:</strong> Targets son agresivos pero adaptativos. Si momentum se debilita (no aparece 1+ semanas), salir independientemente del target. Rotación mensual activa hacia mejores oportunidades.
+                            <strong>${isOptimized ? '🔧 Momentum Optimizado:' : '⚡ Momentum Responsivo:'}</strong> 
+                            ${isOptimized ? 
+                                'Targets son calculados con Weekly ATR para mejor alineación temporal. Si momentum se debilita (no aparece 1+ semanas), salir independientemente del target. Rotación mensual con fundamentales estrictos.' :
+                                'Targets son agresivos pero adaptativos. Si momentum se debilita (no aparece 1+ semanas), salir independientemente del target. Rotación mensual activa hacia mejores oportunidades.'
+                            }
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Optimization Summary (si hay optimizaciones)
+            if (isOptimized && optimizationMetrics.weekly_atr_implemented) {
+                analysisHtml += `
+                    <div class="optimization-summary">
+                        <h4>🔧 Optimization Stack - Performance Metrics</h4>
+                        <div class="optimization-grid">
+                            <div class="optimization-stat">
+                                <div class="optimization-stat-value">${optimizationMetrics.positive_earnings_percentage.toFixed(0)}%</div>
+                                <div class="optimization-stat-label">Earnings Positivos</div>
+                            </div>
+                            <div class="optimization-stat">
+                                <div class="optimization-stat-value">${optimizationMetrics.atr_ratio.toFixed(1)}x</div>
+                                <div class="optimization-stat-label">Weekly/Daily Ratio</div>
+                            </div>
+                            <div class="optimization-stat">
+                                <div class="optimization-stat-value">✅</div>
+                                <div class="optimization-stat-label">Stop Loss Restrictivo</div>
+                            </div>
+                            <div class="optimization-stat">
+                                <div class="optimization-stat-value">1M</div>
+                                <div class="optimization-stat-label">Timeframe Aligned</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.85em; color: #065f46; text-align: center;">
+                            <strong>Impact:</strong> Optimization stack improves hit rates through better temporal alignment and stricter quality filtering.
                         </div>
                     </div>
                 `;
@@ -1361,8 +1838,9 @@
                     🗓️ Fecha de análisis: ${data.market_date}<br>
                     ⏰ Próximo análisis: ${getNextUpdateTime()}<br>
                     📅 Ejecución automática: Sábados 10 AM España<br>
+                    ${isOptimized ? '🔧 Optimization Stack: Weekly ATR + Min Stop Loss + Strict Fundamentals<br>' : ''}
                     <div class="signature">
-                        <small>📊 Professional Momentum Analytics Platform by <strong>0t4c0n</strong></small>
+                        <small>📊 Professional Momentum Analytics Platform ${isOptimized ? '- Weekly ATR Optimized' : ''} by <strong>0t4c0n</strong></small>
                     </div>
                 </div>
             `;

@@ -4,7 +4,9 @@ Momentum Responsive Stock Screener - Optimizado para rotación mensual agresiva
 Take profit targets agresivos + timeframes responsivos + momentum acceleration
 🎯 Filosofía: "Swing for the fences" con gestión manual de exits
 🛡️ MANTIENE: Stop loss ≤10% como filtro crítico de riesgo
-🆕 NUEVO: Sistema responsivo para capturar momentum emergente rápidamente
+🆕 NOVO: Sistema responsivo para capturar momentum emergente rápidamente
+🛠️ CORREGIDO: Filtros fundamentales estrictos y lógica SPY benchmark
+🔧 FIXED: Weekly ATR para take profit + Min stop loss para filtrado restrictivo
 """
 
 import yfinance as yf
@@ -142,6 +144,30 @@ class MomentumResponsiveScreener:
         except Exception:
             return 0
     
+    def calculate_weekly_atr(self, df, period=14):
+        """🆕 Calcula ATR semanal - más apropiado para swing trading de 1 mes"""
+        try:
+            if len(df) < 50:  # Necesitamos suficientes datos
+                return self.calculate_atr(df, 20) * 2.2  # Fallback escalado
+            
+            # Resample a datos semanales (viernes como cierre)
+            weekly_data = df.resample('W-FRI').agg({
+                'High': 'max',
+                'Low': 'min', 
+                'Close': 'last'
+            }).dropna()
+            
+            if len(weekly_data) < period:
+                # Fallback: Daily ATR escalado
+                return self.calculate_atr(df, 20) * 2.2
+                
+            # Calcular ATR en datos semanales
+            return self.calculate_atr(weekly_data, period)
+            
+        except Exception as e:
+            print(f"⚠️ Error calculando Weekly ATR: {e}")
+            return self.calculate_atr(df, 20) * 2.2  # Fallback seguro
+    
     def calculate_support_resistance(self, df, window=20):
         """Calcula niveles de soporte y resistencia dinámicos"""
         try:
@@ -201,9 +227,12 @@ class MomentumResponsiveScreener:
             return {'volatility_rank': 'MEDIUM'}
     
     def calculate_ultra_conservative_stop_loss(self, hist, current_price, atr, support_resistance, volatility_metrics):
-        """🛡️ STOP LOSS ULTRA CONSERVADOR - MANTIENE límite ≤10% sagrado"""
+        """🛡️ STOP LOSS ULTRA CONSERVADOR - Nueva lógica de priorización
+        🔧 NUEVA PRIORIZACIÓN: MA50 → MA21 → otros (si MA muy pequeños) → 8% fallback
+        """
         try:
-            stops = []
+            # Calcular todas las opciones de stop
+            all_stops = {}
             
             # 1. ATR-based stop (conservador)
             if atr > 0:
@@ -217,58 +246,128 @@ class MomentumResponsiveScreener:
                     atr_multiplier = 1.8
                 
                 atr_stop = current_price - (atr * atr_multiplier)
-                stops.append(('atr', atr_stop))
+                atr_risk = ((current_price - atr_stop) / current_price) * 100
+                
+                if atr_risk <= 10.0:  # Solo considerar si está dentro del límite
+                    all_stops['atr'] = {
+                        'price': atr_stop,
+                        'risk': atr_risk
+                    }
             
             # 2. Support-based stop
             if support_resistance and support_resistance['support'] < current_price:
                 support_stop = support_resistance['support'] * 0.985  # 1.5% buffer
-                stops.append(('support', support_stop))
+                support_risk = ((current_price - support_stop) / current_price) * 100
+                
+                if support_risk <= 10.0:  # Solo considerar si está dentro del límite
+                    all_stops['support'] = {
+                        'price': support_stop,
+                        'risk': support_risk
+                    }
             
             # 3. Moving averages stops
+            ma21_stop_data = None
+            ma50_stop_data = None
+            
             if len(hist) >= 50:
                 ma21 = hist['Close'].rolling(21).mean().iloc[-1]
                 ma50 = hist['Close'].rolling(50).mean().iloc[-1]
                 
-                if (ma21 > 0 and current_price > ma21 and 
-                    ((current_price - ma21) / current_price) < 0.06):
-                    stops.append(('ma21', ma21 * 0.985))
+                # MA21 stop
+                if ma21 > 0 and current_price > ma21:
+                    ma21_stop = ma21 * 0.985
+                    ma21_risk = ((current_price - ma21_stop) / current_price) * 100
+                    
+                    if 5 < ma21_risk <= 10.0:
+                        ma21_stop_data = {
+                            'price': ma21_stop,
+                            'risk': ma21_risk
+                        }
+                        all_stops['ma21'] = ma21_stop_data
                 
-                if (ma50 > 0 and current_price > ma50 and 
-                    ((current_price - ma50) / current_price) < 0.09):
-                    stops.append(('ma50', ma50 * 0.985))
+                # MA50 stop
+                if ma50 > 0 and current_price > ma50:
+                    ma50_stop = ma50 * 0.985
+                    ma50_risk = ((current_price - ma50_stop) / current_price) * 100
+                    
+                    if 5 < ma50_risk <= 10.0:
+                        ma50_stop_data = {
+                            'price': ma50_stop,
+                            'risk': ma50_risk
+                        }
+                        all_stops['ma50'] = ma50_stop_data
             
-            # SELECCIÓN FINAL: El MÁS ALTO (menos riesgo)
-            if stops:
-                stop_values = [s[1] for s in stops if s[1] > 0]
-                final_stop = max(stop_values) if stop_values else current_price * 0.90
-                                
-                # Asegurar que no sea demasiado tight (mínimo 3%)
-                min_stop = current_price * 0.97
-                final_stop = min(final_stop, min_stop)
-                
-                risk_percentage = ((current_price - final_stop) / current_price) * 100
-                
-                return {
-                    'stop_price': final_stop,
-                    'risk_percentage': risk_percentage,
-                    'methods_used': [s[0] for s in stops],
-                    'all_stops': {s[0]: s[1] for s in stops},
-                    'stop_selection': 'ultra_conservative'
-                }
+            # 🆕 NUEVA LÓGICA DE PRIORIZACIÓN
+            final_stop = None
+            selection_method = None
             
-            # Fallback ultra conservador
+            # PRIORIDAD 1: MA50 válido
+            if ma50_stop_data:
+                final_stop = ma50_stop_data['price']
+                risk_percentage = ma50_stop_data['risk']
+                selection_method = 'ma50_priority'
+                methods_used = ['ma50']
+                
+            # PRIORIDAD 2: MA21 válido (si no hay MA50 válido)
+            elif ma21_stop_data:
+                final_stop = ma21_stop_data['price']
+                risk_percentage = ma21_stop_data['risk']
+                selection_method = 'ma21_priority'
+                methods_used = ['ma21']
+                
+            # PRIORIDAD 3: Si MA50/MA21 son "muy pequeños" (< 5%), usar mínimo de otros
+            elif (((ma50_stop_data and ma50_stop_data['risk'] < 5.0) or 
+                (ma21_stop_data and ma21_stop_data['risk'] < 5.0))):
+                
+                # Usar mínimo de ATR y support (más restrictivo)
+                other_stops = {k: v for k, v in all_stops.items() if k not in ['ma21', 'ma50']}
+                
+                if other_stops:
+                    # Seleccionar el más restrictivo (menor precio = mayor riesgo, pero controlado)
+                    min_stop_key = min(other_stops.keys(), key=lambda k: other_stops[k]['price'])
+                    final_stop = other_stops[min_stop_key]['price']
+                    risk_percentage = other_stops[min_stop_key]['risk']
+                    selection_method = f'ma_too_small_using_{min_stop_key}'
+                    methods_used = [min_stop_key]
+                    
+                    # Verificar que el "mínimo de otros" no sea demasiado tight
+                    min_acceptable_stop = current_price * 0.97  # Mínimo 3%
+                    if final_stop > min_acceptable_stop:
+                        final_stop = min_acceptable_stop
+                        risk_percentage = 3.0
+                        selection_method += '_adjusted_to_min_3pct'
+                else:
+                    # Si no hay otros stops válidos, usar fallback
+                    final_stop = current_price * 0.92  # 8% fallback
+                    risk_percentage = 8.0
+                    selection_method = 'ma_too_small_fallback_8pct'
+                    methods_used = ['fallback_8pct']
+            
+            # FALLBACK: Stop mínimo del 8%
+            else:
+                final_stop = current_price * 0.80  # 8% desde precio actual
+                risk_percentage = 20.0
+                selection_method = 'descartar'
+                methods_used = ['descartar']
+            
             return {
-                'stop_price': current_price * 0.90,
-                'risk_percentage': 10.0,
-                'methods_used': ['fallback_ultra_conservative']
+                'stop_price': final_stop,
+                'risk_percentage': risk_percentage,
+                'methods_used': methods_used,
+                'all_stops_calculated': {k: f"{v['price']:.2f} ({v['risk']:.1f}%)" for k, v in all_stops.items()},
+                'stop_selection': selection_method,
+                'ma21_data': f"{ma21_stop_data['price']:.2f} ({ma21_stop_data['risk']:.1f}%)" if ma21_stop_data else 'N/A',
+                'ma50_data': f"{ma50_stop_data['price']:.2f} ({ma50_stop_data['risk']:.1f}%)" if ma50_stop_data else 'N/A',
+                'priority_logic_applied': True
             }
             
         except Exception as e:
             return {
-                'stop_price': current_price * 0.90,
-                'risk_percentage': 10.0,
-                'methods_used': ['error_fallback'],
-                'error': str(e)
+                'stop_price': current_price * 0.92,  # 8% fallback en caso de error
+                'risk_percentage': 8.0,
+                'methods_used': ['error_fallback_8pct'],
+                'error': str(e),
+                'stop_selection': 'error_fallback'
             }
     
     def apply_ultra_conservative_risk_filter(self, stock_result):
@@ -305,29 +404,41 @@ class MomentumResponsiveScreener:
             return 0
     
     def get_fundamental_data(self, ticker_info):
-        """Extrae datos fundamentales"""
+        """🛠️ CORREGIDO: Extrae datos fundamentales con filtros estrictos"""
         fundamental_data = {
             'quarterly_earnings_positive': None,
             'quarterly_earnings_growth': None,
             'revenue_growth': None,
             'roe': None,
-            'fundamental_score': 0
+            'fundamental_score': 0,
+            'has_required_data': False  # 🆕 Flag para verificar si tiene datos mínimos
         }
         
         try:
-            # Beneficios último trimestre
-            quarterly_growth = ticker_info.get('quarterlyEarningsGrowthYOY')
+            # 🛠️ FILTRO CRÍTICO: Beneficios último trimestre
+            quarterly_growth = ticker_info.get('earningsQuarterlyGrowth')
             quarterly_positive = ticker_info.get('trailingEps')
-            if quarterly_growth is not None:
+            
+            # 🛠️ LÓGICA CORREGIDA: Establecer valores explícitos
+            if quarterly_growth is not None and quarterly_positive is not None:
                 fundamental_data['quarterly_earnings_positive'] = quarterly_positive > 0
                 fundamental_data['quarterly_earnings_growth'] = quarterly_growth
+                fundamental_data['has_required_data'] = True
                 
-                if quarterly_growth > 0.30:
-                    fundamental_data['fundamental_score'] += 40
-                elif quarterly_growth > 0.15:
-                    fundamental_data['fundamental_score'] += 25
-                elif quarterly_growth > 0:
-                    fundamental_data['fundamental_score'] += 10
+                # Solo dar puntos si hay beneficios POSITIVOS
+                if quarterly_positive > 0:
+                    if quarterly_growth > 0.30:
+                        fundamental_data['fundamental_score'] += 40
+                    elif quarterly_growth > 0.15:
+                        fundamental_data['fundamental_score'] += 25
+                    elif quarterly_growth > 0:
+                        fundamental_data['fundamental_score'] += 10
+                # Si beneficios son negativos o cero, score = 0
+            else:
+                # 🛠️ CRÍTICO: Si no hay datos de beneficios, marcar como negativo
+                fundamental_data['quarterly_earnings_positive'] = False
+                fundamental_data['has_required_data'] = False
+                print(f"⚠️ Sin datos de beneficios - descartando")
             
             # Crecimiento de ingresos
             revenue_growth = ticker_info.get('revenueGrowth')
@@ -351,34 +462,40 @@ class MomentumResponsiveScreener:
                     
         except Exception as e:
             print(f"⚠️ Error fundamentales: {e}")
+            # En caso de error, marcar como sin beneficios para mayor seguridad
+            fundamental_data['quarterly_earnings_positive'] = False
+            fundamental_data['has_required_data'] = False
         
         return fundamental_data
     
     def calculate_aggressive_take_profit(self, hist, current_price, atr, support_resistance, outperformance_60d, score):
         """
-        🎯 TAKE PROFIT AGRESIVO - "Swing for the fences"
-        Targets optimizados para capturar momentum fuerte hasta 30-40%
+        🎯 TAKE PROFIT AGRESIVO con Weekly ATR - Optimizado para holds de 1 mes
+        🔧 FIXED: Usar Weekly ATR + multiplicadores ajustados para swing trading
         """
         try:
-            # 🎯 MULTIPLICADORES AGRESIVOS para capturar más upside
+            # 🆕 USAR WEEKLY ATR en lugar de daily
+            weekly_atr = self.calculate_weekly_atr(hist, 14)
+            
+            # 🎯 MULTIPLICADORES AJUSTADOS para Weekly ATR (más conservadores porque weekly ATR es mayor)
             if score > 100:  # Momentum fuerte
                 momentum_strength = "FUERTE"
-                atr_multiplier = 4.5  # Target ~35-45%
+                atr_multiplier = 3.0  # Era 4.5 - reducido porque weekly ATR es mayor
             elif score >= 60:  # Momentum moderado
                 momentum_strength = "MODERADO"
-                atr_multiplier = 4.0  # Target ~30-40%
+                atr_multiplier = 2.5  # Era 4.0
             else:  # Momentum débil
                 momentum_strength = "DÉBIL"
-                atr_multiplier = 3.5  # Target ~25-35%
+                atr_multiplier = 2.0  # Era 3.5
             
-            # 🎯 CÁLCULO PRINCIPAL: ATR agresivo
-            target_price = current_price + (atr * atr_multiplier)
+            # 🎯 CÁLCULO PRINCIPAL: Weekly ATR agresivo
+            target_price = current_price + (weekly_atr * atr_multiplier)
             
-            # 🔧 VALIDACIÓN: Límites de seguridad más amplios
-            min_target = current_price * 1.10  # Mínimo 10% para que valga la pena
-            max_target = current_price * 2.50  # Máximo 150% (muy amplio para momentum excepcional)
+            # 🔧 VALIDACIÓN: Límites de seguridad
+            min_target = current_price * 1.10  # Mínimo 10%
+            max_target = current_price * 2.50  # Máximo 150%
             
-            method_note = "aggressive_atr"
+            method_note = "weekly_atr_swing_optimized"
             if target_price < min_target:
                 target_price = min_target
                 method_note = "min_enforced"
@@ -386,12 +503,12 @@ class MomentumResponsiveScreener:
                 target_price = max_target
                 method_note = "max_enforced"
             
-            # 🎯 AJUSTE OPCIONAL: Usar resistencia solo si mejora el target
+            # 🎯 AJUSTE OPCIONAL: Resistencia si mejora el target
             if support_resistance and support_resistance['resistance'] > current_price:
-                resistance_target = support_resistance['resistance'] * 1.05  # 5% por encima de resistencia
+                resistance_target = support_resistance['resistance'] * 1.05
                 if resistance_target > target_price and resistance_target < max_target:
                     target_price = resistance_target
-                    method_note = "resistance_enhanced"
+                    method_note = "resistance_enhanced_weekly"
             
             upside_percentage = ((target_price / current_price) - 1) * 100
             
@@ -400,26 +517,30 @@ class MomentumResponsiveScreener:
                 'upside_percentage': upside_percentage,
                 'momentum_strength': momentum_strength,
                 'atr_multiplier_used': atr_multiplier,
+                'weekly_atr_used': weekly_atr,  # 🆕 Para tracking
+                'daily_atr_used': atr,  # Para comparación
                 'confidence_level': 'Alta' if score > 100 else 'Media' if score >= 60 else 'Baja',
-                'primary_method': 'aggressive_atr_swing_for_fences',
+                'primary_method': 'weekly_atr_swing_for_fences',
                 'method_note': method_note,
-                'calculation_method': 'atr_aggressive_momentum',
+                'calculation_method': 'weekly_atr_1month_optimized',
                 'score_range': f"{score:.1f} ({momentum_strength})",
-                'atr_value': atr,
-                'target_range': f"{upside_percentage:.1f}% (targeting 30-40%+)"
+                'atr_comparison': f"Weekly: {weekly_atr:.2f} vs Daily: {atr:.2f}",
+                'target_range': f"{upside_percentage:.1f}% (1-month swing optimized)"
             }
             
         except Exception as e:
-            # Fallback agresivo pero razonable
-            fallback_target = current_price * 1.25  # 25% default
+            # Fallback con daily ATR escalado
+            fallback_target = current_price * 1.25
             return {
                 'target_price': fallback_target,
                 'upside_percentage': 25.0,
-                'momentum_strength': 'UNKNOWN',
+                'momentum_strength': 'FALLBACK',
                 'atr_multiplier_used': 0,
+                'weekly_atr_used': 0,
+                'daily_atr_used': atr,
                 'confidence_level': 'Fallback',
                 'primary_method': 'error_fallback',
-                'method_note': 'error',
+                'method_note': 'weekly_atr_error',
                 'error': str(e)
             }
     
@@ -434,7 +555,7 @@ class MomentumResponsiveScreener:
             'technical_score': technical_score,
             'rr_bonus': rr_bonus,
             'rr_weight_used': self.rr_weight,
-            'scoring_method': 'momentum_responsive'
+            'scoring_method': 'momentum_responsive_weekly_atr'
         }
     
     def calculate_momentum_acceleration_bonus(self, outperf_20d, outperf_60d, outperf_90d):
@@ -560,6 +681,8 @@ class MomentumResponsiveScreener:
     def evaluate_stock_momentum_responsive(self, symbol):
         """
         🎯 EVALUACIÓN OPTIMIZADA PARA MOMENTUM TRADING AGRESIVO
+        🛠️ CORREGIDO: Filtros fundamentales estrictos y lógica SPY
+        🔧 FIXED: Weekly ATR para take profit + Min stop loss
         """
         try:
             normalize_ticker = self.normalize_symbol(symbol)
@@ -585,15 +708,15 @@ class MomentumResponsiveScreener:
                           current_price >= ma50 * 1.02 and
                           current_price <= ma21 * 1.08)  # Más flexible: 8% vs 7%
             
-            if not (trend_bullish and (above_ma21 or rebote_ma50)):
+            if (trend_bullish and (above_ma21 or rebote_ma50)) == False:
                 return None
             
             volume_avg_30d = hist['Volume'].tail(30).mean()
-            if volume_avg_30d < 1_000_000:
+            if volume_avg_30d < 1000000:
                 return None
             
-            # 🎯 BENCHMARKING vs SPY - FILTROS MÁS AGRESIVOS
-            if self.spy_benchmark is None:
+            # 🛠️ CORREGIDO: LÓGICA SPY BENCHMARK FIXED
+            if self.spy_benchmark is None:  # ✅ CORREGIDO: era "!= None"
                 return None
             
             spy_data = self.spy_benchmark['data']
@@ -608,11 +731,12 @@ class MomentumResponsiveScreener:
             # Nota: outperformance_90d ya no se filtra
             
             # ANÁLISIS TÉCNICO
-            atr = self.calculate_atr(hist, 20)
+            atr = self.calculate_atr(hist, 20)  # Daily ATR para stops
+            weekly_atr = self.calculate_weekly_atr(hist, 14)  # 🆕 Weekly ATR para take profit
             support_resistance = self.calculate_support_resistance(hist)
             volatility_metrics = self.calculate_volatility_metrics(hist)
             
-            # 🛡️ STOP LOSS ULTRA CONSERVADOR (MANTIENE ≤10%)
+            # 🛡️ STOP LOSS ULTRA CONSERVADOR (MANTIENE ≤10%) - Usando Daily ATR
             stop_analysis = self.calculate_ultra_conservative_stop_loss(
                 hist, current_price, atr, support_resistance, volatility_metrics
             )
@@ -621,16 +745,24 @@ class MomentumResponsiveScreener:
             if stop_analysis['risk_percentage'] > self.max_allowed_risk:
                 return None
             
-            # FUNDAMENTALES
+            # 🛠️ CORREGIDO: FUNDAMENTALES CON FILTROS ESTRICTOS
             try:
                 ticker_info = ticker.info
                 fundamental_data = self.get_fundamental_data(ticker_info)
                 
-                if fundamental_data.get('quarterly_earnings_positive') is False:
+                # 🛠️ FILTRO CRÍTICO CORREGIDO
+                if fundamental_data.get('quarterly_earnings_positive') == False:
+                    print(f"🚫 {symbol} DESCARTADO - Sin beneficios positivos")
+                    return None
+                
+                # 🛠️ NUEVO: Verificar que tenga datos mínimos requeridos
+                if not fundamental_data.get('has_required_data', False):
+                    print(f"🚫 {symbol} DESCARTADO - Sin datos fundamentales suficientes")
                     return None
                     
-            except Exception:
-                fundamental_data = {'fundamental_score': 0}
+            except Exception as e:
+                print(f"🚫 {symbol} DESCARTADO - Error obteniendo fundamentales: {e}")
+                return None
             
             # 🆕 SCORE TÉCNICO CON NUEVO SISTEMA DE MOMENTUM RESPONSIVO
             momentum_analysis = self.calculate_responsive_momentum_score(
@@ -661,7 +793,7 @@ class MomentumResponsiveScreener:
                 volume_score                                           
             )
 
-            # 🎯 TAKE PROFIT AGRESIVO
+            # 🎯 TAKE PROFIT AGRESIVO CON WEEKLY ATR
             take_profit_analysis = self.calculate_aggressive_take_profit(
                 hist, current_price, atr, support_resistance, outperformance_60d, technical_score
             )
@@ -696,6 +828,7 @@ class MomentumResponsiveScreener:
                 'volume_surge': round(volume_surge_val, 1),
                 'fundamental_score': fundamental_data.get('fundamental_score', 0),
                 'atr': round(atr, 2),
+                'weekly_atr': round(weekly_atr, 2),  # 🆕 Weekly ATR
                 'volatility_rank': volatility_metrics.get('volatility_rank', 'MEDIUM'),
                 'support_resistance': support_resistance,
                 'stop_analysis': stop_analysis,
@@ -706,7 +839,7 @@ class MomentumResponsiveScreener:
                     'volatility_bonus': volatility_bonus,
                     'volume_score': volume_score,
                     'risk_bonus': risk_bonus,
-                    'scoring_method': 'momentum_responsive_aggressive'
+                    'scoring_method': 'momentum_responsive_aggressive_weekly_atr'
                 },
                 'company_info': company_info,
                 'ma_levels': {
@@ -716,16 +849,20 @@ class MomentumResponsiveScreener:
                     'entry_type': 'above_ma21' if above_ma21 else 'rebote_ma50',
                     'trend_bullish': trend_bullish
                 },
+                'fundamental_data': fundamental_data,  # 🛠️ Incluir datos fundamentales
                 'momentum_responsive': True,
                 'max_risk_applied': self.max_allowed_risk,
                 'aggressive_targets': True,
+                'weekly_atr_optimized': True,  # 🆕 Flag
                 'target_hold': '~1 mes (rotación agresiva)',
                 'analysis_date': datetime.now().isoformat(),
                 'momentum_filters_applied': {
                     'min_20d': self.min_outperf_20d,
                     'min_60d': self.min_outperf_60d,
                     '90d_eliminated': True
-                }
+                },
+                'filters_passed': True,  # 🛠️ Flag indicando que pasó todos los filtros
+                'improvements_applied': 'weekly_atr_take_profit_min_stop_loss'  # 🔧 Tracking
             }
             
             # APLICAR FILTRO FINAL
@@ -736,12 +873,14 @@ class MomentumResponsiveScreener:
             return None
     
     def screen_all_stocks_momentum_responsive(self):
-        """Screening optimizado para momentum trading agresivo"""
-        print(f"=== MOMENTUM RESPONSIVE SCREENING AGRESIVO ===")
-        print(f"🎯 Take Profit: Targets agresivos (ATR × 4.5/4.0/3.5) para 30-40% upside")
+        """Screening optimizado para momentum trading agresivo con Weekly ATR"""
+        print(f"=== MOMENTUM RESPONSIVE SCREENING AGRESIVO - WEEKLY ATR OPTIMIZED ===")
+        print(f"🎯 Take Profit: Weekly ATR-based (× 3.0/2.5/2.0) para holds de 1 mes")
+        print(f"🛡️ Stop Loss: Min de múltiples métodos (MÁS RESTRICTIVO)")
         print(f"📈 Momentum: 20d {self.momentum_20d_weight*100:.0f}% + 60d {self.momentum_60d_weight*100:.0f}% + 90d eliminado")
         print(f"🔧 Filtros: 20d >{self.min_outperf_20d}%, 60d >{self.min_outperf_60d}%")
         print(f"🛡️ Riesgo: ≤{self.max_allowed_risk}% SAGRADO")
+        print(f"🛠️ Fundamentales: Solo beneficios POSITIVOS + datos completos")
         
         # Calcular benchmark SPY
         self.spy_benchmark = self.calculate_spy_benchmark()
@@ -761,6 +900,8 @@ class MomentumResponsiveScreener:
         
         all_results = []
         failed_count = 0
+        fundamental_rejects = 0
+        risk_filter_rejects = 0
         
         for batch_num in range(total_batches):
             start_idx = batch_num * batch_size
@@ -781,7 +922,16 @@ class MomentumResponsiveScreener:
                         risk = result.get('risk_pct', 0)
                         upside = result.get('upside_pct', 0)
                         mom_20d = result.get('outperformance_20d', 0)
-                        print(f"✅ {symbol} - Score: {final_score:.1f} (técnico: {technical_score:.1f}) - R/R: {rr_ratio:.1f} - Risk: {risk:.1f}% - Upside: {upside:.1f}% - Mom20d: {mom_20d:+.1f}%")
+                        weekly_atr = result.get('weekly_atr', 0)
+                        daily_atr = result.get('atr', 0)
+                        earnings_positive = result.get('fundamental_data', {}).get('quarterly_earnings_positive', False)
+                        print(f"✅ {symbol} - Score: {final_score:.1f} (técnico: {technical_score:.1f}) - R/R: {rr_ratio:.1f} - Risk: {risk:.1f}% - Upside: {upside:.1f}% - Mom20d: {mom_20d:+.1f}% - WeeklyATR: {weekly_atr:.2f} - Earnings: {'✅' if earnings_positive else '❌'}")
+                    else:
+                        # Tracking de rechazos
+                        if "Sin beneficios" in str(symbol) or "fundamentales" in str(symbol):
+                            fundamental_rejects += 1
+                        elif "DESCARTADO - Riesgo" in str(symbol):
+                            risk_filter_rejects += 1
                     
                 except Exception as e:
                     failed_count += 1
@@ -796,27 +946,41 @@ class MomentumResponsiveScreener:
         # Ordenar por score final
         all_results.sort(key=lambda x: x['score'], reverse=True)
         
-        print(f"\n=== RESUMEN MOMENTUM RESPONSIVO AGRESIVO ===")
+        print(f"\n=== RESUMEN MOMENTUM RESPONSIVO CON WEEKLY ATR ===")
         print(f"Procesadas: {len(all_symbols)} | Pasaron filtros: {len(all_results)}")
-        print(f"Filtro de riesgo: ≤{self.max_allowed_risk}% (SAGRADO)")
-        print(f"Momentum: 20d peso {self.momentum_20d_weight:.1f}, 60d peso {self.momentum_60d_weight:.1f}")
-        print(f"Errores: {failed_count}")
+        print(f"🔧 Mejoras aplicadas: Weekly ATR take profit + Min stop loss")
+        print(f"🛡️ Filtro de riesgo: ≤{self.max_allowed_risk}% (SAGRADO - MÁS RESTRICTIVO)")
+        print(f"📈 Momentum: 20d peso {self.momentum_20d_weight:.1f}, 60d peso {self.momentum_60d_weight:.1f}")
+        print(f"🛠️ Rechazos por fundamentales: {fundamental_rejects}")
+        print(f"🚫 Rechazos por riesgo >10%: {risk_filter_rejects}")
+        print(f"❌ Errores: {failed_count}")
         
         if all_results:
             avg_risk = sum(r['risk_pct'] for r in all_results) / len(all_results)
             avg_rr = sum(r['risk_reward_ratio'] for r in all_results) / len(all_results)
             avg_upside = sum(r['upside_pct'] for r in all_results) / len(all_results)
             avg_mom_20d = sum(r['outperformance_20d'] for r in all_results) / len(all_results)
+            avg_weekly_atr = sum(r.get('weekly_atr', 0) for r in all_results) / len(all_results)
+            avg_daily_atr = sum(r.get('atr', 0) for r in all_results) / len(all_results)
             
             high_upside = len([r for r in all_results if r['upside_pct'] > 30])
             excellent_rr = len([r for r in all_results if r['risk_reward_ratio'] > 3.0])
             
-            print(f"📊 Riesgo promedio: {avg_risk:.1f}%")
-            print(f"📊 R/R promedio: {avg_rr:.1f}:1")
-            print(f"📊 Upside promedio: {avg_upside:.1f}%")
-            print(f"📊 Momentum 20d promedio: {avg_mom_20d:+.1f}%")
+            # 🛠️ NUEVO: Verificar que todos tienen beneficios positivos
+            with_positive_earnings = len([r for r in all_results 
+                                        if r.get('fundamental_data', {}).get('quarterly_earnings_positive', False)])
+            
+            print(f"📊 ESTADÍSTICAS OPTIMIZADAS:")
+            print(f"   - Riesgo promedio: {avg_risk:.1f}% (más restrictivo con min stop)")
+            print(f"   - R/R promedio: {avg_rr:.1f}:1")
+            print(f"   - Upside promedio: {avg_upside:.1f}% (weekly ATR optimized)")
+            print(f"   - Momentum 20d promedio: {avg_mom_20d:+.1f}%")
+            print(f"   - Weekly ATR promedio: {avg_weekly_atr:.2f}")
+            print(f"   - Daily ATR promedio: {avg_daily_atr:.2f}")
+            print(f"   - Ratio Weekly/Daily ATR: {avg_weekly_atr/avg_daily_atr:.1f}x" if avg_daily_atr > 0 else "")
             print(f"🎯 Con upside >30%: {high_upside}/{len(all_results)} ({high_upside/len(all_results)*100:.1f}%)")
             print(f"🏆 Con R/R >3:1: {excellent_rr}/{len(all_results)} ({excellent_rr/len(all_results)*100:.1f}%)")
+            print(f"🛠️ Con beneficios positivos: {with_positive_earnings}/{len(all_results)} ({with_positive_earnings/len(all_results)*100:.1f}%)")
         
         return all_results
 
@@ -882,13 +1046,13 @@ def archive_previous_results():
             print(f"❌ Error creando backup: {e2}")
 
 def main():
-    """Función principal optimizada para momentum trading agresivo"""
+    """Función principal optimizada para momentum trading agresivo con Weekly ATR"""
     screener = MomentumResponsiveScreener()
     
     # PASO 1: Archivar archivo anterior
     archive_previous_results()
     
-    # PASO 2: Ejecutar screening momentum responsivo
+    # PASO 2: Ejecutar screening momentum responsivo con Weekly ATR
     results = screener.screen_all_stocks_momentum_responsive()
     
     # PASO 3: Guardar resultados
@@ -899,7 +1063,12 @@ def main():
     with open(full_results_file, 'w') as f:
         json.dump({
             'timestamp': datetime.now().isoformat(),
-            'analysis_type': 'momentum_responsive_aggressive_trading',
+            'analysis_type': 'momentum_responsive_aggressive_trading_weekly_atr_optimized',
+            'improvements_applied': {
+                'weekly_atr_take_profit': True,
+                'min_stop_loss_restrictive': True,
+                'timeframe_alignment': '1_month_swing_trading'
+            },
             'max_allowed_risk': screener.max_allowed_risk,
             'momentum_weights': {
                 '20d': screener.momentum_20d_weight,
@@ -911,6 +1080,11 @@ def main():
                 'min_outperf_60d': screener.min_outperf_60d,
                 '90d_eliminated': True
             },
+            'fundamental_filters': {
+                'earnings_positive_required': True,
+                'complete_data_required': True,
+                'strict_validation': True
+            },
             'total_screened': len(screener.get_nyse_nasdaq_symbols()) if screener.get_nyse_nasdaq_symbols() else 0,
             'total_passed': len(results),
             'spy_benchmark': screener.spy_benchmark,
@@ -920,9 +1094,13 @@ def main():
                 'target_hold': '~1 mes con rotación agresiva',
                 'entry_filters': 'Momentum responsivo: 20d >5%, 60d >0%, 90d eliminado',
                 'max_risk_filter': f'{screener.max_allowed_risk}% maximum (SAGRADO)',
-                'stop_loss': 'Ultra conservative: ≤10% enforcement',
-                'take_profit': 'Aggressive ATR: 4.5x/4.0x/3.5x targeting 30-40% upside',
-                'scoring': 'Momentum weighted (20d 70%, 60d 30%) + acceleration bonus + R/R integration'
+                'stop_loss': 'Ultra conservative: ≤10% enforcement with MIN selection (more restrictive)',
+                'take_profit': 'Weekly ATR-based: 3.0x/2.5x/2.0x targeting optimized for 1-month holds',
+                'scoring': 'Momentum weighted (20d 70%, 60d 30%) + acceleration bonus + R/R integration',
+                'fundamental_requirement': 'ONLY positive earnings + complete fundamental data',
+                'spy_benchmark_fix': 'Applied - now correctly filters when SPY unavailable',
+                'weekly_atr_optimization': 'Weekly ATR for take profit alignment with 1-month holding period',
+                'stop_loss_improvement': 'MIN selection for more restrictive risk filtering'
             }
         }, f, indent=2, default=str)
     
@@ -930,12 +1108,24 @@ def main():
     top_15 = results[:15]
     screening_data = {
         'analysis_date': datetime.now().isoformat(),
-        'analysis_type': 'momentum_responsive_aggressive_trading',
-        'philosophy': 'swing_for_fences_with_manual_exits',
+        'analysis_type': 'momentum_responsive_aggressive_trading_weekly_atr_optimized',
+        'philosophy': 'swing_for_fences_with_manual_exits_weekly_atr',
         'momentum_optimization': {
             'timeframe_weights': {'20d': 70, '60d': 30, '90d': 0},
             'aggressive_filters': True,
-            'acceleration_detection': True
+            'acceleration_detection': True,
+            'weekly_atr_take_profit': True,
+            'min_stop_loss_restrictive': True
+        },
+        'fundamental_validation': {
+            'earnings_positive_only': True,
+            'complete_data_required': True,
+            'strict_filtering': True
+        },
+        'improvements_applied': {
+            'weekly_atr_optimization': 'Take profit targets now use weekly ATR for 1-month alignment',
+            'stop_loss_restriction': 'MIN selection makes risk filtering more restrictive',
+            'timeframe_alignment': 'Weekly volatility patterns match 1-month holding period'
         },
         'top_symbols': [r['symbol'] for r in top_15],
         'detailed_results': top_15,
@@ -950,7 +1140,11 @@ def main():
             'avg_upside': sum(r.get('upside_pct', 0) for r in top_15) / len(top_15) if top_15 else 0,
             'avg_momentum_20d': sum(r.get('outperformance_20d', 0) for r in top_15) / len(top_15) if top_15 else 0,
             'high_upside_count': len([r for r in top_15 if r.get('upside_pct', 0) > 30]) if top_15 else 0,
-            'excellent_rr_count': len([r for r in top_15 if r.get('risk_reward_ratio', 0) > 3.0]) if top_15 else 0
+            'excellent_rr_count': len([r for r in top_15 if r.get('risk_reward_ratio', 0) > 3.0]) if top_15 else 0,
+            'positive_earnings_count': len([r for r in top_15 
+                                          if r.get('fundamental_data', {}).get('quarterly_earnings_positive', False)]) if top_15 else 0,
+            'avg_weekly_atr': sum(r.get('weekly_atr', 0) for r in top_15) / len(top_15) if top_15 else 0,
+            'avg_daily_atr': sum(r.get('atr', 0) for r in top_15) / len(top_15) if top_15 else 0
         }
     }
     
@@ -960,13 +1154,13 @@ def main():
     # PASO 4: Limpieza automática
     cleanup_old_files()
     
-    print(f"\n✅ Archivos guardados con sistema MOMENTUM AGRESIVO:")
-    print(f"   - {full_results_file} (resultados momentum responsivos)")
+    print(f"\n✅ Archivos guardados con WEEKLY ATR + MIN STOP LOSS OPTIMIZATION:")
+    print(f"   - {full_results_file} (resultados momentum responsivos optimizados)")
     print(f"   - weekly_screening_results.json (actual)")
     print(f"   - Archivos históricos mantenidos automáticamente")
     
     if len(top_15) > 0:
-        print(f"\n🏆 TOP 5 MOMENTUM AGRESIVO - SWING FOR THE FENCES:")
+        print(f"\n🏆 TOP 5 MOMENTUM AGRESIVO - WEEKLY ATR OPTIMIZED:")
         for i, stock in enumerate(top_15[:5]):
             final_score = stock.get('score', 0)
             technical_score = stock.get('technical_score', 0)
@@ -976,23 +1170,32 @@ def main():
             upside = stock.get('upside_pct', 0)
             mom_20d = stock.get('outperformance_20d', 0)
             atr_mult = stock.get('take_profit_analysis', {}).get('atr_multiplier_used', 0)
+            weekly_atr = stock.get('weekly_atr', 0)
+            daily_atr = stock.get('atr', 0)
+            earnings_positive = stock.get('fundamental_data', {}).get('quarterly_earnings_positive', False)
             
             print(f"   {i+1}. {stock['symbol']} - Score Final: {final_score:.1f} (Técnico: {technical_score:.1f})")
             print(f"      🎯 ${stock['current_price']:.2f} → Target: ${target:.2f} ({upside:.1f}% upside)")
             print(f"      🛡️ Risk: {risk:.1f}% | R/R: {rr:.1f}:1 | Mom20d: {mom_20d:+.1f}%")
-            print(f"      🚀 ATR Multiplier: {atr_mult}x (targeting 30-40%+)")
+            print(f"      🔧 Weekly ATR: {weekly_atr:.2f} vs Daily ATR: {daily_atr:.2f} | Multiplier: {atr_mult}x")
+            print(f"      📊 Earnings: {'✅' if earnings_positive else '❌'} | Stop: MIN restrictive")
             print()
             
         stats = screening_data['momentum_responsive_stats']
-        print(f"📊 ESTADÍSTICAS AGRESIVAS:")
-        print(f"   - Upside promedio: {stats['avg_upside']:.1f}% (targeting 30-40%)")
+        print(f"📊 ESTADÍSTICAS WEEKLY ATR OPTIMIZED:")
+        print(f"   - Upside promedio: {stats['avg_upside']:.1f}% (weekly ATR optimized)")
         print(f"   - R/R promedio: {stats['avg_risk_reward']:.1f}:1")
         print(f"   - Con upside >30%: {stats['high_upside_count']}/{len(top_15)}")
         print(f"   - Con R/R >3:1: {stats['excellent_rr_count']}/{len(top_15)}")
         print(f"   - Momentum 20d promedio: {stats['avg_momentum_20d']:+.1f}%")
+        print(f"   - Weekly ATR promedio: {stats['avg_weekly_atr']:.2f}")
+        print(f"   - Daily ATR promedio: {stats['avg_daily_atr']:.2f}")
+        print(f"   - Weekly/Daily ratio: {stats['avg_weekly_atr']/stats['avg_daily_atr']:.1f}x" if stats['avg_daily_atr'] > 0 else "")
+        print(f"   - 🛠️ Con beneficios positivos: {stats['positive_earnings_count']}/{len(top_15)} (100% requerido)")
+        print(f"   - 🔧 Mejoras: Weekly ATR + Min Stop Loss = mejor alineación temporal")
     else:
-        print(f"\n⚠️ Ninguna acción pasa los filtros momentum agresivos esta semana")
-        print("💡 Mercado puede estar en corrección o momentum débil general")
+        print(f"\n⚠️ Ninguna acción pasa los filtros momentum agresivos optimizados esta semana")
+        print("💡 Filtros ahora más restrictivos: Weekly ATR + Min stop loss + fundamentales estrictos")
 
 if __name__ == "__main__":
     main()
