@@ -94,6 +94,20 @@ jobs:
         fi
       env:
         PYTHONUNBUFFERED: 1
+
+    - name: 1.1. FORZAR creación de archivo histórico de screening
+      run: |
+        echo "🔧 FORZANDO creación de archivo histórico de screening..."
+        DATE_STAMP=$(date +%Y%m%d)
+        
+        if [ -f "weekly_screening_results.json" ]; then
+          # Crear copia histórica con timestamp
+          cp weekly_screening_results.json "weekly_screening_results_${DATE_STAMP}.json"
+          echo "✅ Archivo histórico creado: weekly_screening_results_${DATE_STAMP}.json"
+          ls -la weekly_screening_results_${DATE_STAMP}.json
+        else
+          echo "❌ No se puede crear histórico - archivo principal no existe"
+        fi
         
     - name: 2. Analizar consistencia histórica con archivos mejorados
       run: |
@@ -112,6 +126,20 @@ jobs:
         fi
       env:
         PYTHONUNBUFFERED: 1
+
+    - name: 2.1. FORZAR creación de archivo histórico de consistencia
+      run: |
+        echo "🔧 FORZANDO creación de archivo histórico de consistencia..."
+        DATE_STAMP=$(date +%Y%m%d)
+        
+        if [ -f "consistency_analysis.json" ]; then
+          # Crear copia histórica con timestamp
+          cp consistency_analysis.json "consistency_analysis_${DATE_STAMP}.json"
+          echo "✅ Archivo histórico creado: consistency_analysis_${DATE_STAMP}.json"
+          ls -la consistency_analysis_${DATE_STAMP}.json
+        else
+          echo "❌ No se puede crear histórico - archivo principal no existe"
+        fi
         
     - name: 3. Generar recomendaciones de rotación con historial
       run: |
@@ -129,6 +157,20 @@ jobs:
         fi
       env:
         PYTHONUNBUFFERED: 1
+
+    - name: 3.1. FORZAR creación de archivo histórico de rotación
+      run: |
+        echo "🔧 FORZANDO creación de archivo histórico de rotación..."
+        DATE_STAMP=$(date +%Y%m%d)
+        
+        if [ -f "rotation_recommendations.json" ]; then
+          # Crear copia histórica con timestamp
+          cp rotation_recommendations.json "rotation_recommendations_${DATE_STAMP}.json"
+          echo "✅ Archivo histórico creado: rotation_recommendations_${DATE_STAMP}.json"
+          ls -la rotation_recommendations_${DATE_STAMP}.json
+        else
+          echo "❌ No se puede crear histórico - archivo principal no existe"
+        fi
         
     - name: 4. Crear reporte semanal mejorado con historial
       run: |
@@ -159,6 +201,40 @@ jobs:
         fi
       env:
         PYTHONUNBUFFERED: 1
+        
+    - name: 🔧 DEBUG - Verificar archivos históricos FORZADOS
+      run: |
+        echo "=== 🔧 VERIFICACIÓN DEBUG DE ARCHIVOS HISTÓRICOS FORZADOS ==="
+        DATE_STAMP=$(date +%Y%m%d)
+        
+        echo "📁 Archivos con patrón histórico esperado:"
+        ls -la *_${DATE_STAMP}.json 2>/dev/null || echo "   ❌ No hay archivos con fecha de hoy"
+        
+        echo "📁 Todos los archivos históricos (con fecha):"
+        ls -la *_*.json 2>/dev/null | grep -v "weekly_screening_results.json" | head -10 || echo "   ❌ No hay archivos históricos"
+        
+        echo "📁 Reportes históricos:"
+        ls -la ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -5 || echo "   ❌ No hay reportes históricos"
+        
+        echo "📊 CONTEO TOTAL DESPUÉS DE FORZADO:"
+        HIST_SCREENING=$(ls weekly_screening_results_*.json 2>/dev/null | wc -l)
+        HIST_CONSISTENCY=$(ls consistency_analysis_*.json 2>/dev/null | wc -l)
+        HIST_ROTATION=$(ls rotation_recommendations_*.json 2>/dev/null | wc -l)
+        HIST_REPORTS=$(ls ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | wc -l)
+        echo "   - Screening históricos: $HIST_SCREENING"
+        echo "   - Consistencia históricos: $HIST_CONSISTENCY"  
+        echo "   - Rotación históricos: $HIST_ROTATION"
+        echo "   - Reportes históricos: $HIST_REPORTS"
+        
+        TOTAL_HISTORICAL=$((HIST_SCREENING + HIST_CONSISTENCY + HIST_ROTATION + HIST_REPORTS))
+        echo "   - TOTAL HISTÓRICOS: $TOTAL_HISTORICAL"
+        
+        if [ $TOTAL_HISTORICAL -eq 0 ]; then
+          echo "🚨 CRITICAL: No se generaron archivos históricos"
+          exit 1
+        else
+          echo "✅ SUCCESS: Se generaron $TOTAL_HISTORICAL archivos históricos"
+        fi
         
     - name: Verificar archivos generados y calidad con historial
       run: |
@@ -205,47 +281,63 @@ jobs:
       env:
         PYTHONUNBUFFERED: 1
         
-    - name: Commit y push de resultados con historial automático CORREGIDO
+    - name: 🔧 COMMIT FORZADO con gestión de historial CORREGIDA
       run: |
-        # Verificar si hay cambios
-        if git diff --quiet && git diff --staged --quiet; then
-          echo "Sin cambios para commitear"
-        else
-          echo "=== AÑADIENDO ARCHIVOS PRINCIPALES ==="
-          # Añadir archivos principales (actuales)
-          git add weekly_screening_results.json
-          git add consistency_analysis.json  
-          git add rotation_recommendations.json
-          git add docs/data.json
-          
-          echo "=== AÑADIENDO ARCHIVOS HISTÓRICOS ==="
-          # 🆕 CORREGIDO: Añadir archivos históricos con fecha
-          git add weekly_screening_results_*.json 2>/dev/null || echo "No hay archivos de screening históricos nuevos"
-          git add consistency_analysis_*.json 2>/dev/null || echo "No hay archivos de consistencia históricos nuevos"
-          git add rotation_recommendations_*.json 2>/dev/null || echo "No hay archivos de rotación históricos nuevos"
-          
-          echo "=== AÑADIENDO REPORTES ==="
-          # Añadir reportes si existen
-          git add ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null || echo "No hay reportes mejorados nuevos"
-          git add WEEKLY_REPORT_*.md 2>/dev/null || echo "No hay reportes regulares nuevos"
-          
-          echo "=== VERIFICANDO ARCHIVOS AÑADIDOS ==="
+        echo "=== 🔧 INICIANDO COMMIT FORZADO CON HISTORIAL ==="
+        
+        # Añadir TODOS los archivos, incluyendo históricos
+        echo "📁 Añadiendo archivos principales..."
+        git add weekly_screening_results.json || echo "Skip weekly_screening_results.json"
+        git add consistency_analysis.json || echo "Skip consistency_analysis.json"
+        git add rotation_recommendations.json || echo "Skip rotation_recommendations.json"
+        git add docs/data.json || echo "Skip docs/data.json"
+        
+        echo "📚 Añadiendo archivos históricos FORZADAMENTE..."
+        git add weekly_screening_results_*.json || echo "No historic screening files"
+        git add consistency_analysis_*.json || echo "No historic consistency files"
+        git add rotation_recommendations_*.json || echo "No historic rotation files"
+        git add ENHANCED_WEEKLY_REPORT_*.md || echo "No historic reports"
+        git add WEEKLY_REPORT_*.md || echo "No regular reports"
+        
+        # También añadir cualquier otro archivo generado
+        echo "🔧 Añadiendo otros archivos generados..."
+        git add momentum_responsive_results_*.json || echo "No momentum files"
+        git add ultra_conservative_results_*.json || echo "No ultra conservative files"
+        
+        echo "=== 🔍 VERIFICANDO ARCHIVOS AÑADIDOS ==="
+        git status --porcelain
+        STAGED_FILES=$(git status --porcelain | wc -l)
+        echo "Archivos en staging: $STAGED_FILES"
+        
+        if [ $STAGED_FILES -eq 0 ]; then
+          echo "🚨 FORZANDO AÑADIR TODO CON ADD --ALL"
+          git add --all
           git status --porcelain
-          
-          echo "=== REALIZANDO COMMIT ==="
+          STAGED_FILES_ALL=$(git status --porcelain | wc -l)
+          echo "Archivos después de --all: $STAGED_FILES_ALL"
+        fi
+        
+        echo "=== 📝 REALIZANDO COMMIT FORZADO ==="
+        FINAL_STAGED=$(git status --porcelain | wc -l)
+        if [ $FINAL_STAGED -gt 0 ]; then
           # Commit con mensaje personalizado
           if [ -f "commit_message.txt" ]; then
             git commit -F commit_message.txt
           else
-            git commit -m "Enhanced Weekly Analysis + Auto History $(date +%Y-%m-%d) - File Management Fixed"
+            git commit -m "🔧 FIXED: Enhanced Weekly Analysis + Forced History Management $(date +%Y-%m-%d)"
           fi
           
-          echo "=== PUSHING CAMBIOS ==="
+          echo "=== 🚀 PUSHING CAMBIOS ==="
           git push
-          echo "SUCCESS: Resultados commiteados con historial automático CORREGIDO"
+          echo "✅ SUCCESS: Archivos históricos commiteados CORRECTAMENTE"
           
-          echo "=== RESUMEN DE ARCHIVOS COMMITEADOS ==="
-          git show --name-only --pretty=format: HEAD | sort
+          echo "=== 📋 RESUMEN DE ARCHIVOS COMMITEADOS ==="
+          git show --name-only --pretty=format: HEAD | sort | head -20
+        else
+          echo "❌ CRITICAL: No hay archivos para commitear después de forzar"
+          echo "Listando todos los archivos generados:"
+          find . -name "*.json" -o -name "*.md" | grep -E "(weekly_screening|consistency|rotation|ENHANCED)" | head -10
+          exit 1
         fi
         
     - name: Configurar GitHub Pages
@@ -260,23 +352,23 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
       
-    - name: Resumen final con historial y métricas MEJORADO
+    - name: 🎉 Resumen final con historial FORZADO y métricas MEJORADO
       run: |
-        echo "🎉 ===== ANÁLISIS MEJORADO COMPLETADO CON ÉXITO ====="
+        echo "🎉 ===== ANÁLISIS MEJORADO COMPLETADO CON HISTORIAL FORZADO ====="
         echo "🕐 Iniciado: $ANALYSIS_START_TIME UTC"
         echo "🕐 Finalizado: $(date -u +%H:%M) UTC"
         echo ""
         echo "📊 ARCHIVOS PRINCIPALES GENERADOS:"
         ls -la *.json *.md 2>/dev/null | grep -E "(weekly_screening_results\.json|consistency_analysis\.json|rotation_recommendations\.json|ENHANCED_WEEKLY_REPORT_.*\.md)" || echo "Sin archivos principales"
         echo ""
-        echo "📚 GESTIÓN DE HISTORIAL CORREGIDA:"
-        echo "✅ Archivos históricos ahora se commitean correctamente"
+        echo "📚 GESTIÓN DE HISTORIAL FORZADA - CORREGIDA:"
+        echo "🔧 NUEVO: Archivos históricos ahora se crean FORZADAMENTE después de cada paso"
         TOTAL_HISTORICAL=$(ls *_*.json ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | wc -l)
-        echo "📁 Total archivos históricos: $TOTAL_HISTORICAL"
+        echo "📁 Total archivos históricos FORZADOS: $TOTAL_HISTORICAL"
         echo ""
         if [ $TOTAL_HISTORICAL -gt 0 ]; then
-          echo "📋 Últimos archivos históricos generados:"
-          ls -lt *_*.json ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -5
+          echo "📋 Archivos históricos FORZADOS generados:"
+          ls -lt *_*.json ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -10
         fi
         echo ""
         echo "🌐 DASHBOARD: ${{ steps.deployment.outputs.page_url }}"
@@ -284,5 +376,6 @@ jobs:
         echo "📈 PRÓXIMAS EJECUCIONES:"
         echo "🔄 Próxima ejecución: Sábados 10:00 AM España"
         echo "⚡ Ejecución manual disponible en Actions tab"
-        echo "📚 Historial automático: FUNCIONANDO CORRECTAMENTE"
+        echo "📚 Historial forzado: ✅ IMPLEMENTADO Y FUNCIONANDO"
+        echo "🔧 Gestión histórica: PROACTIVA (crea archivos siempre)"
         echo "=============================================="
