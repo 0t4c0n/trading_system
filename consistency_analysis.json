@@ -1,0 +1,260 @@
+{
+  "analysis_date": "2025-08-01T13:06:55.224975",
+  "weeks_analyzed": 5,
+  "data_sources": {
+    "historical_files": [
+      "N/A - Sin datos",
+      "N/A - Sin datos",
+      "weekly_screening_results.json",
+      "weekly_screening_results_20250801.json"
+    ],
+    "current_week_file": "weekly_screening_results.json"
+  },
+  "consistency_analysis": {
+    "consistent_winners": [],
+    "strong_candidates": [
+      {
+        "symbol": "AUPH",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 9.24,
+        "score": 152.7,
+        "risk_pct": 7.83,
+        "outperformance_60d": 0.41
+      },
+      {
+        "symbol": "SOFI",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 22.58,
+        "score": 150.3,
+        "risk_pct": 8.57,
+        "outperformance_60d": 63.93
+      },
+      {
+        "symbol": "TTMI",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 47.25,
+        "score": 132.9,
+        "risk_pct": 5.85,
+        "outperformance_60d": 74.57
+      },
+      {
+        "symbol": "TPR",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 108.03,
+        "score": 128.9,
+        "risk_pct": 7.31,
+        "outperformance_60d": 34.57
+      },
+      {
+        "symbol": "CALM",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 111.14,
+        "score": 126.0,
+        "risk_pct": 6.73,
+        "outperformance_60d": 1.28
+      },
+      {
+        "symbol": "LVS",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 52.4,
+        "score": 121.3,
+        "risk_pct": 6.09,
+        "outperformance_60d": 21.57
+      },
+      {
+        "symbol": "PLTR",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 158.35,
+        "score": 117.8,
+        "risk_pct": 7.3,
+        "outperformance_60d": 32.01
+      },
+      {
+        "symbol": "GOOGL",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 191.9,
+        "score": 114.7,
+        "risk_pct": 8.86,
+        "outperformance_60d": 4.26
+      },
+      {
+        "symbol": "GOOG",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 192.86,
+        "score": 114.4,
+        "risk_pct": 8.77,
+        "outperformance_60d": 3.44
+      },
+      {
+        "symbol": "NVDA",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 177.87,
+        "score": 113.4,
+        "risk_pct": 6.54,
+        "outperformance_60d": 43.22
+      },
+      {
+        "symbol": "META",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 773.44,
+        "score": 113.0,
+        "risk_pct": 8.83,
+        "outperformance_60d": 18.35
+      },
+      {
+        "symbol": "AVGO",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 293.7,
+        "score": 113.0,
+        "risk_pct": 5.08,
+        "outperformance_60d": 33.68
+      },
+      {
+        "symbol": "VNT",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 41.47,
+        "score": 112.7,
+        "risk_pct": 7.85,
+        "outperformance_60d": 10.69
+      },
+      {
+        "symbol": "CBRE",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 155.74,
+        "score": 107.9,
+        "risk_pct": 8.95,
+        "outperformance_60d": 12.27
+      },
+      {
+        "symbol": "APH",
+        "frequency": 3,
+        "weeks_appeared": [
+          3,
+          4,
+          5
+        ],
+        "appeared_this_week": true,
+        "consistency_score": 90.0,
+        "current_price": 106.51,
+        "score": 106.5,
+        "risk_pct": 6.01,
+        "outperformance_60d": 20.41
+      }
+    ],
+    "emerging_opportunities": [],
+    "volatile_signals": [],
+    "disappeared_stocks": []
+  },
+  "trend_changes": {
+    "newly_emerged": [],
+    "gaining_momentum": [],
+    "losing_momentum": [],
+    "disappeared_this_week": []
+  },
+  "summary_stats": {
+    "total_unique_symbols": 15,
+    "consistent_winners_count": 0,
+    "strong_candidates_count": 15,
+    "emerging_count": 0,
+    "newly_emerged_count": 0,
+    "disappeared_count": 0
+  }
+}

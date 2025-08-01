@@ -1,0 +1,1757 @@
+{
+  "analysis_date": "2025-08-01T13:06:55.086457",
+  "analysis_type": "momentum_responsive_aggressive_trading_weekly_atr_optimized",
+  "philosophy": "swing_for_fences_with_manual_exits_weekly_atr",
+  "momentum_optimization": {
+    "timeframe_weights": {
+      "20d": 70,
+      "60d": 30,
+      "90d": 0
+    },
+    "aggressive_filters": true,
+    "acceleration_detection": true,
+    "weekly_atr_take_profit": true,
+    "min_stop_loss_restrictive": true
+  },
+  "fundamental_validation": {
+    "earnings_positive_only": true,
+    "complete_data_required": true,
+    "strict_filtering": true
+  },
+  "improvements_applied": {
+    "weekly_atr_optimization": "Take profit targets now use weekly ATR for 1-month alignment",
+    "stop_loss_restriction": "MIN selection makes risk filtering more restrictive",
+    "timeframe_alignment": "Weekly volatility patterns match 1-month holding period"
+  },
+  "top_symbols": [
+    "AUPH",
+    "SOFI",
+    "TTMI",
+    "TPR",
+    "CALM",
+    "LVS",
+    "PLTR",
+    "GOOGL",
+    "GOOG",
+    "NVDA",
+    "META",
+    "AVGO",
+    "VNT",
+    "CBRE",
+    "APH"
+  ],
+  "detailed_results": [
+    {
+      "symbol": "AUPH",
+      "score": 152.7,
+      "technical_score": 113.1,
+      "rr_bonus": 39.6,
+      "current_price": 9.24,
+      "stop_loss": 8.52,
+      "take_profit": 11.64,
+      "risk_pct": 7.83,
+      "upside_pct": 25.87,
+      "risk_reward_ratio": 3.3,
+      "outperformance_20d": 20.73,
+      "outperformance_60d": 0.41,
+      "outperformance_90d": -2.05,
+      "volume_surge": 9.5,
+      "fundamental_score": 75,
+      "atr": 0.41,
+      "weekly_atr": 0.8,
+      "volatility_rank": "HIGH",
+      "support_resistance": {
+        "resistance": 9.138333002726236,
+        "support": 8.12833340962728,
+        "current": 9.244999885559082,
+        "distance_to_resistance": -1.1537791687749155,
+        "distance_to_support": 13.737951184546793
+      },
+      "stop_analysis": {
+        "stop_price": 8.520719062827883,
+        "risk_percentage": 7.834297800939333,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "8.51 (7.9%)",
+          "ma21": "8.52 (7.8%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "8.52 (7.8%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 11.636642592293875,
+        "upside_percentage": 25.869580706762328,
+        "momentum_strength": "FUERTE",
+        "atr_multiplier_used": 3.0,
+        "weekly_atr_used": 0.7972142355782645,
+        "daily_atr_used": 0.40690007209777834,
+        "confidence_level": "Alta",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "113.1 (FUERTE)",
+        "atr_comparison": "Weekly: 0.80 vs Daily: 0.41",
+        "target_range": "25.9% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 47.00360130800776,
+        "momentum_20d_score": 29.01806679752296,
+        "momentum_60d_score": 0.12193922565516963,
+        "momentum_90d_score": -0.0,
+        "acceleration_bonus": 15,
+        "exceptional_bonus": 2.8635952848296284,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 152.71542005578905,
+        "technical_score": 113.09030286354665,
+        "rr_bonus": 39.62511719224239,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 0,
+        "volume_score": 2.8381482569478917,
+        "risk_bonus": 3.2485532985910006
+      },
+      "company_info": {
+        "name": "Aurinia Pharmaceuticals Inc.",
+        "sector": "Healthcare",
+        "market_cap": 1249036416
+      },
+      "ma_levels": {
+        "ma_21": 8.65,
+        "ma_50": 8.33,
+        "ma_200": 8.19,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 28.796,
+        "revenue_growth": 0.224,
+        "roe": 0.17327,
+        "fundamental_score": 75,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:57:17.726098",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "SOFI",
+      "score": 150.3,
+      "technical_score": 112.4,
+      "rr_bonus": 37.9,
+      "current_price": 22.58,
+      "stop_loss": 20.64,
+      "take_profit": 28.69,
+      "risk_pct": 8.57,
+      "upside_pct": 27.05,
+      "risk_reward_ratio": 3.16,
+      "outperformance_20d": 20.52,
+      "outperformance_60d": 63.93,
+      "outperformance_90d": 54.15,
+      "volume_surge": 55.3,
+      "fundamental_score": 60,
+      "atr": 1.16,
+      "weekly_atr": 2.04,
+      "volatility_rank": "HIGH",
+      "support_resistance": {
+        "resistance": 22.739999771118164,
+        "support": 19.81999969482422,
+        "current": 22.579999923706055,
+        "distance_to_resistance": 0.7085910006763507,
+        "distance_to_support": 13.925329320779856
+      },
+      "stop_analysis": {
+        "stop_price": 20.644192817778812,
+        "risk_percentage": 8.573105015358736,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "20.48 (9.3%)",
+          "ma21": "20.64 (8.6%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "20.64 (8.6%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 28.687786306653706,
+        "upside_percentage": 27.049541202767102,
+        "momentum_strength": "FUERTE",
+        "atr_multiplier_used": 3.0,
+        "weekly_atr_used": 2.035928794315883,
+        "daily_atr_used": 1.1648999214172364,
+        "confidence_level": "Alta",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "112.4 (FUERTE)",
+        "atr_comparison": "Weekly: 2.04 vs Daily: 1.16",
+        "target_range": "27.0% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 45.65912066988652,
+        "momentum_20d_score": 28.722621609931846,
+        "momentum_60d_score": 19.178419913550446,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -5,
+        "exceptional_bonus": 2.7580791464042314,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 150.25450522172304,
+        "technical_score": 112.39255277255864,
+        "rr_bonus": 37.86195244916439,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 0,
+        "volume_score": 16.59308962571023,
+        "risk_bonus": 2.1403424769618953
+      },
+      "company_info": {
+        "name": "SoFi Technologies, Inc.",
+        "sector": "Financial Services",
+        "market_cap": 25141475328
+      },
+      "ma_levels": {
+        "ma_21": 20.96,
+        "ma_50": 17.28,
+        "ma_200": 14.53,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 4.589,
+        "revenue_growth": 0.439,
+        "roe": 0.08801,
+        "fundamental_score": 60,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:30:48.035782",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "TTMI",
+      "score": 132.9,
+      "technical_score": 90.7,
+      "rr_bonus": 42.2,
+      "current_price": 47.25,
+      "stop_loss": 44.48,
+      "take_profit": 56.99,
+      "risk_pct": 5.85,
+      "upside_pct": 20.6,
+      "risk_reward_ratio": 3.52,
+      "outperformance_20d": 6.26,
+      "outperformance_60d": 74.57,
+      "outperformance_90d": 91.32,
+      "volume_surge": 51.2,
+      "fundamental_score": 60,
+      "atr": 2.37,
+      "weekly_atr": 3.89,
+      "volatility_rank": "HIGH",
+      "support_resistance": {
+        "resistance": 48.59000015258789,
+        "support": 43.5,
+        "current": 47.25,
+        "distance_to_resistance": 2.83597915891618,
+        "distance_to_support": 8.62068965517242
+      },
+      "stop_analysis": {
+        "stop_price": 44.48447661990211,
+        "risk_percentage": 5.852959534598707,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "42.99 (9.0%)",
+          "support": "42.85 (9.3%)",
+          "ma21": "44.48 (5.9%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "44.48 (5.9%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 56.9857143674578,
+        "upside_percentage": 20.604686491974178,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 3.8942857469831194,
+        "daily_atr_used": 2.365500259399414,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "90.7 (MODERADO)",
+        "atr_comparison": "Weekly: 3.89 vs Daily: 2.37",
+        "target_range": "20.6% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 21.135887260125212,
+        "momentum_20d_score": 8.763664913427508,
+        "momentum_60d_score": 22.372222346697704,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -10,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 132.9494435100629,
+        "technical_score": 90.70479164768801,
+        "rr_bonus": 42.24465186237489,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 0,
+        "volume_score": 15.348343689460865,
+        "risk_bonus": 6.22056069810194
+      },
+      "company_info": {
+        "name": "TTM Technologies, Inc.",
+        "sector": "Technology",
+        "market_cap": 4802017280
+      },
+      "ma_levels": {
+        "ma_21": 45.16,
+        "ma_50": 38.93,
+        "ma_200": 27.28,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.576,
+        "revenue_growth": 0.207,
+        "roe": 0.058870003,
+        "fundamental_score": 60,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T13:05:01.061069",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "TPR",
+      "score": 128.9,
+      "technical_score": 101.6,
+      "rr_bonus": 27.2,
+      "current_price": 108.03,
+      "stop_loss": 100.13,
+      "take_profit": 125.96,
+      "risk_pct": 7.31,
+      "upside_pct": 16.6,
+      "risk_reward_ratio": 2.27,
+      "outperformance_20d": 18.69,
+      "outperformance_60d": 34.57,
+      "outperformance_90d": 32.87,
+      "volume_surge": -2.7,
+      "fundamental_score": 75,
+      "atr": 2.81,
+      "weekly_atr": 5.98,
+      "volatility_rank": "MEDIUM",
+      "support_resistance": {
+        "resistance": 110.44000244140625,
+        "support": 77.44632026414156,
+        "current": 108.02999877929688,
+        "distance_to_resistance": 2.230865212757216,
+        "distance_to_support": 39.49016352338675
+      },
+      "stop_analysis": {
+        "stop_price": 100.13181635175432,
+        "risk_percentage": 7.311101098573906,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "103.81 (3.9%)",
+          "ma21": "100.13 (7.3%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "100.13 (7.3%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 125.96136488785008,
+        "upside_percentage": 16.59850625860566,
+        "momentum_strength": "FUERTE",
+        "atr_multiplier_used": 3.0,
+        "weekly_atr_used": 5.977122036184403,
+        "daily_atr_used": 2.814500427246094,
+        "confidence_level": "Alta",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "101.6 (FUERTE)",
+        "atr_comparison": "Weekly: 5.98 vs Daily: 2.81",
+        "target_range": "16.6% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 33.37968790655189,
+        "momentum_20d_score": 26.165124541965298,
+        "momentum_60d_score": 10.369876028170413,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -5,
+        "exceptional_bonus": 1.8446873364161789,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 128.86158122806268,
+        "technical_score": 101.61779504350011,
+        "rr_bonus": 27.24378618456256,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 5,
+        "volume_score": -0.7952412151909072,
+        "risk_bonus": 4.033348352139141
+      },
+      "company_info": {
+        "name": "Tapestry, Inc.",
+        "sector": "Consumer Cyclical",
+        "market_cap": 22436751360
+      },
+      "ma_levels": {
+        "ma_21": 101.66,
+        "ma_50": 90.1,
+        "ma_200": 72.5,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.458,
+        "revenue_growth": 0.069,
+        "roe": 0.40273,
+        "fundamental_score": 75,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:45:54.105170",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "CALM",
+      "score": 126.0,
+      "technical_score": 95.9,
+      "rr_bonus": 30.1,
+      "current_price": 111.14,
+      "stop_loss": 103.67,
+      "take_profit": 129.91,
+      "risk_pct": 6.73,
+      "upside_pct": 16.89,
+      "risk_reward_ratio": 2.51,
+      "outperformance_20d": 6.93,
+      "outperformance_60d": 1.28,
+      "outperformance_90d": 13.23,
+      "volume_surge": 16.3,
+      "fundamental_score": 85,
+      "atr": 4.54,
+      "weekly_atr": 7.51,
+      "volatility_rank": "HIGH",
+      "support_resistance": {
+        "resistance": 111.46333312988281,
+        "support": 99.3499984741211,
+        "current": 111.13999938964844,
+        "distance_to_resistance": 0.2909247273799265,
+        "distance_to_support": 11.8671374902924
+      },
+      "stop_analysis": {
+        "stop_price": 103.66515250978016,
+        "risk_percentage": 6.725613569298333,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "102.96 (7.4%)",
+          "ma21": "103.67 (6.7%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "103.67 (6.7%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 129.91404664468743,
+        "upside_percentage": 16.892250637161332,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 7.509618902015594,
+        "daily_atr_used": 4.543500518798828,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "95.9 (MODERADO)",
+        "atr_comparison": "Weekly: 7.51 vs Daily: 4.54",
+        "target_range": "16.9% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 18.0868033247123,
+        "momentum_20d_score": 9.701944395065183,
+        "momentum_60d_score": 0.38485892964711804,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": 8,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 126.02973622140118,
+        "technical_score": 95.89018009654878,
+        "rr_bonus": 30.139556124852405,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 0,
+        "volume_score": 4.891797125783987,
+        "risk_bonus": 4.9115796460525
+      },
+      "company_info": {
+        "name": "Cal-Maine Foods, Inc.",
+        "sector": "Consumer Defensive",
+        "market_cap": 5390011904
+      },
+      "ma_levels": {
+        "ma_21": 105.24,
+        "ma_50": 100.82,
+        "ma_200": 94.78,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 2.024,
+        "revenue_growth": 0.722,
+        "roe": 0.55842996,
+        "fundamental_score": 85,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:31:28.034489",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "LVS",
+      "score": 121.3,
+      "technical_score": 92.3,
+      "rr_bonus": 29.0,
+      "current_price": 52.4,
+      "stop_loss": 49.21,
+      "take_profit": 60.11,
+      "risk_pct": 6.09,
+      "upside_pct": 14.71,
+      "risk_reward_ratio": 2.42,
+      "outperformance_20d": 7.59,
+      "outperformance_60d": 21.57,
+      "outperformance_90d": 16.67,
+      "volume_surge": 4.3,
+      "fundamental_score": 85,
+      "atr": 1.13,
+      "weekly_atr": 3.08,
+      "volatility_rank": "MEDIUM",
+      "support_resistance": {
+        "resistance": 46.829999923706055,
+        "support": 44.0,
+        "current": 52.400001525878906,
+        "distance_to_resistance": -10.62977374041102,
+        "distance_to_support": 19.0909125588157
+      },
+      "stop_analysis": {
+        "stop_price": 49.2101312028794,
+        "risk_percentage": 6.08753860708213,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "50.70 (3.2%)",
+          "ma21": "49.21 (6.1%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "49.21 (6.1%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 60.110137979650275,
+        "upside_percentage": 14.714000437506748,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 3.0840545815085463,
+        "daily_atr_used": 1.133500099182129,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "92.3 (MODERADO)",
+        "atr_comparison": "Weekly: 3.08 vs Daily: 1.13",
+        "target_range": "14.7% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 12.097666279085555,
+        "momentum_20d_score": 10.627106828439098,
+        "momentum_60d_score": 6.470559450646456,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -5,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 121.27285973464038,
+        "technical_score": 92.26803255462626,
+        "rr_bonus": 29.00482718001411,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 5,
+        "volume_score": 1.3016741861639125,
+        "risk_bonus": 5.868692089376806
+      },
+      "company_info": {
+        "name": "Las Vegas Sands Corp.",
+        "sector": "Consumer Cyclical",
+        "market_cap": 35970191360
+      },
+      "ma_levels": {
+        "ma_21": 49.96,
+        "ma_50": 45.25,
+        "ma_200": 44.96,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.306,
+        "revenue_growth": 0.15,
+        "roe": 0.54145,
+        "fundamental_score": 85,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:55:55.309134",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "PLTR",
+      "score": 117.8,
+      "technical_score": 82.1,
+      "rr_bonus": 35.8,
+      "current_price": 158.35,
+      "stop_loss": 146.78,
+      "take_profit": 192.83,
+      "risk_pct": 7.3,
+      "upside_pct": 21.78,
+      "risk_reward_ratio": 2.98,
+      "outperformance_20d": 16.78,
+      "outperformance_60d": 32.01,
+      "outperformance_90d": 53.24,
+      "volume_surge": -23.2,
+      "fundamental_score": 70,
+      "atr": 4.87,
+      "weekly_atr": 13.79,
+      "volatility_rank": "MEDIUM",
+      "support_resistance": {
+        "resistance": 149.58499654134116,
+        "support": 136.78599548339844,
+        "current": 158.35000610351562,
+        "distance_to_resistance": -5.535212645615351,
+        "distance_to_support": 15.764779533102402
+      },
+      "stop_analysis": {
+        "stop_price": 146.78470206124442,
+        "risk_percentage": 7.303633467946194,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "151.05 (4.6%)",
+          "ma21": "146.78 (7.3%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "146.78 (7.3%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 192.83268410818917,
+        "upside_percentage": 21.77624040136237,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 13.79307120186942,
+        "daily_atr_used": 4.869098663330078,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "82.1 (MODERADO)",
+        "atr_comparison": "Weekly: 13.79 vs Daily: 4.87",
+        "target_range": "21.8% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 23.980850880088433,
+        "momentum_20d_score": 23.4880916476887,
+        "momentum_60d_score": 9.604155072510913,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -10,
+        "exceptional_bonus": 0.888604159888823,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 117.83441158835443,
+        "technical_score": 82.05566037319645,
+        "rr_bonus": 35.77875121515798,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 5,
+        "volume_score": -6.969740304972702,
+        "risk_bonus": 4.044549798080709
+      },
+      "company_info": {
+        "name": "Palantir Technologies Inc.",
+        "sector": "Technology",
+        "market_cap": 373691744256
+      },
+      "ma_levels": {
+        "ma_21": 149.02,
+        "ma_50": 139.28,
+        "ma_200": 96.04,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 1.028,
+        "revenue_growth": 0.393,
+        "roe": 0.12357,
+        "fundamental_score": 70,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:38:13.219758",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "GOOGL",
+      "score": 114.7,
+      "technical_score": 95.2,
+      "rr_bonus": 19.5,
+      "current_price": 191.9,
+      "stop_loss": 174.89,
+      "take_profit": 219.51,
+      "risk_pct": 8.86,
+      "upside_pct": 14.39,
+      "risk_reward_ratio": 1.62,
+      "outperformance_20d": 5.81,
+      "outperformance_60d": 4.26,
+      "outperformance_90d": 4.15,
+      "volume_surge": -6.4,
+      "fundamental_score": 70,
+      "atr": 4.08,
+      "weekly_atr": 11.04,
+      "volatility_rank": "LOW",
+      "support_resistance": {
+        "resistance": 189.58999633789062,
+        "support": 167.38500213623047,
+        "current": 191.89999389648438,
+        "distance_to_resistance": -1.2037507202005582,
+        "distance_to_support": 14.645871163714986
+      },
+      "stop_analysis": {
+        "stop_price": 174.89251667480468,
+        "risk_percentage": 8.862677312462006,
+        "methods_used": [
+          "ma50"
+        ],
+        "all_stops_calculated": {
+          "atr": "187.00 (2.6%)",
+          "ma50": "174.89 (8.9%)"
+        },
+        "stop_selection": "ma50_priority",
+        "ma21_data": "N/A",
+        "ma50_data": "174.89 (8.9%)",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 219.5070967497585,
+        "upside_percentage": 14.386192668753317,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 11.042841141309642,
+        "daily_atr_used": 4.081999969482422,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "95.2 (MODERADO)",
+        "atr_comparison": "Weekly: 11.04 vs Daily: 4.08",
+        "target_range": "14.4% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 24.41484311272229,
+        "momentum_20d_score": 8.137358040653341,
+        "momentum_60d_score": 1.2774850720689506,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": 15,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 114.67018148270884,
+        "technical_score": 95.19138225098065,
+        "rr_bonus": 19.47879923172819,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 15,
+        "volume_score": -1.9294448930486285,
+        "risk_bonus": 1.7059840313069907
+      },
+      "company_info": {
+        "name": "Alphabet Inc.",
+        "sector": "Communication Services",
+        "market_cap": 2326058237952
+      },
+      "ma_levels": {
+        "ma_21": 185.37,
+        "ma_50": 177.56,
+        "ma_200": 174.58,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.194,
+        "revenue_growth": 0.138,
+        "roe": 0.34829,
+        "fundamental_score": 70,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:44:24.899142",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "GOOG",
+      "score": 114.4,
+      "technical_score": 95.0,
+      "rr_bonus": 19.4,
+      "current_price": 192.86,
+      "stop_loss": 175.95,
+      "take_profit": 220.2,
+      "risk_pct": 8.77,
+      "upside_pct": 14.18,
+      "risk_reward_ratio": 1.62,
+      "outperformance_20d": 5.74,
+      "outperformance_60d": 3.44,
+      "outperformance_90d": 3.2,
+      "volume_surge": -6.2,
+      "fundamental_score": 70,
+      "atr": 4.06,
+      "weekly_atr": 10.94,
+      "volatility_rank": "LOW",
+      "support_resistance": {
+        "resistance": 190.2750015258789,
+        "support": 168.6050033569336,
+        "current": 192.86000061035156,
+        "distance_to_resistance": -1.3403500343730168,
+        "distance_to_support": 14.385692459001698
+      },
+      "stop_analysis": {
+        "stop_price": 175.94605786132814,
+        "risk_percentage": 8.770062581922227,
+        "methods_used": [
+          "ma50"
+        ],
+        "all_stops_calculated": {
+          "atr": "187.99 (2.5%)",
+          "ma50": "175.95 (8.8%)"
+        },
+        "stop_selection": "ma50_priority",
+        "ma21_data": "N/A",
+        "ma50_data": "175.95 (8.8%)",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 220.19833542279972,
+        "upside_percentage": 14.175222817551303,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 10.935333924979258,
+        "daily_atr_used": 4.060250091552734,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "95.0 (MODERADO)",
+        "atr_comparison": "Weekly: 10.94 vs Daily: 4.06",
+        "target_range": "14.2% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 24.06697580052729,
+        "momentum_20d_score": 8.036339375832279,
+        "momentum_60d_score": 1.0306364246950104,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": 15,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 114.43588982965073,
+        "technical_score": 95.04005630831998,
+        "rr_bonus": 19.39583352133075,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 15,
+        "volume_score": -1.8718256193239713,
+        "risk_bonus": 1.8449061271166594
+      },
+      "company_info": {
+        "name": "Alphabet Inc.",
+        "sector": "Communication Services",
+        "market_cap": 2326045917184
+      },
+      "ma_levels": {
+        "ma_21": 186.34,
+        "ma_50": 178.63,
+        "ma_200": 176.14,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.194,
+        "revenue_growth": 0.138,
+        "roe": 0.34829,
+        "fundamental_score": 70,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:43:15.470586",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "NVDA",
+      "score": 113.4,
+      "technical_score": 86.7,
+      "rr_bonus": 26.8,
+      "current_price": 177.87,
+      "stop_loss": 166.24,
+      "take_profit": 203.84,
+      "risk_pct": 6.54,
+      "upside_pct": 14.6,
+      "risk_reward_ratio": 2.23,
+      "outperformance_20d": 10.55,
+      "outperformance_60d": 43.22,
+      "outperformance_90d": 36.09,
+      "volume_surge": -7.6,
+      "fundamental_score": 70,
+      "atr": 3.91,
+      "weekly_atr": 10.39,
+      "volatility_rank": "MEDIUM",
+      "support_resistance": {
+        "resistance": 174.25,
+        "support": 152.71500396728516,
+        "current": 177.8699951171875,
+        "distance_to_resistance": -2.0351915536976906,
+        "distance_to_support": 16.471853122756098
+      },
+      "stop_analysis": {
+        "stop_price": 166.235636458624,
+        "risk_percentage": 6.5409338156772066,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "172.00 (3.3%)",
+          "ma21": "166.24 (6.5%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "166.24 (6.5%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 203.8441468657074,
+        "upside_percentage": 14.60288551276292,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 10.389660699407955,
+        "daily_atr_used": 3.9125,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "86.7 (MODERADO)",
+        "atr_comparison": "Weekly: 10.39 vs Daily: 3.91",
+        "target_range": "14.6% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 22.738301101383488,
+        "momentum_20d_score": 14.7719711642355,
+        "momentum_60d_score": 12.966329937147988,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -5,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 113.44117243829828,
+        "technical_score": 86.65071237689918,
+        "rr_bonus": 26.790460061399102,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 5,
+        "volume_score": -2.2761880009685087,
+        "risk_bonus": 5.18859927648419
+      },
+      "company_info": {
+        "name": "NVIDIA Corporation",
+        "sector": "Technology",
+        "market_cap": 4337822334976
+      },
+      "ma_levels": {
+        "ma_21": 168.77,
+        "ma_50": 153.72,
+        "ma_200": 134.55,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.262,
+        "revenue_growth": 0.692,
+        "roe": 1.15463,
+        "fundamental_score": 70,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:47:32.274550",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "META",
+      "score": 113.0,
+      "technical_score": 93.9,
+      "rr_bonus": 19.0,
+      "current_price": 773.44,
+      "stop_loss": 705.17,
+      "take_profit": 881.71,
+      "risk_pct": 8.83,
+      "upside_pct": 14.0,
+      "risk_reward_ratio": 1.59,
+      "outperformance_20d": 6.49,
+      "outperformance_60d": 18.35,
+      "outperformance_90d": 14.65,
+      "volume_surge": 48.6,
+      "fundamental_score": 85,
+      "atr": 17.51,
+      "weekly_atr": 43.31,
+      "volatility_rank": "HIGH",
+      "support_resistance": {
+        "resistance": 728.1125014700658,
+        "support": 685.1600036621094,
+        "current": 773.4400024414062,
+        "distance_to_resistance": -5.860506416562583,
+        "distance_to_support": 12.884581456513722
+      },
+      "stop_analysis": {
+        "stop_price": 705.1736939784458,
+        "risk_percentage": 8.82632243580291,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "741.91 (4.1%)",
+          "ma21": "705.17 (8.8%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "705.17 (8.8%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 881.7140195828994,
+        "upside_percentage": 13.999019548991543,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 43.309606856597256,
+        "daily_atr_used": 17.513995361328124,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "93.9 (MODERADO)",
+        "atr_comparison": "Weekly: 43.31 vs Daily: 17.51",
+        "target_range": "14.0% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 9.592763859476689,
+        "momentum_20d_score": 9.089245157523393,
+        "momentum_60d_score": 5.503518701953295,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -5,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 112.95552500511486,
+        "technical_score": 93.92288306281797,
+        "rr_bonus": 19.03264194229689,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 0,
+        "volume_score": 14.56960285704565,
+        "risk_bonus": 1.7605163462956357
+      },
+      "company_info": {
+        "name": "Meta Platforms, Inc.",
+        "sector": "Communication Services",
+        "market_cap": 1942989570048
+      },
+      "ma_levels": {
+        "ma_21": 715.91,
+        "ma_50": 696.57,
+        "ma_200": 627.52,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.362,
+        "revenue_growth": 0.216,
+        "roe": 0.40647998,
+        "fundamental_score": 85,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:54:09.169403",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "AVGO",
+      "score": 113.0,
+      "technical_score": 76.8,
+      "rr_bonus": 36.2,
+      "current_price": 293.7,
+      "stop_loss": 278.77,
+      "take_profit": 338.78,
+      "risk_pct": 5.08,
+      "upside_pct": 15.35,
+      "risk_reward_ratio": 3.02,
+      "outperformance_20d": 5.65,
+      "outperformance_60d": 33.68,
+      "outperformance_90d": 43.5,
+      "volume_surge": -12.0,
+      "fundamental_score": 75,
+      "atr": 7.72,
+      "weekly_atr": 18.03,
+      "volatility_rank": "MEDIUM",
+      "support_resistance": {
+        "resistance": 277.7099914550781,
+        "support": 262.249994913737,
+        "current": 293.70001220703125,
+        "distance_to_resistance": -5.444337789363674,
+        "distance_to_support": 11.992380516018407
+      },
+      "stop_analysis": {
+        "stop_price": 278.76906942458385,
+        "risk_percentage": 5.0837392447646454,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "282.13 (3.9%)",
+          "ma21": "278.77 (5.1%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "278.77 (5.1%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 338.77671331472675,
+        "upside_percentage": 15.347871717458638,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 18.03068044307819,
+        "daily_atr_used": 7.716502380371094,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "76.8 (MODERADO)",
+        "atr_comparison": "Weekly: 18.03 vs Daily: 7.72",
+        "target_range": "15.3% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 8.017637924340008,
+        "momentum_20d_score": 7.913269682014236,
+        "momentum_60d_score": 10.104368242325771,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -10,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 113.02838129019612,
+        "technical_score": 76.80023272825505,
+        "rr_bonus": 36.22814856194107,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 5,
+        "volume_score": -3.5917963289379915,
+        "risk_bonus": 7.374391132853032
+      },
+      "company_info": {
+        "name": "Broadcom Inc.",
+        "sector": "Technology",
+        "market_cap": 1381409226752
+      },
+      "ma_levels": {
+        "ma_21": 283.01,
+        "ma_50": 263.92,
+        "ma_200": 213.11,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 1.727,
+        "revenue_growth": 0.164,
+        "roe": 0.18977,
+        "fundamental_score": 75,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T13:01:08.456542",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "VNT",
+      "score": 112.7,
+      "technical_score": 95.0,
+      "rr_bonus": 17.7,
+      "current_price": 41.47,
+      "stop_loss": 38.21,
+      "take_profit": 46.27,
+      "risk_pct": 7.85,
+      "upside_pct": 11.58,
+      "risk_reward_ratio": 1.47,
+      "outperformance_20d": 6.8,
+      "outperformance_60d": 10.69,
+      "outperformance_90d": 9.72,
+      "volume_surge": 36.7,
+      "fundamental_score": 85,
+      "atr": 0.84,
+      "weekly_atr": 1.92,
+      "volatility_rank": "MEDIUM",
+      "support_resistance": {
+        "resistance": 38.0,
+        "support": 36.15999984741211,
+        "current": 41.470001220703125,
+        "distance_to_resistance": -8.367497271668256,
+        "distance_to_support": 14.684738373059037
+      },
+      "stop_analysis": {
+        "stop_price": 38.2142476763044,
+        "risk_percentage": 7.850864356312938,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "40.21 (3.0%)",
+          "ma21": "38.21 (7.9%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "38.21 (7.9%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 46.27023173550334,
+        "upside_percentage": 11.575187782738205,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 1.9200922059200856,
+        "daily_atr_used": 0.8390998840332031,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "95.0 (MODERADO)",
+        "atr_comparison": "Weekly: 1.92 vs Daily: 0.84",
+        "target_range": "11.6% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 7.733008670977881,
+        "momentum_20d_score": 9.526452768373073,
+        "momentum_60d_score": 3.2065559026048085,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -5,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 112.67281586522071,
+        "technical_score": 94.98020940958043,
+        "rr_bonus": 17.69260645564028,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 5,
+        "volume_score": 11.02349727307195,
+        "risk_bonus": 3.223703465530593
+      },
+      "company_info": {
+        "name": "Vontier Corporation",
+        "sector": "Technology",
+        "market_cap": 6133413376
+      },
+      "ma_levels": {
+        "ma_21": 38.8,
+        "ma_50": 37.31,
+        "ma_200": 36.18,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.311,
+        "revenue_growth": 0.111,
+        "roe": 0.35386002,
+        "fundamental_score": 85,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T13:04:27.728420",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "CBRE",
+      "score": 107.9,
+      "technical_score": 91.6,
+      "rr_bonus": 16.2,
+      "current_price": 155.74,
+      "stop_loss": 141.8,
+      "take_profit": 174.61,
+      "risk_pct": 8.95,
+      "upside_pct": 12.11,
+      "risk_reward_ratio": 1.35,
+      "outperformance_20d": 7.69,
+      "outperformance_60d": 12.27,
+      "outperformance_90d": 5.91,
+      "volume_surge": 65.4,
+      "fundamental_score": 70,
+      "atr": 3.33,
+      "weekly_atr": 7.55,
+      "volatility_rank": "MEDIUM",
+      "support_resistance": {
+        "resistance": 140.5199966430664,
+        "support": 135.44000244140625,
+        "current": 155.74000549316406,
+        "distance_to_resistance": -9.772703424468364,
+        "distance_to_support": 14.988188633959854
+      },
+      "stop_analysis": {
+        "stop_price": 141.80482214428127,
+        "risk_percentage": 8.947722394612633,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "150.75 (3.2%)",
+          "ma21": "141.80 (8.9%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "141.80 (8.9%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 174.60785920279366,
+        "upside_percentage": 12.114969207740112,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 7.547141483851841,
+        "daily_atr_used": 3.328999328613281,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "91.6 (MODERADO)",
+        "atr_comparison": "Weekly: 7.55 vs Daily: 3.33",
+        "target_range": "12.1% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 9.45318966546039,
+        "momentum_20d_score": 10.772121113603266,
+        "momentum_60d_score": 3.681068551857125,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -5,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 107.88939955611613,
+        "technical_score": 91.64173069902088,
+        "rr_bonus": 16.247668857095242,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 5,
+        "volume_score": 19.610124625479447,
+        "risk_bonus": 1.5784164080810505
+      },
+      "company_info": {
+        "name": "CBRE Group, Inc.",
+        "sector": "Real Estate",
+        "market_cap": 46341058560
+      },
+      "ma_levels": {
+        "ma_21": 143.96,
+        "ma_50": 136.29,
+        "ma_200": 132.83,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 0.654,
+        "revenue_growth": 0.162,
+        "roe": 0.12946999,
+        "fundamental_score": 70,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:36:00.263220",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    },
+    {
+      "symbol": "APH",
+      "score": 106.5,
+      "technical_score": 83.1,
+      "rr_bonus": 23.4,
+      "current_price": 106.51,
+      "stop_loss": 100.11,
+      "take_profit": 118.99,
+      "risk_pct": 6.01,
+      "upside_pct": 11.72,
+      "risk_reward_ratio": 1.95,
+      "outperformance_20d": 6.01,
+      "outperformance_60d": 20.41,
+      "outperformance_90d": 43.54,
+      "volume_surge": -1.5,
+      "fundamental_score": 85,
+      "atr": 2.7,
+      "weekly_atr": 4.99,
+      "volatility_rank": "MEDIUM",
+      "support_resistance": {
+        "resistance": 101.16747723812263,
+        "support": 95.19000244140625,
+        "current": 106.51000213623047,
+        "distance_to_resistance": -5.015984218340863,
+        "distance_to_support": 11.892004837159442
+      },
+      "stop_analysis": {
+        "stop_price": 100.11399231320335,
+        "risk_percentage": 6.00507904867598,
+        "methods_used": [
+          "ma21"
+        ],
+        "all_stops_calculated": {
+          "atr": "102.46 (3.8%)",
+          "ma21": "100.11 (6.0%)"
+        },
+        "stop_selection": "ma21_priority",
+        "ma21_data": "100.11 (6.0%)",
+        "ma50_data": "N/A",
+        "priority_logic_applied": true
+      },
+      "take_profit_analysis": {
+        "target_price": 118.98907359060321,
+        "upside_percentage": 11.716337624715777,
+        "momentum_strength": "MODERADO",
+        "atr_multiplier_used": 2.5,
+        "weekly_atr_used": 4.991628581749096,
+        "daily_atr_used": 2.7025005340576174,
+        "confidence_level": "Media",
+        "primary_method": "weekly_atr_swing_for_fences",
+        "method_note": "weekly_atr_swing_optimized",
+        "calculation_method": "weekly_atr_1month_optimized",
+        "score_range": "83.1 (MODERADO)",
+        "atr_comparison": "Weekly: 4.99 vs Daily: 2.70",
+        "target_range": "11.7% (1-month swing optimized)"
+      },
+      "momentum_analysis": {
+        "total_score": 4.537712836893853,
+        "momentum_20d_score": 8.414654872814852,
+        "momentum_60d_score": 6.123057964079001,
+        "momentum_90d_score": 0.0,
+        "acceleration_bonus": -10,
+        "exceptional_bonus": 0,
+        "weights_used": {
+          "20d": 0.7,
+          "60d": 0.3,
+          "90d": 0.0
+        }
+      },
+      "score_breakdown": {
+        "final_score": 106.50379989139367,
+        "technical_score": 83.09094381457176,
+        "rr_bonus": 23.412856076821907,
+        "rr_weight_used": 12.0,
+        "scoring_method": "momentum_responsive_aggressive_weekly_atr",
+        "volatility_bonus": 5,
+        "volume_score": -0.4391504493081233,
+        "risk_bonus": 5.9923814269860305
+      },
+      "company_info": {
+        "name": "Amphenol Corporation",
+        "sector": "Technology",
+        "market_cap": 130040201216
+      },
+      "ma_levels": {
+        "ma_21": 101.64,
+        "ma_50": 96.14,
+        "ma_200": 76.61,
+        "entry_type": "above_ma21",
+        "trend_bullish": "True"
+      },
+      "fundamental_data": {
+        "quarterly_earnings_positive": true,
+        "quarterly_earnings_growth": 1.079,
+        "revenue_growth": 0.565,
+        "roe": 0.31049,
+        "fundamental_score": 85,
+        "has_required_data": true
+      },
+      "momentum_responsive": true,
+      "max_risk_applied": 10.0,
+      "aggressive_targets": true,
+      "weekly_atr_optimized": true,
+      "target_hold": "~1 mes (rotaci\u00f3n agresiva)",
+      "analysis_date": "2025-08-01T12:45:38.337950",
+      "momentum_filters_applied": {
+        "min_20d": 5.0,
+        "min_60d": 0.0,
+        "90d_eliminated": true
+      },
+      "filters_passed": true,
+      "improvements_applied": "weekly_atr_take_profit_min_stop_loss"
+    }
+  ],
+  "benchmark_context": {
+    "spy_20d": 1.8744467167375545,
+    "spy_60d": 12.499980989282955,
+    "spy_90d": 12.40622502174098
+  },
+  "momentum_responsive_stats": {
+    "avg_risk": 7.371333333333333,
+    "avg_risk_reward": 2.3340000000000005,
+    "avg_upside": 16.761999999999997,
+    "avg_momentum_20d": 10.149333333333333,
+    "high_upside_count": 0,
+    "excellent_rr_count": 4,
+    "positive_earnings_count": 15,
+    "avg_weekly_atr": 9.684000000000001,
+    "avg_daily_atr": 4.096
+  }
+}
