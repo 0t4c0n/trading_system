@@ -714,7 +714,7 @@ class MomentumResponsiveScreener:
             volume_avg_30d = hist['Volume'].tail(30).mean()
             if volume_avg_30d < 1000000:
                 return None
-            
+             
             # 🛠️ CORREGIDO: LÓGICA SPY BENCHMARK FIXED
             if self.spy_benchmark is None:  # ✅ CORREGIDO: era "!= None"
                 return None
