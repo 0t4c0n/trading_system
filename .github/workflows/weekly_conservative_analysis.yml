@@ -3,9 +3,9 @@ name: Daily Conservative Stock Analysis with MA50 Bonus
 
 on:
   schedule:
-    # Lunes a viernes a las 9:00 AM España (8:00 UTC)
+    # Lunes a viernes a las 9:00 AM Espana (8:00 UTC)
     - cron: '0 8 * * 1-5'
-  workflow_dispatch:  # Permitir ejecución manual
+  workflow_dispatch:  # Permitir ejecucion manual
 
 # PERMISOS NECESARIOS PARA GITHUB PAGES Y COMMITS
 permissions:
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   daily-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 120  # 2 horas para análisis completo diario
+    timeout-minutes: 120  # 2 horas para analisis completo diario
     
     # Configurar entorno para GitHub Pages
     environment:
@@ -29,17 +29,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-    - name: Checkout código
+    - name: "Checkout codigo"
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Historial completo para análisis de consistencia
+        fetch-depth: 0  # Historial completo para analisis de consistencia
         
-    - name: Configurar Python
+    - name: "Configurar Python"
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
-    - name: Cache dependencies optimizado para ejecución diaria
+    - name: "Cache dependencies optimizado para ejecucion diaria"
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
@@ -48,31 +48,31 @@ jobs:
           ${{ runner.os }}-pip-daily-
           ${{ runner.os }}-pip-
         
-    - name: Instalar dependencias
+    - name: "Instalar dependencias"
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: Verificar configuración y estado histórico diario
+    - name: "Verificar configuracion y estado historico diario"
       run: |
-        echo "=== VERIFICANDO CONFIGURACION PARA EJECUCION DIARIA ==="
+        echo "Verificando configuracion para ejecucion diaria..."
         if [ ! -f "current_portfolio.json" ]; then
           echo "ERROR: current_portfolio.json no encontrado"
           exit 1
         fi
-        echo "✅ Portfolio configurado para monitorización diaria"
+        echo "Portfolio configurado para monitorizacion diaria"
         
-        # Verificar archivos históricos recientes (últimos 7 días)
-        echo "📚 Archivos del historial diario (últimos 7 días):"
+        # Verificar archivos historicos recientes (ultimos 7 dias)
+        echo "Archivos del historial diario (ultimos 7 dias):"
         find . -name "*_*.json" -mtime -7 2>/dev/null | grep -E "(weekly_screening_results_|consistency_analysis_|rotation_recommendations_)" | head -10 || echo "   Iniciando historial diario"
         
-        echo "🔄 MODO: Ejecución diaria para trades de ~1 mes"
-        echo "🎯 OBJETIVO: Monitorizar oportunidades sin rotación excesiva"
-        echo "🕘 HORARIO: L-V 9:00 AM España (post-apertura europea)"
+        echo "MODO: Ejecucion diaria para trades de 1 mes"
+        echo "OBJETIVO: Monitorizar oportunidades sin rotacion excesiva"
+        echo "HORARIO: L-V 9:00 AM Espana (post-apertura europea)"
       env:
         PYTHONUNBUFFERED: 1
         
-    - name: Configurar variables de entorno para análisis diario
+    - name: "Configurar variables de entorno para analisis diario"
       run: |
         echo "REPORT_DATE=$(date +%Y-%m-%d)" >> $GITHUB_ENV
         echo "ANALYSIS_START_TIME=$(date -u +%H:%M)" >> $GITHUB_ENV
@@ -81,233 +81,232 @@ jobs:
         echo "AUTO_HISTORY=true" >> $GITHUB_ENV
         echo "EXECUTION_FREQUENCY=daily" >> $GITHUB_ENV
         
-    - name: 1. Screening diario con bonus MA50
+    - name: "1. Screening diario con bonus MA50"
       run: |
-        echo "🔍 === SCREENING DIARIO CON BONUS MA50 ==="
-        echo "🌟 Sistema: MA50 priority con +22 puntos por rebote alcista"
-        echo "📅 Frecuencia: Diaria (L-V 9:00 AM España)"
-        echo "🎯 Objetivo: Trades de ~1 mes con gestión diaria de exits"
+        echo "Screening diario con bonus MA50..."
+        echo "Sistema: MA50 priority con +22 puntos por rebote alcista"
+        echo "Frecuencia: Diaria (L-V 9:00 AM Espana)"
+        echo "Objetivo: Trades de 1 mes con gestion diaria de exits"
         
         python conservative_screener.py
         
-        echo "✅ Screening diario completado"
+        echo "Screening diario completado"
         ls -la weekly_screening_results.json momentum_responsive_results_*.json 2>/dev/null || echo "Verificando archivos generados..."
       env:
         PYTHONUNBUFFERED: 1
 
-    - name: 1.1. Crear archivo histórico de screening diario
+    - name: "1.1. Crear archivo historico de screening diario"
       run: |
-        echo "🔧 Creando archivo histórico de screening diario..."
+        echo "Creando archivo historico de screening diario..."
         DATE_STAMP=$(date +%Y%m%d)
         
         if [ -f "weekly_screening_results.json" ]; then
           cp weekly_screening_results.json "weekly_screening_results_${DATE_STAMP}.json"
-          echo "✅ Archivo histórico creado: weekly_screening_results_${DATE_STAMP}.json"
+          echo "Archivo historico creado: weekly_screening_results_${DATE_STAMP}.json"
           ls -la weekly_screening_results_${DATE_STAMP}.json
         else
-          echo "❌ No se puede crear histórico - archivo principal no existe"
+          echo "No se puede crear historico - archivo principal no existe"
         fi
         
-    - name: 2. Análisis de consistencia adaptado para ejecución diaria
+    - name: "2. Analisis de consistencia adaptado para ejecucion diaria"
       run: |
-        echo "📊 === ANALISIS DE CONSISTENCIA DIARIO ==="
-        echo "🔄 Adaptado para: Detección de tendencias en ejecución diaria"
-        echo "⏱️ Ventana: Últimos 7 días de screening para patrones"
+        echo "Analisis de consistencia diario..."
+        echo "Adaptado para: Deteccion de tendencias en ejecucion diaria"
+        echo "Ventana: Ultimos 7 dias de screening para patrones"
         
         python consistency_analyzer.py
         
-        echo "✅ Análisis de consistencia diario completado"
+        echo "Analisis de consistencia diario completado"
         ls -la consistency_analysis.json consistency_analysis_*.json 2>/dev/null || echo "Verificando archivos de consistencia..."
       env:
         PYTHONUNBUFFERED: 1
 
-    - name: 2.1. Crear archivo histórico de consistencia diaria
+    - name: "2.1. Crear archivo historico de consistencia diaria"
       run: |
-        echo "🔧 Creando archivo histórico de consistencia diaria..."
+        echo "Creando archivo historico de consistencia diaria..."
         DATE_STAMP=$(date +%Y%m%d)
         
         if [ -f "consistency_analysis.json" ]; then
           cp consistency_analysis.json "consistency_analysis_${DATE_STAMP}.json"
-          echo "✅ Archivo histórico creado: consistency_analysis_${DATE_STAMP}.json"
+          echo "Archivo historico creado: consistency_analysis_${DATE_STAMP}.json"
           ls -la consistency_analysis_${DATE_STAMP}.json
         else
-          echo "❌ No se puede crear histórico - archivo principal no existe"
+          echo "No se puede crear historico - archivo principal no existe"
         fi
         
-    - name: 3. Recomendaciones optimizadas para trades mensuales
+    - name: "3. Recomendaciones optimizadas para trades mensuales"
       run: |
-        echo "💡 === RECOMENDACIONES PARA TRADES MENSUALES ==="
-        echo "🎯 Filosofía: Trades de ~1 mes con criterios estrictos de rotación"
-        echo "⚠️ Solo rotar cuando:"
-        echo "   - Posición cerca del stop loss (2-3%)"
-        echo "   - Sin momentum por 3+ días consecutivos" 
+        echo "Recomendaciones para trades mensuales..."
+        echo "Filosofia: Trades de 1 mes con criterios estrictos de rotacion"
+        echo "Solo rotar cuando:"
+        echo "   - Posicion cerca del stop loss (2-3%)"
+        echo "   - Sin momentum por 3+ dias consecutivos" 
         echo "   - Oportunidad 30+ puntos superior"
         echo "   - Deterioro fundamental"
         
         python rotation_recommender.py
         
-        echo "✅ Recomendaciones mensuales generadas"
+        echo "Recomendaciones mensuales generadas"
         ls -la rotation_recommendations.json rotation_recommendations_*.json 2>/dev/null || echo "Verificando recomendaciones..."
       env:
         PYTHONUNBUFFERED: 1
 
-    - name: 3.1. Crear archivo histórico de recomendaciones diarias
+    - name: "3.1. Crear archivo historico de recomendaciones diarias"
       run: |
-        echo "🔧 Creando archivo histórico de recomendaciones diarias..."
+        echo "Creando archivo historico de recomendaciones diarias..."
         DATE_STAMP=$(date +%Y%m%d)
         
         if [ -f "rotation_recommendations.json" ]; then
           cp rotation_recommendations.json "rotation_recommendations_${DATE_STAMP}.json"
-          echo "✅ Archivo histórico creado: rotation_recommendations_${DATE_STAMP}.json"
+          echo "Archivo historico creado: rotation_recommendations_${DATE_STAMP}.json"
           ls -la rotation_recommendations_${DATE_STAMP}.json
         else
-          echo "❌ No se puede crear histórico - archivo principal no existe"
+          echo "No se puede crear historico - archivo principal no existe"
         fi
         
-    - name: 4. Generar reporte diario optimizado
+    - name: "4. Generar reporte diario optimizado"
       run: |
-        echo "📋 === GENERANDO REPORTE DIARIO ==="
-        echo "📅 Tipo: Daily Market Analysis + Monthly Trading Recommendations"
+        echo "Generando reporte diario..."
+        echo "Tipo: Daily Market Analysis + Monthly Trading Recommendations"
         
         python create_weekly_report.py
         
-        echo "✅ Reporte diario generado"
+        echo "Reporte diario generado"
         ls -la ENHANCED_WEEKLY_REPORT_*.md docs/data.json 2>/dev/null || echo "Verificando reporte y dashboard..."
       env:
         PYTHONUNBUFFERED: 1
         
-    - name: 5. Generar mensaje de commit inteligente para ejecución diaria
+    - name: "5. Generar mensaje de commit inteligente para ejecucion diaria"
       run: |
-        echo "📝 === GENERANDO COMMIT MESSAGE DIARIO ==="
+        echo "Generando commit message diario..."
         
         # Crear mensaje específico para ejecución diaria
-        cat > commit_message.txt << 'EOF'
-🔄 Daily Analysis: MA50 Bonus System + Monthly Trading Focus
+        cat > commit_message.txt << EOF
+        Daily Analysis: MA50 Bonus System + Monthly Trading Focus
+        
+        Execution: Daily monitoring for 1 month trades
+        MA50 Bonus: +22pts for bullish rebounds  
+        Philosophy: Daily screening, monthly rotation criteria
+        Features: Weekly ATR + Strict rotation thresholds
+        Schedule: Mon-Fri 9:00 AM Spain (post-EU open)
+        
+        Daily Stats:
+        - Screening: Conservative momentum with MA50 priority
+        - Consistency: 7-day pattern detection
+        - Recommendations: Only high-conviction rotations
+        - Target: 1-month holds with daily exit management
+        
+        Optimizations Applied:
+        - MA50 stop loss bonus system
+        - Daily execution frequency  
+        - Reduced rotation frequency
+        - Enhanced risk management
+        
+        [Daily Conservative Analysis \$(date +%Y-%m-%d)]
+        EOF
 
-📅 Execution: Daily monitoring for ~1 month trades
-🌟 MA50 Bonus: +22pts for bullish rebounds  
-🎯 Philosophy: Daily screening, monthly rotation criteria
-⚡ Features: Weekly ATR + Strict rotation thresholds
-🕘 Schedule: Mon-Fri 9:00 AM Spain (post-EU open)
-
-📊 Daily Stats:
-- Screening: Conservative momentum with MA50 priority
-- Consistency: 7-day pattern detection
-- Recommendations: Only high-conviction rotations
-- Target: 1-month holds with daily exit management
-
-🔧 Optimizations Applied:
-- MA50 stop loss bonus system
-- Daily execution frequency  
-- Reduced rotation frequency
-- Enhanced risk management
-
-[Daily Conservative Analysis $(date +%Y-%m-%d)]
-EOF
-
-        echo "=== MENSAJE DE COMMIT DIARIO GENERADO ==="
+        echo "Commit message generado correctamente"
         cat commit_message.txt
-        echo "================================="
       env:
         PYTHONUNBUFFERED: 1
         
-    - name: Configurar Git para commits diarios automáticos
+    - name: "Configurar Git para commits diarios automaticos"
       run: |
         git config --global user.name 'Daily Conservative Bot'
         git config --global user.email 'actions@github.com'
         
-    - name: 6. Commit diario con gestión histórica optimizada
+    - name: "6. Commit diario con gestion historica optimizada"
       run: |
-        echo "=== 🔧 INICIANDO COMMIT DIARIO ==="
+        echo "Iniciando commit diario..."
         
-        # Añadir archivos principales del día
-        echo "📁 Añadiendo archivos principales del análisis diario..."
+        # Anadir archivos principales del dia
+        echo "Anadiendo archivos principales del analisis diario..."
         git add weekly_screening_results.json || echo "Skip weekly_screening_results.json"
         git add consistency_analysis.json || echo "Skip consistency_analysis.json"  
         git add rotation_recommendations.json || echo "Skip rotation_recommendations.json"
         git add docs/data.json || echo "Skip docs/data.json"
         
-        # Añadir archivos históricos diarios
-        echo "📚 Añadiendo archivos históricos diarios..."
+        # Anadir archivos historicos diarios
+        echo "Anadiendo archivos historicos diarios..."
         git add weekly_screening_results_*.json || echo "No historic screening files"
         git add consistency_analysis_*.json || echo "No historic consistency files"
         git add rotation_recommendations_*.json || echo "No historic rotation files"
         git add ENHANCED_WEEKLY_REPORT_*.md || echo "No historic reports"
         git add momentum_responsive_results_*.json || echo "No momentum files"
         
-        echo "=== 🔍 VERIFICANDO ARCHIVOS DIARIOS AÑADIDOS ==="
+        echo "Verificando archivos diarios anadidos..."
         git status --porcelain
         STAGED_FILES=$(git status --porcelain | wc -l)
         echo "Archivos en staging: $STAGED_FILES"
         
         if [ $STAGED_FILES -eq 0 ]; then
-          echo "🚨 AÑADIENDO TODOS LOS ARCHIVOS DIARIOS"
+          echo "Anadiendo todos los archivos diarios..."
           git add --all
           git status --porcelain
           STAGED_FILES_ALL=$(git status --porcelain | wc -l)
-          echo "Archivos después de --all: $STAGED_FILES_ALL"
+          echo "Archivos despues de --all: $STAGED_FILES_ALL"
         fi
         
-        echo "=== 📝 REALIZANDO COMMIT DIARIO ==="
+        echo "Realizando commit diario..."
         FINAL_STAGED=$(git status --porcelain | wc -l)
         if [ $FINAL_STAGED -gt 0 ]; then
           git commit -F commit_message.txt
           
-          echo "=== 🚀 PUSHING CAMBIOS DIARIOS ==="
+          echo "Pushing cambios diarios..."
           git push
-          echo "✅ SUCCESS: Análisis diario commiteado correctamente"
+          echo "SUCCESS: Analisis diario commiteado correctamente"
           
-          echo "=== 📋 RESUMEN DE ARCHIVOS DIARIOS COMMITEADOS ==="
+          echo "Resumen de archivos diarios commiteados:"
           git show --name-only --pretty=format: HEAD | sort | head -15
         else
-          echo "❌ CRITICAL: No hay archivos para commitear en análisis diario"
+          echo "CRITICAL: No hay archivos para commitear en analisis diario"
           exit 1
         fi
         
-    - name: Configurar GitHub Pages
+    - name: "Configurar GitHub Pages"
       uses: actions/configure-pages@v5
       
-    - name: Subir artefactos para Pages
+    - name: "Subir artefactos para Pages"
       uses: actions/upload-pages-artifact@v3
       with:
         path: './docs'
         
-    - name: Desplegar a GitHub Pages
+    - name: "Desplegar a GitHub Pages"
       id: deployment
       uses: actions/deploy-pages@v4
       
-    - name: 7. Resumen final del análisis diario
+    - name: "7. Resumen final del analisis diario"
       run: |
-        echo "🎉 ===== ANÁLISIS DIARIO COMPLETADO ====="
-        echo "🕐 Iniciado: $ANALYSIS_START_TIME UTC"
-        echo "🕐 Finalizado: $(date -u +%H:%M) UTC"
-        echo "📅 Fecha: $(date +%Y-%m-%d)"
+        echo "Analisis diario completado"
+        echo "Iniciado: $ANALYSIS_START_TIME UTC"
+        echo "Finalizado: $(date -u +%H:%M) UTC"
+        echo "Fecha: $(date +%Y-%m-%d)"
         echo ""
-        echo "📊 ARCHIVOS DIARIOS GENERADOS:"
-        ls -la *.json *.md 2>/dev/null | grep -E "(weekly_screening_results\.json|consistency_analysis\.json|rotation_recommendations\.json|ENHANCED_WEEKLY_REPORT_*.md)" || echo "Sin archivos principales"
+        echo "Archivos diarios generados:"
+        ls -la *.json *.md 2>/dev/null | grep -E "(weekly_screening_results\.json|consistency_analysis\.json|rotation_recommendations\.json|ENHANCED_WEEKLY_REPORT_.*\.md)" || echo "Sin archivos principales"
         echo ""
-        echo "🔄 CONFIGURACIÓN DIARIA APLICADA:"
-        echo "🌟 MA50 Bonus System: +22pts por rebote alcista"
-        echo "📅 Frecuencia: Lunes-Viernes 9:00 AM España"
-        echo "🎯 Filosofía: Trades de ~1 mes con monitorización diaria"
-        echo "⚠️ Rotaciones: Solo con criterios estrictos"
+        echo "Configuracion diaria aplicada:"
+        echo "MA50 Bonus System: +22pts por rebote alcista"
+        echo "Frecuencia: Lunes-Viernes 9:00 AM Espana"
+        echo "Filosofia: Trades de 1 mes con monitorizacion diaria"
+        echo "Rotaciones: Solo con criterios estrictos"
         echo ""
-        echo "📚 GESTIÓN HISTÓRICA DIARIA:"
+        echo "Gestion historica diaria:"
         TOTAL_HISTORICAL=$(ls *_*.json ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | wc -l)
-        echo "📁 Total archivos históricos: $TOTAL_HISTORICAL"
+        echo "Total archivos historicos: $TOTAL_HISTORICAL"
         echo ""
         if [ $TOTAL_HISTORICAL -gt 0 ]; then
-          echo "📋 Archivos históricos recientes (últimos 5):"
+          echo "Archivos historicos recientes (ultimos 5):"
           ls -lt *_*.json ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -5
         fi
         echo ""
-        echo "🌐 DASHBOARD: ${{ steps.deployment.outputs.page_url }}"
+        echo "Dashboard: ${{ steps.deployment.outputs.page_url }}"
         echo ""
-        echo "📈 PRÓXIMAS EJECUCIONES:"
-        echo "🔄 Próxima ejecución: Lunes-Viernes 9:00 AM España"
-        echo "⚡ Ejecución manual disponible en Actions tab"
-        echo "🎯 Sistema: Optimizado para trades mensuales con gestión diaria"
-        echo "🌟 Bonus MA50: Sistema implementado y funcionando"
+        echo "Proximas ejecuciones:"
+        echo "Proxima ejecucion: Lunes-Viernes 9:00 AM Espana"
+        echo "Ejecucion manual disponible en Actions tab"
+        echo "Sistema: Optimizado para trades mensuales con gestion diaria"
+        echo "Bonus MA50: Sistema implementado y funcionando"
         echo "=============================================="
       env:
         PYTHONUNBUFFERED: 1
