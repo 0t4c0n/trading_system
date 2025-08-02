@@ -309,9 +309,9 @@ class MomentumResponsiveScreener:
             spy_return_90d = ((spy_current - spy_90d_ago) / spy_90d_ago) * 100
             
             benchmark = {
-                'return_20d': spy_return_20d,
-                'return_60d': spy_return_60d,
-                'return_90d': spy_return_90d
+                'return_20d': float(spy_return_20d),
+                'return_60d': float(spy_return_60d),
+                'return_90d': float(spy_return_90d)
             }
             
             print(f"✅ SPY Benchmark: 20d={spy_return_20d:.1f}% | 60d={spy_return_60d:.1f}% | 90d={spy_return_90d:.1f}%")
@@ -399,7 +399,7 @@ class MomentumResponsiveScreener:
                       f"Support=${support_level:.2f} | ATR_Stop=${atr_stop:.2f} | "
                       f"Final_Stop=${calculated_stop:.2f}")
             
-            return ma50_is_stop_loss
+            return bool(ma50_is_stop_loss)  # Asegurar bool nativo
             
         except Exception as e:
             print(f"⚠️ Error verificando MA50 como stop loss: {e}")
@@ -664,32 +664,32 @@ class MomentumResponsiveScreener:
             # INFORMACIÓN COMPLETA
             ticker_info = self.data_fetcher.robust_yfinance_info(normalized_symbol)
             company_info = {
-                'name': ticker_info.get('longName', 'N/A') if ticker_info else 'N/A',
-                'sector': ticker_info.get('sector', 'N/A') if ticker_info else 'N/A',
+                'name': str(ticker_info.get('longName', 'N/A')) if ticker_info else 'N/A',
+                'sector': str(ticker_info.get('sector', 'N/A')) if ticker_info else 'N/A',
                 'market_cap': ticker_info.get('marketCap', 'N/A') if ticker_info else 'N/A'
             }
             
             result = {
-                'symbol': normalized_symbol,
-                'score': round(final_score, 1),
-                'technical_score': round(technical_score, 1),
-                'rr_bonus': round(rr_bonus, 1),
-                'ma50_bonus': ma50_bonus,
-                'is_ma50_stop_loss': is_ma50_stop_loss,  # Cambiado nombre
-                'current_price': round(current_price, 2),
-                'stop_loss': round(stop_price, 2),
-                'take_profit': round(take_profit_price, 2),
-                'risk_pct': round(risk_pct, 2),
-                'upside_pct': round(upside_pct, 2),
-                'risk_reward_ratio': round(risk_reward_ratio, 2),
-                'outperformance_20d': round(outperformance_20d, 2),
-                'outperformance_60d': round(outperformance_60d, 2),
-                'outperformance_90d': round(outperformance_90d, 2),
-                'volume_surge': round(volume_surge_val, 1),
-                'fundamental_score': fundamental_data.get('fundamental_score', 0),
-                'atr': round(atr, 2),
-                'weekly_atr': round(weekly_atr, 2),
-                'volatility_rank': volatility_rank,
+                'symbol': str(normalized_symbol),
+                'score': round(float(final_score), 1),
+                'technical_score': round(float(technical_score), 1),
+                'rr_bonus': round(float(rr_bonus), 1),
+                'ma50_bonus': int(ma50_bonus),
+                'is_ma50_stop_loss': bool(is_ma50_stop_loss),  # Convertir explícitamente a bool nativo
+                'current_price': round(float(current_price), 2),
+                'stop_loss': round(float(stop_price), 2),
+                'take_profit': round(float(take_profit_price), 2),
+                'risk_pct': round(float(risk_pct), 2),
+                'upside_pct': round(float(upside_pct), 2),
+                'risk_reward_ratio': round(float(risk_reward_ratio), 2),
+                'outperformance_20d': round(float(outperformance_20d), 2),
+                'outperformance_60d': round(float(outperformance_60d), 2),
+                'outperformance_90d': round(float(outperformance_90d), 2),
+                'volume_surge': round(float(volume_surge_val), 1),
+                'fundamental_score': int(fundamental_data.get('fundamental_score', 0)),
+                'atr': round(float(atr), 2),
+                'weekly_atr': round(float(weekly_atr), 2),
+                'volatility_rank': str(volatility_rank),
                 'company_info': company_info
             }
             
@@ -820,54 +820,117 @@ class MomentumResponsiveScreener:
         
         return all_results
     
+    def clean_data_for_json(self, data):
+        """Convierte tipos numpy a tipos nativos de Python para JSON"""
+        if isinstance(data, dict):
+            return {key: self.clean_data_for_json(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.clean_data_for_json(item) for item in data]
+        elif isinstance(data, np.bool_):
+            return bool(data)
+        elif isinstance(data, np.integer):
+            return int(data)
+        elif isinstance(data, np.floating):
+            # Verificar NaN e infinitos
+            if np.isnan(data) or np.isinf(data):
+                return 0.0
+            return float(data)
+        elif isinstance(data, np.ndarray):
+            return data.tolist()
+        elif pd.isna(data):
+            return None
+        elif isinstance(data, float):
+            # Verificar NaN e infinitos en floats nativos también
+            if math.isnan(data) or math.isinf(data):
+                return 0.0
+            return data
+        else:
+            return data
     def save_results_optimized(self, results, elapsed_time, symbols_processed, ma50_count):
-        """Guarda resultados"""
+        """Guarda resultados con limpieza de tipos numpy"""
         top_15 = results[:15]
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"momentum_responsive_results_{timestamp}.json"
         
+        # Limpiar datos antes de serialización
+        clean_results = self.clean_data_for_json(results)
+        clean_spy_benchmark = self.clean_data_for_json(self.spy_benchmark)
+        
         # Archivo con timestamp
         result_data = {
             'timestamp': datetime.now().isoformat(),
-            'execution_time_minutes': elapsed_time / 60,
-            'symbols_processed': symbols_processed,
-            'symbols_successful': len(results),
-            'ma50_bonus_detections': ma50_count,
+            'execution_time_minutes': float(elapsed_time / 60),
+            'symbols_processed': int(symbols_processed),
+            'symbols_successful': int(len(results)),
+            'ma50_bonus_detections': int(ma50_count),
             'optimization_enabled': True,
             'parallel_processing': True,
-            'spy_benchmark': self.spy_benchmark,
-            'results': results
+            'spy_benchmark': clean_spy_benchmark,
+            'results': clean_results
         }
         
-        with open(filename, 'w') as f:
-            json.dump(result_data, f, indent=2)
+        try:
+            with open(filename, 'w') as f:
+                json.dump(result_data, f, indent=2)
+        except TypeError as e:
+            print(f"❌ Error serialización archivo timestamp: {e}")
+            print("🔍 Intentando identificar tipos problemáticos...")
+            # Guardar solo metadatos si falla
+            safe_data = {
+                'timestamp': datetime.now().isoformat(),
+                'execution_time_minutes': float(elapsed_time / 60),
+                'symbols_processed': int(symbols_processed),
+                'symbols_successful': int(len(results)),
+                'ma50_bonus_detections': int(ma50_count),
+                'error': 'Serialization failed',
+                'results_count': len(clean_results)
+            }
+            with open(filename, 'w') as f:
+                json.dump(safe_data, f, indent=2)
         
-        # Archivo principal
+        # Archivo principal - también limpiado
+        clean_top_15 = self.clean_data_for_json(top_15)
+        
         screening_data = {
             'analysis_date': datetime.now().isoformat(),
-            'execution_time_minutes': elapsed_time / 60,
-            'symbols_analyzed': symbols_processed,
-            'results_count': len(results),
-            'ma50_bonus_count': ma50_count,
+            'execution_time_minutes': float(elapsed_time / 60),
+            'symbols_analyzed': int(symbols_processed),
+            'results_count': int(len(results)),
+            'ma50_bonus_count': int(ma50_count),
             'analysis_type': 'momentum_responsive_optimized',
             'optimizations': {
                 'parallel_processing': True,
                 'quick_filtering': True,
                 'ma50_bonus_system': True,
-                'ma50_bonus_value': self.ma50_stop_bonus
+                'ma50_bonus_value': int(self.ma50_stop_bonus)
             },
-            'top_symbols': [r['symbol'] for r in top_15],
-            'detailed_results': top_15,
+            'top_symbols': [str(r['symbol']) for r in top_15],  # Asegurar string
+            'detailed_results': clean_top_15,
             'benchmark_context': {
-                'spy_20d': self.spy_benchmark['return_20d'] if self.spy_benchmark else 0,
-                'spy_60d': self.spy_benchmark['return_60d'] if self.spy_benchmark else 0,
-                'spy_90d': self.spy_benchmark['return_90d'] if self.spy_benchmark else 0
+                'spy_20d': float(clean_spy_benchmark.get('return_20d', 0)) if clean_spy_benchmark else 0.0,
+                'spy_60d': float(clean_spy_benchmark.get('return_60d', 0)) if clean_spy_benchmark else 0.0,
+                'spy_90d': float(clean_spy_benchmark.get('return_90d', 0)) if clean_spy_benchmark else 0.0
             }
         }
         
-        with open('weekly_screening_results.json', 'w') as f:
-            json.dump(screening_data, f, indent=2, default=str)
+        try:
+            with open('weekly_screening_results.json', 'w') as f:
+                json.dump(screening_data, f, indent=2)
+        except TypeError as e:
+            print(f"❌ Error serialización archivo principal: {e}")
+            print("🔍 Datos problemáticos identificados, usando fallback...")
+            # Crear versión mínima que funcione
+            fallback_data = {
+                'analysis_date': datetime.now().isoformat(),
+                'symbols_analyzed': int(symbols_processed),
+                'results_count': int(len(results)),
+                'ma50_bonus_count': int(ma50_count),
+                'error': 'Full serialization failed - using fallback',
+                'top_symbols': [str(r.get('symbol', 'N/A')) for r in results[:15]]
+            }
+            with open('weekly_screening_results.json', 'w') as f:
+                json.dump(fallback_data, f, indent=2)
         
         print(f"💾 Archivos guardados: {filename} + weekly_screening_results.json")
 
