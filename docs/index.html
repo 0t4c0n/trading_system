@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aggressive Momentum Trading Bot - Weekly ATR Optimized</title>
+    <title>Conservative Trading Bot - Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -12,958 +12,231 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 10px;
-            color: #1f2937;
+            color: #333;
+            line-height: 1.6;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            overflow: hidden;
+            padding: 20px;
         }
         
         .header {
-            background: linear-gradient(135deg, #1f2937, #374151);
-            color: white;
+            background: rgba(255, 255, 255, 0.95);
             padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
-            border-bottom: 3px solid #3b82f6;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 100%;
-        }
-        
-        .title-section {
-            flex: 1;
-            text-align: left;
         }
         
         .header h1 {
-            font-size: 1.6em;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        .header .subtitle {
-            opacity: 0.95;
-            font-size: 0.95em;
-            font-weight: 500;
-        }
-        
-        .creator-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 10px 16px;
-            border-radius: 25px;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        }
-        
-        .creator-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-        
-        .creator-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .creator-info {
-            text-align: right;
-            line-height: 1.2;
-        }
-        
-        .creator-name {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: white;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-        }
-        
-        .creator-label {
-            font-size: 0.8em;
-            opacity: 0.9;
-            color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Optimization Banner */
-        .optimization-banner {
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            animation: pulse-glow 3s ease-in-out infinite;
-        }
-        
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
-        }
-        
-        .optimization-banner .banner-title {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
-        
-        .optimization-banner .banner-subtitle {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-        
-        .optimization-features {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .optimization-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 8px;
-            border-radius: 10px;
-            font-size: 0.75em;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-        
-        .summary {
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-            border-bottom: 1px solid #cbd5e1;
-        }
-        
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 15px;
-            text-align: center;
-        }
-        
-        .summary-item {
-            background: white;
-            padding: 12px 8px;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            border-left: 4px solid #3b82f6;
-            border-top: 1px solid #e2e8f0;
-            position: relative;
-        }
-        
-        .summary-item.optimized {
-            border-left-color: #10b981;
-            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-        }
-        
-        .summary-item.optimized::after {
-            content: "OPT";
-            position: absolute;
-            top: 2px;
-            right: 4px;
-            font-size: 0.6em;
-            background: #10b981;
-            color: white;
-            padding: 1px 4px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        
-        .summary-number {
-            font-size: 1.9em;
-            font-weight: 700;
-        }
-        
-        .summary-number.momentum {
-            color: #2563eb;
-        }
-        
-        .summary-number.aggressive {
-            color: #059669;
-        }
-        
-        .summary-number.rotation {
-            color: #7c3aed;
-        }
-        
-        .summary-number.targeting {
-            color: #dc2626;
-        }
-        
-        .summary-number.optimized {
-            color: #10b981;
-        }
-        
-        .summary-label {
-            font-size: 0.8em;
-            color: #666;
-            margin-top: 5px;
-            font-weight: 500;
-        }
-        
-        .momentum-philosophy {
-            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-            padding: 15px 20px;
-            border-left: 5px solid #3b82f6;
-            margin: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .momentum-philosophy h3 {
             color: #1e40af;
+            font-size: 2.5rem;
             margin-bottom: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-        }
-        
-        .momentum-weights {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 10px;
-        }
-        
-        .weight-item {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px solid #3b82f6;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .weight-value {
-            font-size: 1.4em;
             font-weight: 700;
-            color: #1d4ed8;
         }
         
-        .weight-label {
-            font-size: 0.8em;
-            color: #666;
-            margin-top: 3px;
+        .header-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
         }
         
-        /* ATR Comparison Section */
-        .atr-comparison {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            padding: 15px 20px;
-            border-left: 5px solid #f59e0b;
-            margin: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .atr-comparison h3 {
-            color: #92400e;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-        }
-        
-        .atr-metrics {
+        .summary-stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            margin-top: 10px;
+            margin-top: 20px;
         }
         
-        .atr-metric {
+        .stat-card {
             background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px solid #f59e0b;
-        }
-        
-        .atr-value {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #92400e;
-        }
-        
-        .atr-label {
-            font-size: 0.8em;
-            color: #666;
-            margin-top: 3px;
-        }
-        
-        .analysis-sections {
-            padding: 20px;
-            display: grid;
-            gap: 20px;
-        }
-        
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .section-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #333;
-            display: flex;
-            align-items: center;
-        }
-        
-        .section-title::before {
-            content: "🚀";
-            margin-right: 8px;
-        }
-        
-        .section-title.picks::before {
-            content: "⚡";
-        }
-        
-        .section-title.momentum::before {
-            content: "🔥";
-        }
-        
-        .section-title.rotation::before {
-            content: "🎯";
-        }
-        
-        .section-title.optimized::before {
-            content: "🔧";
-        }
-        
-        .analysis-card {
-            background: white;
-            border-radius: 15px;
             padding: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border-left: 4px solid #3b82f6;
-            border-top: 1px solid #e5e7eb;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
-        .analysis-card.optimized {
-            border-left-color: #10b981;
-            background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
-        }
-        
-        .top-picks-grid {
-            display: grid;
-            gap: 15px;
-        }
-        
-        .pick-card {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 12px;
-            padding: 15px;
-            border-left: 4px solid #3b82f6;
-            position: relative;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .pick-card.optimized {
-            border-left-color: #10b981;
-            background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
-        }
-        
-        .pick-card.optimized::after {
-            content: "OPTIMIZED";
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            font-size: 0.6em;
-            background: #10b981;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        
-        .pick-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .pick-symbol {
-            font-size: 1.4em;
+        .stat-value {
+            font-size: 2rem;
             font-weight: 700;
-            color: #1e40af;
-        }
-        
-        .pick-price {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .pick-company {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        
-        .momentum-indicators {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 8px;
-            margin: 10px 0;
-        }
-        
-        .momentum-badge {
-            background: #3b82f6;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7em;
-            font-weight: 600;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .momentum-badge.exceptional {
-            background: #dc2626;
-        }
-        
-        .momentum-badge.strong {
-            background: #059669;
-        }
-        
-        .momentum-badge.moderate {
-            background: #7c3aed;
-        }
-        
-        .momentum-badge.weak {
-            background: #6b7280;
-        }
-        
-        .momentum-badge.optimized {
-            background: #10b981;
-        }
-        
-        /* ATR Indicators */
-        .atr-indicators {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 8px;
-            margin: 10px 0;
-            padding: 8px;
-            background: rgba(251, 191, 36, 0.1);
-            border-radius: 8px;
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-        
-        .atr-badge {
-            background: #f59e0b;
-            color: white;
-            padding: 3px 6px;
-            border-radius: 8px;
-            font-size: 0.65em;
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        .atr-badge.weekly {
-            background: #dc2626;
-        }
-        
-        .atr-badge.daily {
-            background: #6b7280;
-        }
-        
-        .atr-badge.ratio {
-            background: #7c3aed;
-        }
-        
-        .trading-levels {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin: 10px 0;
-        }
-        
-        .level-item {
-            background: white;
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #d1d5db;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        
-        .level-item.optimized {
-            border-color: #10b981;
-            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-        }
-        
-        .level-value {
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-        
-        .level-value.stop-loss {
-            color: #dc2626;
-        }
-        
-        .level-value.take-profit {
-            color: #059669;
-        }
-        
-        .level-value.current {
-            color: #2563eb;
-        }
-        
-        .level-value.aggressive {
-            color: #7c3aed;
-            font-size: 1.0em;
-            font-weight: 700;
-        }
-        
-        .level-value.optimized {
-            color: #10b981;
-            font-weight: 700;
-        }
-        
-        .level-label {
-            font-size: 0.7em;
-            color: #666;
-            margin-top: 2px;
-        }
-        
-        .pick-metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .metric-item {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 6px;
-            border-radius: 6px;
-            text-align: center;
-        }
-        
-        .metric-item.optimized {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .metric-value {
-            font-weight: bold;
-            font-size: 0.8em;
-        }
-        
-        .metric-value.optimized {
-            color: #10b981;
-            font-weight: 700;
-        }
-        
-        .metric-label {
-            font-size: 0.6em;
-            color: #666;
-        }
-        
-        .pick-reasoning {
-            background: rgba(59, 130, 246, 0.08);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-        }
-        
-        .pick-reasoning.optimized {
-            background: rgba(16, 185, 129, 0.08);
-            border-color: rgba(16, 185, 129, 0.2);
-        }
-        
-        .reasoning-title {
-            font-weight: 600;
-            color: #1e40af;
-            font-size: 0.8em;
-            margin-bottom: 5px;
-        }
-        
-        .reasoning-title.optimized {
-            color: #065f46;
-        }
-        
-        .reasoning-text {
-            font-size: 0.8em;
-            color: #374151;
-            line-height: 1.3;
-        }
-        
-        .optimization-metrics {
-            background: rgba(16, 185, 129, 0.05);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-        }
-        
-        .optimization-title {
-            font-weight: 600;
-            color: #065f46;
-            font-size: 0.8em;
-            margin-bottom: 5px;
-        }
-        
-        .optimization-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 6px;
-        }
-        
-        .optimization-detail {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 4px 6px;
-            border-radius: 4px;
-            text-align: center;
-        }
-        
-        .optimization-detail-value {
-            font-weight: bold;
-            font-size: 0.7em;
             color: #10b981;
         }
         
-        .optimization-detail-label {
-            font-size: 0.6em;
-            color: #666;
-        }
-        
-        .momentum-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .momentum-item {
-            background: #f8fafc;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .momentum-number {
-            font-size: 1.5em;
-            font-weight: 700;
-            color: #2563eb;
-        }
-        
-        .momentum-label {
-            font-size: 0.8em;
-            color: #666;
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
             margin-top: 5px;
         }
         
-        .symbol-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
         }
         
-        .symbol-badge {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            padding: 4px 10px;
+        .card {
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         
-        .symbol-badge.exceptional {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-        }
-        
-        .symbol-badge.strong {
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-        
-        .symbol-badge.emerging {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-        }
-        
-        .rotation-section {
+        .card h3 {
+            color: #1e40af;
             margin-bottom: 15px;
-        }
-        
-        .rotation-title {
-            font-weight: bold;
-            margin-bottom: 8px;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
+            gap: 10px;
         }
         
-        .rotation-title.urgent::before {
-            content: "🚨";
-            margin-right: 8px;
-        }
-        
-        .rotation-title.aggressive::before {
-            content: "⚡";
-            margin-right: 8px;
-        }
-        
-        .rotation-title.emerging::before {
-            content: "🌱";
-            margin-right: 8px;
-        }
-        
-        .rotation-title.hold::before {
-            content: "✅";
-            margin-right: 8px;
-        }
-        
-        .rotation-recommendations {
-            display: grid;
+        .stock-list {
+            display: flex;
+            flex-direction: column;
             gap: 12px;
         }
         
-        .recommendation-item {
+        .stock-item {
             background: #f8fafc;
+            border: 2px solid #e5e7eb;
             border-radius: 10px;
-            padding: 12px;
-            border-left: 4px solid #3b82f6;
-            border: 1px solid #e5e7eb;
+            padding: 15px;
+            transition: all 0.3s ease;
         }
         
-        .recommendation-item.urgent {
-            border-left-color: #dc2626;
-            background: #fef2f2;
-            border-color: #fecaca;
+        .stock-item:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
         }
         
-        .recommendation-item.aggressive {
-            border-left-color: #059669;
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-        }
-        
-        .recommendation-item.emerging {
-            border-left-color: #7c3aed;
-            background: #faf5ff;
-            border-color: #e9d5ff;
-        }
-        
-        .recommendation-header {
+        .stock-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
-        .recommendation-symbol {
-            font-weight: 600;
-            color: #1f2937;
+        .stock-symbol {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e40af;
         }
         
-        .recommendation-action {
-            font-size: 0.8em;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 10px;
-            background: #3b82f6;
+        .stock-score {
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-        }
-        
-        .recommendation-action.urgent {
-            background: #dc2626;
-        }
-        
-        .recommendation-action.aggressive {
-            background: #059669;
-        }
-        
-        .recommendation-action.emerging {
-            background: #7c3aed;
-        }
-        
-        .recommendation-reason {
-            font-size: 0.85em;
-            color: #666;
-            line-height: 1.3;
-        }
-        
-        .action-badge {
-            display: inline-block;
             padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.9em;
+            border-radius: 20px;
             font-weight: 600;
-            margin: 4px 8px 4px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
+            font-size: 0.9rem;
         }
         
-        .action-badge.maintain {
-            background: #f0fdf4;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
+        .stock-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
         }
         
-        .action-badge.evaluate {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
+        .info-item {
+            display: flex;
+            flex-direction: column;
         }
         
-        .action-badge.rotation-required {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
+        .info-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            font-weight: 500;
         }
         
-        .action-badge.urgent-rotation {
-            background: #faf5ff;
-            color: #7c3aed;
-            border: 1px solid #e9d5ff;
-            animation: pulse 2s infinite;
+        .info-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
         }
         
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .positive {
+            color: #10b981;
+        }
+        
+        .negative {
+            color: #ef4444;
+        }
+        
+        .ma50-bonus {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .company-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #4b5563;
         }
         
         .market-context {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-radius: 15px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 10px;
             padding: 15px;
-            margin-top: 15px;
-            border: 1px solid #e2e8f0;
+            margin-top: 20px;
         }
         
         .market-context h4 {
-            margin-bottom: 10px;
             color: #1e40af;
-            font-weight: 600;
+            margin-bottom: 10px;
         }
         
         .spy-metrics {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 10px;
         }
         
         .spy-metric {
-            background: white;
-            padding: 8px;
-            border-radius: 8px;
             text-align: center;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 8px;
         }
         
         .spy-value {
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-        
-        .spy-value.positive {
-            color: #059669;
-        }
-        
-        .spy-value.negative {
-            color: #dc2626;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
         }
         
         .spy-label {
-            font-size: 0.8em;
-            color: #666;
-            margin-top: 2px;
-        }
-        
-        .optimization-summary {
-            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-            border: 2px solid #10b981;
-            border-radius: 15px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-        
-        .optimization-summary h4 {
-            color: #065f46;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        
-        .optimization-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-        }
-        
-        .optimization-stat {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .optimization-stat-value {
-            font-weight: 700;
-            font-size: 1.1em;
-            color: #10b981;
-        }
-        
-        .optimization-stat-label {
-            font-size: 0.8em;
-            color: #666;
-            margin-top: 2px;
+            font-size: 0.8rem;
+            color: #6b7280;
         }
         
         .last-update {
             text-align: center;
-            padding: 15px;
-            font-size: 0.8em;
+            padding: 20px;
+            font-size: 0.9rem;
             color: #6b7280;
-            background: #f8fafc;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .signature {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #d1d5db;
-            background: linear-gradient(135deg, #1e40af, #3b82f6);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 600;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin-top: 20px;
         }
         
         .loading {
@@ -975,11 +248,11 @@
         .error {
             background: #fef2f2;
             color: #dc2626;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
             text-align: center;
-            border: 1px solid #fecaca;
+            border: 2px solid #fecaca;
         }
         
         .refresh-btn {
@@ -989,65 +262,86 @@
             background: #3b82f6;
             color: white;
             border: none;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            font-size: 1.2em;
+            font-size: 1.5rem;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             cursor: pointer;
             transition: transform 0.2s;
+            z-index: 1000;
         }
         
         .refresh-btn:hover {
             transform: scale(1.1);
         }
         
+        /* RESPONSIVE DESIGN - MOBILE FIRST */
         @media (max-width: 768px) {
-            .two-column {
-                grid-template-columns: 1fr;
+            .container {
+                padding: 10px;
             }
             
-            .trading-levels {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .summary-stats {
                 grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .title-section {
-                text-align: center;
-            }
-            
-            .optimization-features {
                 gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .stock-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .stock-info {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .spy-metrics {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .refresh-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+                bottom: 15px;
+                right: 15px;
             }
         }
         
         @media (max-width: 480px) {
-            .container {
-                margin: 5px;
-                border-radius: 15px;
+            .header h1 {
+                font-size: 1.8rem;
             }
             
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            
-            .pick-metrics {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .trading-levels {
+            .summary-stats {
                 grid-template-columns: 1fr;
             }
             
-            .optimization-features {
-                flex-direction: column;
-                gap: 5px;
+            .stock-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .spy-metrics {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1055,59 +349,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-content">
-                <div class="title-section">
-                    <h1>📊 Professional Momentum Analytics</h1>
-                    <div class="subtitle">Advanced Trading Intelligence - Weekly ATR Optimized</div>
-                </div>
-                <div class="creator-section">
-                    <div class="creator-avatar">
-                        <!-- Avatar preparado para inserción manual -->
-                    </div>
-                    <div class="creator-info">
-                        <div class="creator-name">0t4c0n</div>
-                        <div class="creator-label">Creator</div>
-                    </div>
-                </div>
-            </div>
+            <h1>📈 Conservative Trading Bot</h1>
+            <div class="header-subtitle">Trading Mensual con Monitorización Diaria + Bonus MA50</div>
+            <div id="summary-section"></div>
         </div>
         
-        <!-- Optimization Banner -->
-        <div class="optimization-banner">
-            <div class="banner-title">🔧 OPTIMIZATION STACK APPLIED</div>
-            <div class="banner-subtitle">Weekly ATR + Restrictive Stop Loss + Strict Fundamentals</div>
-            <div class="optimization-features">
-                <div class="optimization-badge">📊 Weekly ATR</div>
-                <div class="optimization-badge">🛡️ Min Stop Loss</div>
-                <div class="optimization-badge">📈 Earnings+</div>
-                <div class="optimization-badge">🎯 1-Month Aligned</div>
-            </div>
-        </div>
-        
-        <div class="momentum-philosophy">
-            <h3>🎯 Investment Philosophy: Dynamic Momentum Allocation - OPTIMIZED</h3>
-            <div style="font-size: 0.9em; margin-bottom: 10px;">
-                Systematic momentum detection with monthly rotation optimization and technical enhancements. 
-                Targeting institutional-grade risk-adjusted returns through data-driven position management with Weekly ATR alignment.
-            </div>
-            <div class="momentum-weights">
-                <div class="weight-item">
-                    <div class="weight-value">70%</div>
-                    <div class="weight-label">Momentum 20d</div>
-                </div>
-                <div class="weight-item">
-                    <div class="weight-value">30%</div>
-                    <div class="weight-label">Momentum 60d</div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="content">
-            <div class="loading">
-                <div>📊 Loading professional momentum analytics with Weekly ATR optimization and enhanced filtering...</div>
-                <div style="margin-top: 10px; font-size: 0.9em; color: #888;">
-                    🔧 Applying optimization stack: Weekly ATR + Min Stop Loss + Strict Fundamentals
-                </div>
+        <div class="content-grid">
+            <div id="main-content" class="loading">
+                <div>⏳ Cargando datos del dashboard...</div>
             </div>
         </div>
     </div>
@@ -1117,735 +366,247 @@
     </button>
 
     <script>
+        function formatCurrency(value) {
+            if (typeof value !== 'number') return 'N/A';
+            return '$' + value.toFixed(2);
+        }
+        
+        function formatPercentage(value) {
+            if (typeof value !== 'number') return 'N/A';
+            const sign = value >= 0 ? '+' : '';
+            return sign + value.toFixed(1) + '%';
+        }
+        
+        function formatNumber(value) {
+            if (typeof value !== 'number') return 'N/A';
+            return value.toFixed(1);
+        }
+        
         function getNextUpdateTime() {
             const now = new Date();
-            const nextSaturday = new Date(now);
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(9, 0, 0, 0); // 9:00 AM del día siguiente
             
-            const daysUntilSaturday = (6 - now.getDay() + 7) % 7;
-            if (daysUntilSaturday === 0 && now.getHours() < 10) {
-                nextSaturday.setHours(10, 0, 0, 0);
-            } else {
-                nextSaturday.setDate(now.getDate() + (daysUntilSaturday || 7));
-                nextSaturday.setHours(10, 0, 0, 0);
-            }
+            // Si es fin de semana, ir al lunes
+            if (tomorrow.getDay() === 0) tomorrow.setDate(tomorrow.getDate() + 1); // Domingo -> Lunes
+            if (tomorrow.getDay() === 6) tomorrow.setDate(tomorrow.getDate() + 2); // Sábado -> Lunes
             
-            return nextSaturday.toLocaleString('es-ES', {
+            return tomorrow.toLocaleString('es-ES', {
                 weekday: 'long',
-                year: 'numeric',
-                month: 'long',
                 day: 'numeric',
+                month: 'long',
                 hour: '2-digit',
                 minute: '2-digit'
             });
         }
         
-        function calculateAggressiveTradingLevels(stock) {
-            const currentPrice = stock.price || stock.current_price || 0;
-            const stopLoss = stock.stop_loss || (currentPrice * 0.90); // 10% default para momentum
+        function renderDashboard(data) {
+            // Summary stats
+            const summaryEl = document.getElementById('summary-section');
+            const summary = data.summary || {};
             
-            // Take Profit más agresivo basado en momentum category
-            let takeProfit = currentPrice;
-            const momentumCategory = stock.momentum_category || 'MODERATE';
+            summaryEl.innerHTML = `
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">${summary.total_analyzed || 'N/A'}</div>
+                        <div class="stat-label">Símbolos Analizados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${summary.passed_filters || summary.results_count || 'N/A'}</div>
+                        <div class="stat-label">Candidatos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${summary.ma50_bonus_count || data.ma50_bonus_count || 0}</div>
+                        <div class="stat-label">Bonus MA50</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.execution_time_minutes ? data.execution_time_minutes.toFixed(1) + 'm' : 'N/A'}</div>
+                        <div class="stat-label">Tiempo Análisis</div>
+                    </div>
+                </div>
+            `;
             
-            // Sistema agresivo basado en categoría de momentum
-            if (momentumCategory === 'EXCEPTIONAL') {
-                takeProfit = currentPrice * 1.45; // 45% target agresivo
-            } else if (momentumCategory === 'STRONG') {
-                takeProfit = currentPrice * 1.35; // 35% target
-            } else if (momentumCategory === 'MODERATE') {
-                takeProfit = currentPrice * 1.25; // 25% target
-            } else {
-                takeProfit = currentPrice * 1.18; // 18% conservador
+            // Main content
+            const contentEl = document.getElementById('main-content');
+            const stocks = data.detailed_results || data.top_picks || data.results || [];
+            
+            if (!stocks || stocks.length === 0) {
+                contentEl.innerHTML = `
+                    <div class="error">
+                        <h3>⚠️ Sin Datos Disponibles</h3>
+                        <p>No se encontraron resultados en el análisis más reciente.</p>
+                        <p>Esto puede ocurrir si:</p>
+                        <ul style="text-align: left; margin: 10px 0;">
+                            <li>El análisis aún está ejecutándose</li>
+                            <li>Los mercados están cerrados</li>
+                            <li>No hay acciones que cumplan los filtros conservadores</li>
+                        </ul>
+                    </div>
+                `;
+                return;
             }
             
-            // Aplicar sistema ATR si está disponible (priorizar Weekly ATR)
-            const weeklyATR = stock.optimizations?.weekly_atr || 0;
-            const dailyATR = stock.atr || (currentPrice * 0.04);
-            const atr = weeklyATR > 0 ? weeklyATR : dailyATR; // Usar Weekly ATR si disponible
+            let stocksHtml = `
+                <div class="card">
+                    <h3>🏆 Top Candidatos (${stocks.length})</h3>
+                    <div class="stock-list">
+            `;
             
-            const atrBasedTarget = currentPrice + (atr * getATRMultiplier(stock.score || 0, weeklyATR > 0));
+            stocks.slice(0, 15).forEach((stock, index) => {
+                // Datos básicos con fallbacks
+                const symbol = stock.symbol || 'N/A';
+                const score = stock.score || stock.final_score || 0;
+                const price = stock.current_price || stock.price || 0;
+                const risk = stock.risk_pct || stock.risk_percentage || 0;
+                const upside = stock.upside_pct || stock.upside_percentage || 0;
+                const rr = stock.risk_reward_ratio || (upside / Math.max(risk, 0.1)) || 0;
+                
+                // MA50 bonus
+                const hasMa50 = stock.is_ma50_rebote || stock.ma50_bonus_applied || stock.ma50_bonus > 0;
+                const ma50BonusValue = stock.ma50_bonus || 22;
+                
+                // Outperformance
+                const out20d = stock.outperformance_20d || 0;
+                const out60d = stock.outperformance_60d || 0;
+                
+                // Company info
+                const companyInfo = stock.company_info || {};
+                const name = companyInfo.name || stock.company || stock.name || 'N/A';
+                const sector = companyInfo.sector || stock.sector || 'N/A';
+                
+                stocksHtml += `
+                    <div class="stock-item">
+                        <div class="stock-header">
+                            <div>
+                                <span class="stock-symbol">${symbol}</span>
+                                ${hasMa50 ? `<span class="ma50-bonus">🌟 MA50 +${ma50BonusValue}</span>` : ''}
+                            </div>
+                            <div class="stock-score">Score: ${formatNumber(score)}</div>
+                        </div>
+                        
+                        <div class="stock-info">
+                            <div class="info-item">
+                                <span class="info-label">Precio</span>
+                                <span class="info-value">${formatCurrency(price)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Riesgo</span>
+                                <span class="info-value ${risk > 8 ? 'negative' : 'positive'}">${formatPercentage(risk)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Upside</span>
+                                <span class="info-value positive">${formatPercentage(upside)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">R/R Ratio</span>
+                                <span class="info-value ${rr > 2.5 ? 'positive' : 'negative'}">${formatNumber(rr)}:1</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">vs SPY 20d</span>
+                                <span class="info-value ${out20d >= 0 ? 'positive' : 'negative'}">${formatPercentage(out20d)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">vs SPY 60d</span>
+                                <span class="info-value ${out60d >= 0 ? 'positive' : 'negative'}">${formatPercentage(out60d)}</span>
+                            </div>
+                        </div>
+                        
+                        ${name !== 'N/A' || sector !== 'N/A' ? `
+                            <div class="company-info">
+                                <strong>${name}</strong>${sector !== 'N/A' ? ` • ${sector}` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
             
-            // Usar el más agresivo para momentum trading
-            takeProfit = Math.max(takeProfit, atrBasedTarget);
+            stocksHtml += `
+                    </div>
+                </div>
+            `;
             
-            return {
-                current: currentPrice,
-                stopLoss: stopLoss,
-                takeProfit: takeProfit,
-                riskReward: ((takeProfit - currentPrice) / (currentPrice - stopLoss)).toFixed(2),
-                targetMethod: weeklyATR > 0 ? 'weekly_atr_optimized' : 'aggressive_momentum',
-                isOptimized: weeklyATR > 0
-            };
-        }
-        
-        function getATRMultiplier(score, isWeeklyATR) {
-            // Multiplicadores ajustados para Weekly ATR (más conservadores)
-            const baseMultipliers = isWeeklyATR ? 
-                { high: 3.0, med: 2.5, low: 2.0 } : 
-                { high: 3.5, med: 2.8, low: 2.3 };
+            // Market context
+            const marketContext = data.benchmark_context || data.market_context || {};
+            const spy20d = marketContext.spy_20d || 0;
+            const spy60d = marketContext.spy_60d || 0;
+            const spy90d = marketContext.spy_90d || 0;
             
-            if (score > 100) return baseMultipliers.high;
-            if (score >= 60) return baseMultipliers.med;
-            return baseMultipliers.low;
-        }
-        
-        function getMomentumCategory(stock) {
-            // Determinar categoría de momentum basada en datos disponibles
-            const score = stock.score || 0;
-            const momentum20d = stock.metrics?.outperformance_20d || 0;
-            const momentum60d = stock.metrics?.outperformance_60d || 0;
+            stocksHtml += `
+                <div class="market-context">
+                    <h4>📊 Contexto de Mercado SPY</h4>
+                    <div class="spy-metrics">
+                        <div class="spy-metric">
+                            <div class="spy-value ${spy20d >= 0 ? 'positive' : 'negative'}">${formatPercentage(spy20d)}</div>
+                            <div class="spy-label">SPY 20 días</div>
+                        </div>
+                        <div class="spy-metric">
+                            <div class="spy-value ${spy60d >= 0 ? 'positive' : 'negative'}">${formatPercentage(spy60d)}</div>
+                            <div class="spy-label">SPY 60 días</div>
+                        </div>
+                        <div class="spy-metric">
+                            <div class="spy-value ${spy90d >= 0 ? 'positive' : 'negative'}">${formatPercentage(spy90d)}</div>
+                            <div class="spy-label">SPY 90 días</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 8px; font-size: 0.9rem; color: #666;">
+                        <strong>🎯 Filosofía Trading Mensual:</strong> 
+                        Monitorización diaria, rotaciones solo cuando sea crítico. 
+                        MA50 Bonus (+22pts) prioriza rebotes técnicos. 
+                        Criterios estrictos para evitar overtrading.
+                    </div>
+                </div>
+            `;
             
-            if (score > 200 || momentum20d > 25) return 'EXCEPTIONAL';
-            if (score > 150 || momentum20d > 15) return 'STRONG';
-            if (score > 100 || momentum20d > 8) return 'MODERATE';
-            if (score > 50) return 'WEAK';
-            return 'POOR';
-        }
-        
-        function generateAggressiveReasoningText(stock, momentum) {
-            let reasoning = [];
+            // Footer
+            const updateTime = data.timestamp ? new Date(data.timestamp).toLocaleString('es-ES') : 'N/A';
+            const analysisDate = data.analysis_date || data.market_date || 'N/A';
             
-            // Análisis de momentum
-            const momentumCategory = getMomentumCategory(stock);
-            if (momentumCategory === 'EXCEPTIONAL') {
-                reasoning.push(`Momentum EXCEPCIONAL detectado - rotación urgente recomendada`);
-            } else if (momentumCategory === 'STRONG') {
-                reasoning.push(`Momentum FUERTE - candidato para rotación agresiva`);
-            }
+            stocksHtml += `
+                <div class="last-update">
+                    📅 <strong>Última actualización:</strong> ${updateTime}<br>
+                    🗓️ <strong>Fecha análisis:</strong> ${analysisDate}<br>
+                    ⏰ <strong>Próximo análisis:</strong> ${getNextUpdateTime()}<br>
+                    📅 <strong>Frecuencia:</strong> Lunes-Viernes 9:00 AM España<br>
+                    🌟 <strong>Sistema:</strong> MA50 Bonus + Trading Mensual + Gestión Diaria<br>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #d1d5db;">
+                        <small style="color: #3b82f6; font-weight: 600;">
+                            📊 Conservative Trading Bot by <strong>0t4c0n</strong>
+                        </small>
+                    </div>
+                </div>
+            `;
             
-            // Momentum 20d (peso 70%)
-            const momentum20d = stock.metrics?.outperformance_20d || 0;
-            if (momentum20d > 20) {
-                reasoning.push(`Momentum 20d excepcional: +${momentum20d.toFixed(1)}% (peso 70%)`);
-            } else if (momentum20d > 10) {
-                reasoning.push(`Momentum 20d fuerte: +${momentum20d.toFixed(1)}% (peso 70%)`);
-            }
-            
-            // Optimizations insights
-            const optimizations = stock.optimizations || {};
-            if (optimizations.weekly_atr > 0) {
-                const ratio = optimizations.atr_ratio || 0;
-                reasoning.push(`Weekly ATR optimization: ${optimizations.weekly_atr.toFixed(2)} (${ratio.toFixed(1)}x vs daily)`);
-            }
-            
-            if (optimizations.earnings_positive) {
-                reasoning.push(`Earnings positivos confirmados - calidad fundamental`);
-            }
-            
-            // Risk/Reward agresivo
-            const risk = stock.metrics?.risk_pct || 0;
-            const rr = stock.metrics?.risk_reward_ratio || 0;
-            if (rr > 3.0) {
-                reasoning.push(`R/R excepcional: ${rr.toFixed(1)}:1 con riesgo ${risk.toFixed(1)}%`);
-            }
-            
-            // Score breakdown
-            const technicalScore = stock.technical_score || 0;
-            const rrBonus = stock.rr_bonus || 0;
-            if (rrBonus > 20) {
-                reasoning.push(`Score técnico ${technicalScore.toFixed(0)} + bonus R/R ${rrBonus.toFixed(0)}`);
-            }
-            
-            // Acceleration signals
-            if (stock.appeared_this_week && stock.frequency >= 2) {
-                reasoning.push(`Acceleration: aparece esta semana + ${stock.frequency} semanas consistencia`);
-            }
-            
-            if (reasoning.length === 0) {
-                reasoning.push(`Análisis momentum optimizado: categoría ${momentumCategory}, target ~1 mes rotación`);
-            }
-            
-            return reasoning.join(". ");
+            contentEl.innerHTML = stocksHtml;
         }
         
         async function loadData() {
             try {
-                const response = await fetch('data.json');
+                const response = await fetch('data.json?t=' + Date.now()); // Cache bust
                 if (!response.ok) throw new Error('No se pudieron cargar los datos');
                 
                 const data = await response.json();
-                renderOptimizedMomentumDashboard(data);
+                renderDashboard(data);
                 
             } catch (error) {
                 console.error('Error loading data:', error);
                 
-                // Fallback con datos de ejemplo optimizados
-                const fallbackData = {
-                    "timestamp": new Date().toISOString(),
-                    "market_date": new Date().toISOString().split('T')[0],
-                    "analysis_type": "aggressive_momentum_responsive_weekly_atr_optimized",
-                    "optimization_stack": {
-                        "weekly_atr_take_profit": true,
-                        "min_stop_loss_restrictive": true,
-                        "fundamental_strict_filtering": true,
-                        "timeframe_alignment": "1_month_swing_trading"
-                    },
-                    "summary": {
-                        "analysis_type": "Aggressive Momentum Responsive - Weekly ATR Optimized",
-                        "total_analyzed": 180,
-                        "passed_filters": 15,
-                        "exceptional_momentum": 3,
-                        "strong_momentum": 6,
-                        "rotation_opportunities": 8,
-                        "optimization_applied": true,
-                        "message": "Testing local - Datos optimizados con Weekly ATR y filtros estrictos"
-                    },
-                    "top_picks": [
-                        {
-                            "rank": 1,
-                            "symbol": "TTMI",
-                            "company": "TTM Technologies Inc",
-                            "sector": "Technology Hardware",
-                            "price": 198.50,
-                            "score": 387.2,
-                            "technical_score": 342.1,
-                            "rr_bonus": 45.1,
-                            "stop_loss": 178.65,
-                            "take_profit": 287.75,
-                            "momentum_category": "EXCEPTIONAL",
-                            "metrics": {
-                                "risk_pct": 9.8,
-                                "upside_pct": 45.0,
-                                "risk_reward_ratio": 4.6,
-                                "outperformance_20d": 28.5,
-                                "outperformance_60d": 65.2,
-                                "volume_surge": 67.3,
-                                "momentum_strength": 95
-                            },
-                            "optimizations": {
-                                "weekly_atr": 12.45,
-                                "daily_atr": 5.23,
-                                "atr_ratio": 2.4,
-                                "earnings_positive": true,
-                                "stop_method": "ma50_priority",
-                                "take_profit_method": "weekly_atr_swing_for_fences",
-                                "weekly_atr_optimized": true
-                            },
-                            "target_hold": "~1 mes (rotación agresiva optimizada)",
-                            "rotation_urgency": "URGENT"
-                        },
-                        {
-                            "rank": 2,
-                            "symbol": "NVDA",
-                            "company": "NVIDIA Corporation",
-                            "sector": "Semiconductors",
-                            "price": 845.20,
-                            "score": 356.8,
-                            "technical_score": 312.4,
-                            "rr_bonus": 44.4,
-                            "stop_loss": 760.68,
-                            "take_profit": 1141.02,
-                            "momentum_category": "STRONG",
-                            "metrics": {
-                                "risk_pct": 10.0,
-                                "upside_pct": 35.0,
-                                "risk_reward_ratio": 3.5,
-                                "outperformance_20d": 22.1,
-                                "outperformance_60d": 78.4,
-                                "volume_surge": 45.2,
-                                "momentum_strength": 88
-                            },
-                            "optimizations": {
-                                "weekly_atr": 28.67,
-                                "daily_atr": 15.12,
-                                "atr_ratio": 1.9,
-                                "earnings_positive": true,
-                                "stop_method": "ma21_priority",
-                                "take_profit_method": "weekly_atr_swing_for_fences",
-                                "weekly_atr_optimized": true
-                            },
-                            "target_hold": "~1 mes (rotación agresiva optimizada)",
-                            "rotation_urgency": "HIGH"
-                        }
-                    ],
-                    "momentum_analysis": {
-                        "philosophy": "swing_for_fences_monthly_rotation_optimized",
-                        "momentum_weights": {
-                            "momentum_20d": 0.70,
-                            "momentum_60d": 0.30
-                        },
-                        "exceptional_momentum": ["TTMI", "NVDA", "QGEN"],
-                        "strong_momentum": ["SOFI", "ADNT", "META"],
-                        "emerging_momentum": ["ASML", "NOW", "CRM"]
-                    },
-                    "rotation_recommendations": {
-                        "overall_action": "URGENT_PORTFOLIO_ROTATION",
-                        "aggressive_rotations": ["TTMI", "NVDA"],
-                        "urgent_exits": ["PLAY"],
-                        "emerging_opportunities": ["QGEN", "ASML"],
-                        "detailed_recommendations": [
-                            {
-                                "symbol": "TTMI",
-                                "action": "URGENT_ROTATION",
-                                "reason": "Momentum excepcional (95/100) + Weekly ATR optimization + R/R 4.6:1",
-                                "urgency": "URGENT",
-                                "momentum_category": "EXCEPTIONAL"
-                            }
-                        ]
-                    },
-                    "market_context": {
-                        "spy_20d": 1.8,
-                        "spy_60d": 6.2,
-                        "spy_90d": 11.1
-                    },
-                    "optimization_metrics": {
-                        "weekly_atr_implemented": true,
-                        "avg_weekly_atr": 18.34,
-                        "avg_daily_atr": 9.12,
-                        "atr_ratio": 2.0,
-                        "positive_earnings_count": 15,
-                        "positive_earnings_percentage": 100
-                    }
-                };
-                
-                console.log('Usando datos de fallback optimizados para testing local');
-                renderOptimizedMomentumDashboard(fallbackData);
-                
-                const errorInfo = document.createElement('div');
-                errorInfo.innerHTML = `
-                    <div style="background: #f0fdf4; border: 1px solid #10b981; border-radius: 8px; padding: 15px; margin: 20px; color: #065f46;">
-                        <strong>🔧 Modo Testing - Weekly ATR Optimized</strong><br>
-                        <small>
-                            Se muestran datos de ejemplo con stack de optimizaciones aplicado.<br>
-                            Para datos reales, ejecuta desde servidor HTTP con archivos del bot optimizado.<br>
-                        </small>
-                    </div>
-                `;
-                document.getElementById('content').appendChild(errorInfo);
-            }
-        }
-        
-        function renderOptimizedMomentumDashboard(data) {
-            const contentEl = document.getElementById('content');
-            
-            // Detectar optimizaciones aplicadas
-            const optimizationStack = data.optimization_stack || {};
-            const optimizationMetrics = data.optimization_metrics || {};
-            const isOptimized = optimizationStack.weekly_atr_take_profit || optimizationMetrics.weekly_atr_implemented;
-            
-            // Resumen optimizado
-            const summaryHtml = `
-                <div class="summary">
-                    <div class="summary-grid">
-                        <div class="summary-item ${isOptimized ? 'optimized' : ''}">
-                            <div class="summary-number momentum">${data.summary.exceptional_momentum || 0}</div>
-                            <div class="summary-label">Momentum Excepcional</div>
-                        </div>
-                        <div class="summary-item ${isOptimized ? 'optimized' : ''}">
-                            <div class="summary-number aggressive">${data.summary.strong_momentum || 0}</div>
-                            <div class="summary-label">Momentum Fuerte</div>
-                        </div>
-                        <div class="summary-item ${isOptimized ? 'optimized' : ''}">
-                            <div class="summary-number rotation">${data.summary.rotation_opportunities || 0}</div>
-                            <div class="summary-label">Oportunidades Rotación</div>
-                        </div>
-                        <div class="summary-item ${isOptimized ? 'optimized' : ''}">
-                            <div class="summary-number ${isOptimized ? 'optimized' : 'targeting'}">${data.top_picks ? data.top_picks.length : 0}</div>
-                            <div class="summary-label">Targets ${isOptimized ? 'Optimizados' : 'Agresivos'}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            let analysisHtml = `<div class="analysis-sections">`;
-            
-            // ATR Comparison Section (si hay datos de optimización)
-            if (optimizationMetrics.weekly_atr_implemented && optimizationMetrics.avg_weekly_atr > 0) {
-                analysisHtml += `
-                    <div class="atr-comparison">
-                        <h3>📊 Weekly ATR vs Daily ATR - Optimization Impact</h3>
-                        <div class="atr-metrics">
-                            <div class="atr-metric">
-                                <div class="atr-value">${optimizationMetrics.avg_weekly_atr.toFixed(2)}</div>
-                                <div class="atr-label">Weekly ATR</div>
-                            </div>
-                            <div class="atr-metric">
-                                <div class="atr-value">${optimizationMetrics.avg_daily_atr.toFixed(2)}</div>
-                                <div class="atr-label">Daily ATR</div>
-                            </div>
-                            <div class="atr-metric">
-                                <div class="atr-value">${optimizationMetrics.atr_ratio.toFixed(1)}x</div>
-                                <div class="atr-label">Ratio W/D</div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 10px; font-size: 0.85em; color: #92400e;">
-                            <strong>Impact:</strong> Weekly ATR provides better alignment with ~1 month holding periods. 
-                            Higher ratio justifies more conservative multipliers for improved hit rates.
-                        </div>
+                document.getElementById('main-content').innerHTML = `
+                    <div class="error">
+                        <h3>❌ Error Cargando Datos</h3>
+                        <p>No se pueden cargar los datos del dashboard.</p>
+                        <p><strong>Posibles causas:</strong></p>
+                        <ul style="text-align: left; margin: 10px 0;">
+                            <li>El archivo data.json no existe o está corrupto</li>
+                            <li>Problemas de red o conectividad</li>
+                            <li>El análisis aún no se ha ejecutado</li>
+                        </ul>
+                        <button onclick="loadData()" style="margin-top: 15px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            🔄 Reintentar
+                        </button>
                     </div>
                 `;
             }
-            
-            // TOP PICKS con optimizaciones
-            if (data.top_picks && data.top_picks.length > 0) {
-                analysisHtml += `
-                    <div class="analysis-card ${isOptimized ? 'optimized' : ''}">
-                        <div class="section-title picks ${isOptimized ? 'optimized' : ''}">Top Momentum Picks - ${isOptimized ? 'Weekly ATR Optimized' : 'Targets Agresivos'}</div>
-                        <div class="top-picks-grid">
-                `;
-                
-                data.top_picks.slice(0, 8).forEach(stock => {
-                    const levels = calculateAggressiveTradingLevels(stock);
-                    const momentumCategory = getMomentumCategory(stock);
-                    const reasoning = generateAggressiveReasoningText(stock, {});
-                    const optimizations = stock.optimizations || {};
-                    const hasOptimizations = optimizations.weekly_atr_optimized || false;
-                    
-                    analysisHtml += `
-                        <div class="pick-card ${hasOptimizations ? 'optimized' : ''}">
-                            <div class="pick-header">
-                                <div class="pick-symbol">${stock.symbol}</div>
-                                <div class="pick-price">$${levels.current.toFixed(2)}</div>
-                            </div>
-                            <div class="pick-company">${stock.company || 'N/A'} • ${stock.sector || 'N/A'}</div>
-                            
-                            <div class="momentum-indicators">
-                                <div class="momentum-badge ${momentumCategory.toLowerCase()} ${hasOptimizations ? 'optimized' : ''}">${momentumCategory}</div>
-                                <div class="momentum-badge ${hasOptimizations ? 'optimized' : ''}">${stock.rotation_urgency || 'MEDIUM'}</div>
-                                <div class="momentum-badge ${hasOptimizations ? 'optimized' : ''}">~1 mes</div>
-                                ${hasOptimizations ? '<div class="momentum-badge optimized">OPTIMIZED</div>' : ''}
-                            </div>
-                            
-                            ${hasOptimizations && optimizations.weekly_atr > 0 ? `
-                            <div class="atr-indicators">
-                                <div class="atr-badge weekly">W: ${optimizations.weekly_atr.toFixed(2)}</div>
-                                <div class="atr-badge daily">D: ${optimizations.daily_atr.toFixed(2)}</div>
-                                <div class="atr-badge ratio">${optimizations.atr_ratio.toFixed(1)}x</div>
-                                <div class="atr-badge">${optimizations.stop_method}</div>
-                            </div>
-                            ` : ''}
-                            
-                            <div class="trading-levels">
-                                <div class="level-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="level-value current">$${levels.current.toFixed(2)}</div>
-                                    <div class="level-label">Precio Actual</div>
-                                </div>
-                                <div class="level-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="level-value stop-loss">$${levels.stopLoss.toFixed(2)}</div>
-                                    <div class="level-label">Stop Loss</div>
-                                </div>
-                                <div class="level-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="level-value ${hasOptimizations ? 'optimized' : 'aggressive'}">$${levels.takeProfit.toFixed(2)}</div>
-                                    <div class="level-label">${hasOptimizations ? 'Weekly ATR Target' : 'Target Agresivo'}</div>
-                                </div>
-                                <div class="level-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="level-value ${hasOptimizations ? 'optimized' : ''}">${levels.riskReward}:1</div>
-                                    <div class="level-label">Risk/Reward</div>
-                                </div>
-                            </div>
-                            
-                            <div class="pick-metrics">
-                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">
-                                        ${((levels.takeProfit - levels.current) / levels.current * 100).toFixed(1)}%
-                                    </div>
-                                    <div class="metric-label">${hasOptimizations ? 'Upside Optimizado' : 'Upside Agresivo'}</div>
-                                </div>
-                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">${stock.metrics?.risk_pct?.toFixed(1) || 'N/A'}%</div>
-                                    <div class="metric-label">Risk</div>
-                                </div>
-                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">
-                                        +${stock.metrics?.outperformance_20d?.toFixed(1) || 'N/A'}%
-                                    </div>
-                                    <div class="metric-label">Momentum 20d (70%)</div>
-                                </div>
-                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">${stock.score?.toFixed(0) || 'N/A'}</div>
-                                    <div class="metric-label">Score Final</div>
-                                </div>
-                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">${stock.technical_score?.toFixed(0) || 'N/A'}</div>
-                                    <div class="metric-label">Score Técnico</div>
-                                </div>
-                                <div class="metric-item ${hasOptimizations ? 'optimized' : ''}">
-                                    <div class="metric-value ${hasOptimizations ? 'optimized' : ''}">
-                                        ${optimizations.earnings_positive ? '✅' : '❌'}
-                                    </div>
-                                    <div class="metric-label">Earnings</div>
-                                </div>
-                            </div>
-                            
-                            ${hasOptimizations ? `
-                            <div class="optimization-metrics">
-                                <div class="optimization-title">🔧 Optimizations Applied:</div>
-                                <div class="optimization-details">
-                                    <div class="optimization-detail">
-                                        <div class="optimization-detail-value">${optimizations.take_profit_method.includes('weekly') ? 'Weekly' : 'Daily'}</div>
-                                        <div class="optimization-detail-label">ATR Method</div>
-                                    </div>
-                                    <div class="optimization-detail">
-                                        <div class="optimization-detail-value">${optimizations.stop_method.replace('_', ' ')}</div>
-                                        <div class="optimization-detail-label">Stop Method</div>
-                                    </div>
-                                    <div class="optimization-detail">
-                                        <div class="optimization-detail-value">${optimizations.earnings_positive ? 'Verified' : 'Missing'}</div>
-                                        <div class="optimization-detail-label">Fundamentals</div>
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            <div class="pick-reasoning ${hasOptimizations ? 'optimized' : ''}">
-                                <div class="reasoning-title ${hasOptimizations ? 'optimized' : ''}">
-                                    ${hasOptimizations ? '🔧 Razón optimizada:' : '⚡ Razón para momentum agresivo:'}
-                                </div>
-                                <div class="reasoning-text">${reasoning}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                analysisHtml += `
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Layout de dos columnas
-            analysisHtml += `<div class="two-column">`;
-            
-            // Análisis de momentum
-            if (data.momentum_analysis) {
-                analysisHtml += `
-                    <div class="analysis-card ${isOptimized ? 'optimized' : ''}">
-                        <div class="section-title momentum ${isOptimized ? 'optimized' : ''}">
-                            ${isOptimized ? 'Análisis Momentum Optimizado' : 'Análisis de Momentum Agresivo'}
-                        </div>
-                        
-                        <div class="momentum-grid">
-                            <div class="momentum-item">
-                                <div class="momentum-number">${data.momentum_analysis.exceptional_momentum?.length || 0}</div>
-                                <div class="momentum-label">Momentum Excepcional</div>
-                            </div>
-                            <div class="momentum-item">
-                                <div class="momentum-number">${data.momentum_analysis.strong_momentum?.length || 0}</div>
-                                <div class="momentum-label">Momentum Fuerte</div>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">🔥 Momentum EXCEPCIONAL ${isOptimized ? '(Weekly ATR 3.0x)' : '(rotación urgente)'}:</div>
-                            <div class="symbol-list">
-                                ${(data.momentum_analysis.exceptional_momentum || []).map(symbol => 
-                                    `<span class="symbol-badge exceptional">${symbol}</span>`
-                                ).join('')}
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">⚡ Momentum FUERTE ${isOptimized ? '(Weekly ATR 2.5x)' : '(rotación agresiva)'}:</div>
-                            <div class="symbol-list">
-                                ${(data.momentum_analysis.strong_momentum || []).map(symbol => 
-                                    `<span class="symbol-badge strong">${symbol}</span>`
-                                ).join('')}
-                            </div>
-                        </div>
-                        
-                        ${data.momentum_analysis.emerging_momentum?.length > 0 ? `
-                        <div style="margin-top: 15px;">
-                            <div style="font-weight: bold; margin-bottom: 8px;">🌱 Momentum EMERGENTE ${isOptimized ? '(Weekly ATR 2.0x)' : '(vigilar)'}:</div>
-                            <div class="symbol-list">
-                                ${data.momentum_analysis.emerging_momentum.map(symbol => 
-                                    `<span class="symbol-badge emerging">${symbol}</span>`
-                                ).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-            }
-            
-            // Recomendaciones de rotación optimizada
-            if (data.rotation_recommendations) {
-                const overallAction = data.rotation_recommendations.overall_action;
-                let actionBadgeClass = 'maintain';
-                let actionText = 'Mantener con vigilancia';
-                
-                if (overallAction === 'URGENT_PORTFOLIO_ROTATION') {
-                    actionBadgeClass = 'urgent-rotation';
-                    actionText = 'Rotación urgente de cartera';
-                } else if (overallAction === 'AGGRESSIVE_ROTATION_REQUIRED') {
-                    actionBadgeClass = 'rotation-required';
-                    actionText = 'Rotación agresiva requerida';
-                } else if (overallAction === 'EVALUATE_MOMENTUM_OPPORTUNITIES') {
-                    actionBadgeClass = 'evaluate';
-                    actionText = 'Evaluar oportunidades momentum';
-                }
-                
-                analysisHtml += `
-                    <div class="analysis-card ${isOptimized ? 'optimized' : ''}">
-                        <div class="section-title rotation ${isOptimized ? 'optimized' : ''}">
-                            ${isOptimized ? 'Rotación Optimizada de Momentum' : 'Rotación Agresiva de Momentum'}
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <span class="action-badge ${actionBadgeClass}">${actionText}</span>
-                            ${isOptimized ? '<span class="action-badge maintain" style="background: #10b981; color: white;">OPTIMIZED</span>' : ''}
-                        </div>
-                        
-                        <div class="rotation-recommendations">
-                `;
-                
-                // Rotaciones agresivas
-                if (data.rotation_recommendations.aggressive_rotations?.length > 0) {
-                    analysisHtml += `
-                        <div class="rotation-section">
-                            <div class="rotation-title urgent">${isOptimized ? 'Rotaciones Optimizadas' : 'Rotaciones Urgentes'}</div>
-                    `;
-                    data.rotation_recommendations.aggressive_rotations.forEach(rotation => {
-                        analysisHtml += `
-                            <div class="recommendation-item urgent">
-                                <div class="recommendation-header">
-                                    <span class="recommendation-symbol">${rotation.symbol || rotation}</span>
-                                    <span class="recommendation-action urgent">${isOptimized ? 'ROTAR OPT' : 'ROTAR AHORA'}</span>
-                                </div>
-                                <div class="recommendation-reason">
-                                    ${rotation.reason || 'Momentum superior detectado'}
-                                    ${isOptimized ? ' - Weekly ATR optimized' : ''}
-                                </div>
-                            </div>
-                        `;
-                    });
-                    analysisHtml += `</div>`;
-                }
-                
-                // Salidas urgentes
-                if (data.rotation_recommendations.urgent_exits?.length > 0) {
-                    analysisHtml += `
-                        <div class="rotation-section">
-                            <div class="rotation-title urgent">Salidas Urgentes</div>
-                    `;
-                    data.rotation_recommendations.urgent_exits.forEach(exit => {
-                        analysisHtml += `
-                            <div class="recommendation-item urgent">
-                                <div class="recommendation-header">
-                                    <span class="recommendation-symbol">${exit.symbol || exit}</span>
-                                    <span class="recommendation-action urgent">SALIR</span>
-                                </div>
-                                <div class="recommendation-reason">${exit.reason || 'Momentum perdido'}</div>
-                            </div>
-                        `;
-                    });
-                    analysisHtml += `</div>`;
-                }
-                
-                // Oportunidades emergentes
-                if (data.rotation_recommendations.emerging_opportunities?.length > 0) {
-                    analysisHtml += `
-                        <div class="rotation-section">
-                            <div class="rotation-title emerging">Oportunidades Emergentes</div>
-                    `;
-                    data.rotation_recommendations.emerging_opportunities.forEach(opp => {
-                        analysisHtml += `
-                            <div class="recommendation-item emerging">
-                                <div class="recommendation-header">
-                                    <span class="recommendation-symbol">${opp.symbol || opp}</span>
-                                    <span class="recommendation-action emerging">VIGILAR</span>
-                                </div>
-                                <div class="recommendation-reason">
-                                    ${opp.reason || 'Momentum emergente prometedor'}
-                                    ${isOptimized ? ' - Weekly ATR tracking' : ''}
-                                </div>
-                            </div>
-                        `;
-                    });
-                    analysisHtml += `</div>`;
-                }
-                
-                analysisHtml += `
-                        </div>
-                    </div>
-                `;
-            }
-            
-            analysisHtml += `</div>`; // Cerrar two-column
-            
-            // Contexto de mercado con optimizaciones
-            if (data.market_context) {
-                analysisHtml += `
-                    <div class="market-context">
-                        <h4>📊 Contexto SPY & ${isOptimized ? 'Momentum Optimizado' : 'Momentum Responsivo'}</h4>
-                        <div class="spy-metrics">
-                            <div class="spy-metric">
-                                <div class="spy-value ${data.market_context.spy_20d >= 0 ? 'positive' : 'negative'}">
-                                    ${data.market_context.spy_20d >= 0 ? '+' : ''}${data.market_context.spy_20d.toFixed(1)}%
-                                </div>
-                                <div class="spy-label">SPY 20 días</div>
-                            </div>
-                            <div class="spy-metric">
-                                <div class="spy-value ${data.market_context.spy_60d >= 0 ? 'positive' : 'negative'}">
-                                    ${data.market_context.spy_60d >= 0 ? '+' : ''}${data.market_context.spy_60d.toFixed(1)}%
-                                </div>
-                                <div class="spy-label">SPY 60 días</div>
-                            </div>
-                            <div class="spy-metric">
-                                <div class="spy-value ${data.market_context.spy_90d >= 0 ? 'positive' : 'negative'}">
-                                    ${data.market_context.spy_90d >= 0 ? '+' : ''}${data.market_context.spy_90d.toFixed(1)}%
-                                </div>
-                                <div class="spy-label">SPY 90 días</div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.8); border-radius: 8px; font-size: 0.85em; color: #666;">
-                            <strong>${isOptimized ? '🔧 Momentum Optimizado:' : '⚡ Momentum Responsivo:'}</strong> 
-                            ${isOptimized ? 
-                                'Targets son calculados con Weekly ATR para mejor alineación temporal. Si momentum se debilita (no aparece 1+ semanas), salir independientemente del target. Rotación mensual con fundamentales estrictos.' :
-                                'Targets son agresivos pero adaptativos. Si momentum se debilita (no aparece 1+ semanas), salir independientemente del target. Rotación mensual activa hacia mejores oportunidades.'
-                            }
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Optimization Summary (si hay optimizaciones)
-            if (isOptimized && optimizationMetrics.weekly_atr_implemented) {
-                analysisHtml += `
-                    <div class="optimization-summary">
-                        <h4>🔧 Optimization Stack - Performance Metrics</h4>
-                        <div class="optimization-grid">
-                            <div class="optimization-stat">
-                                <div class="optimization-stat-value">${optimizationMetrics.positive_earnings_percentage.toFixed(0)}%</div>
-                                <div class="optimization-stat-label">Earnings Positivos</div>
-                            </div>
-                            <div class="optimization-stat">
-                                <div class="optimization-stat-value">${optimizationMetrics.atr_ratio.toFixed(1)}x</div>
-                                <div class="optimization-stat-label">Weekly/Daily Ratio</div>
-                            </div>
-                            <div class="optimization-stat">
-                                <div class="optimization-stat-value">✅</div>
-                                <div class="optimization-stat-label">Stop Loss Restrictivo</div>
-                            </div>
-                            <div class="optimization-stat">
-                                <div class="optimization-stat-value">1M</div>
-                                <div class="optimization-stat-label">Timeframe Aligned</div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 10px; font-size: 0.85em; color: #065f46; text-align: center;">
-                            <strong>Impact:</strong> Optimization stack improves hit rates through better temporal alignment and stricter quality filtering.
-                        </div>
-                    </div>
-                `;
-            }
-            
-            analysisHtml += `</div>`;
-            
-            // Footer
-            const updateTime = new Date(data.timestamp).toLocaleString('es-ES');
-            const footerHtml = `
-                <div class="last-update">
-                    📅 Última actualización: ${updateTime}<br>
-                    🗓️ Fecha de análisis: ${data.market_date}<br>
-                    ⏰ Próximo análisis: ${getNextUpdateTime()}<br>
-                    📅 Ejecución automática: Sábados 10 AM España<br>
-                    ${isOptimized ? '🔧 Optimization Stack: Weekly ATR + Min Stop Loss + Strict Fundamentals<br>' : ''}
-                    <div class="signature">
-                        <small>📊 Professional Momentum Analytics Platform ${isOptimized ? '- Weekly ATR Optimized' : ''} by <strong>0t4c0n</strong></small>
-                    </div>
-                </div>
-            `;
-            
-            contentEl.innerHTML = summaryHtml + analysisHtml + footerHtml;
         }
         
         // Cargar datos al iniciar
@@ -1853,7 +614,7 @@
             loadData();
         });
         
-        // Auto-refresh cada 5 minutos si está activo
+        // Auto-refresh cada 5 minutos si la página está activa
         setInterval(() => {
             if (document.hasFocus()) {
                 loadData();
