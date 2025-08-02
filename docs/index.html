@@ -350,7 +350,7 @@
     <div class="container">
         <div class="header">
             <h1>📈 Conservative Trading Bot</h1>
-            <div class="header-subtitle">Trading Mensual con Monitorización Diaria + Bonus MA50</div>
+            <div class="header-subtitle">Trading Mensual con Monitorización Diaria + Bonus MA50 Stop Loss</div>
             <div id="summary-section"></div>
         </div>
         
@@ -417,8 +417,8 @@
                         <div class="stat-label">Candidatos</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">${summary.ma50_bonus_count || data.ma50_bonus_count || 0}</div>
-                        <div class="stat-label">Bonus MA50</div>
+                        <div class="stat-value">${summary.ma50_stop_loss_count || summary.ma50_bonus_count || data.ma50_bonus_count || 0}</div>
+                        <div class="stat-label">MA50 Stop Loss</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">${data.execution_time_minutes ? data.execution_time_minutes.toFixed(1) + 'm' : 'N/A'}</div>
@@ -463,7 +463,7 @@
                 const rr = stock.risk_reward_ratio || (upside / Math.max(risk, 0.1)) || 0;
                 
                 // MA50 bonus
-                const hasMa50 = stock.is_ma50_rebote || stock.ma50_bonus_applied || stock.ma50_bonus > 0;
+                const hasMa50 = stock.is_ma50_stop_loss || stock.ma50_bonus_applied || stock.ma50_bonus > 0;
                 const ma50BonusValue = stock.ma50_bonus || 22;
                 
                 // Outperformance
@@ -480,7 +480,7 @@
                         <div class="stock-header">
                             <div>
                                 <span class="stock-symbol">${symbol}</span>
-                                ${hasMa50 ? `<span class="ma50-bonus">🌟 MA50 +${ma50BonusValue}</span>` : ''}
+                                ${hasMa50 ? `<span class="ma50-bonus">🌟 MA50 Stop +${ma50BonusValue}</span>` : ''}
                             </div>
                             <div class="stock-score">Score: ${formatNumber(score)}</div>
                         </div>
@@ -552,7 +552,7 @@
                     <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 8px; font-size: 0.9rem; color: #666;">
                         <strong>🎯 Filosofía Trading Mensual:</strong> 
                         Monitorización diaria, rotaciones solo cuando sea crítico. 
-                        MA50 Bonus (+22pts) prioriza rebotes técnicos. 
+                        MA50 Bonus (+22pts) se aplica cuando MA50 es el stop loss óptimo seleccionado. 
                         Criterios estrictos para evitar overtrading.
                     </div>
                 </div>
@@ -568,7 +568,7 @@
                     🗓️ <strong>Fecha análisis:</strong> ${analysisDate}<br>
                     ⏰ <strong>Próximo análisis:</strong> ${getNextUpdateTime()}<br>
                     📅 <strong>Frecuencia:</strong> Lunes-Viernes 9:00 AM España<br>
-                    🌟 <strong>Sistema:</strong> MA50 Bonus + Trading Mensual + Gestión Diaria<br>
+                    🌟 <strong>Sistema:</strong> MA50 Stop Loss Bonus + Trading Mensual + Gestión Diaria<br>
                     <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #d1d5db;">
                         <small style="color: #3b82f6; font-weight: 600;">
                             📊 Conservative Trading Bot by <strong>0t4c0n</strong>
