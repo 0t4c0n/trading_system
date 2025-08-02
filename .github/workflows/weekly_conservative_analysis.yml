@@ -3,8 +3,8 @@ name: Daily Conservative Stock Analysis with MA50 Bonus
 
 on:
   schedule:
-    # Lunes a viernes a las 15:30 España (14:30 UTC) - Después del cierre de mercado USA
-    - cron: '30 14 * * 1-5'
+    # Lunes a viernes a las 9:00 AM España (8:00 UTC)
+    - cron: '0 8 * * 1-5'
   workflow_dispatch:  # Permitir ejecución manual
 
 # PERMISOS NECESARIOS PARA GITHUB PAGES Y COMMITS
@@ -68,6 +68,7 @@ jobs:
         
         echo "🔄 MODO: Ejecución diaria para trades de ~1 mes"
         echo "🎯 OBJETIVO: Monitorizar oportunidades sin rotación excesiva"
+        echo "🕘 HORARIO: L-V 9:00 AM España (post-apertura europea)"
       env:
         PYTHONUNBUFFERED: 1
         
@@ -84,7 +85,7 @@ jobs:
       run: |
         echo "🔍 === SCREENING DIARIO CON BONUS MA50 ==="
         echo "🌟 Sistema: MA50 priority con +22 puntos por rebote alcista"
-        echo "📅 Frecuencia: Diaria (Lunes-Viernes post-market)"
+        echo "📅 Frecuencia: Diaria (L-V 9:00 AM España)"
         echo "🎯 Objetivo: Trades de ~1 mes con gestión diaria de exits"
         
         python conservative_screener.py
@@ -93,6 +94,19 @@ jobs:
         ls -la weekly_screening_results.json momentum_responsive_results_*.json 2>/dev/null || echo "Verificando archivos generados..."
       env:
         PYTHONUNBUFFERED: 1
+
+    - name: 1.1. Crear archivo histórico de screening diario
+      run: |
+        echo "🔧 Creando archivo histórico de screening diario..."
+        DATE_STAMP=$(date +%Y%m%d)
+        
+        if [ -f "weekly_screening_results.json" ]; then
+          cp weekly_screening_results.json "weekly_screening_results_${DATE_STAMP}.json"
+          echo "✅ Archivo histórico creado: weekly_screening_results_${DATE_STAMP}.json"
+          ls -la weekly_screening_results_${DATE_STAMP}.json
+        else
+          echo "❌ No se puede crear histórico - archivo principal no existe"
+        fi
         
     - name: 2. Análisis de consistencia adaptado para ejecución diaria
       run: |
@@ -106,6 +120,19 @@ jobs:
         ls -la consistency_analysis.json consistency_analysis_*.json 2>/dev/null || echo "Verificando archivos de consistencia..."
       env:
         PYTHONUNBUFFERED: 1
+
+    - name: 2.1. Crear archivo histórico de consistencia diaria
+      run: |
+        echo "🔧 Creando archivo histórico de consistencia diaria..."
+        DATE_STAMP=$(date +%Y%m%d)
+        
+        if [ -f "consistency_analysis.json" ]; then
+          cp consistency_analysis.json "consistency_analysis_${DATE_STAMP}.json"
+          echo "✅ Archivo histórico creado: consistency_analysis_${DATE_STAMP}.json"
+          ls -la consistency_analysis_${DATE_STAMP}.json
+        else
+          echo "❌ No se puede crear histórico - archivo principal no existe"
+        fi
         
     - name: 3. Recomendaciones optimizadas para trades mensuales
       run: |
@@ -123,6 +150,19 @@ jobs:
         ls -la rotation_recommendations.json rotation_recommendations_*.json 2>/dev/null || echo "Verificando recomendaciones..."
       env:
         PYTHONUNBUFFERED: 1
+
+    - name: 3.1. Crear archivo histórico de recomendaciones diarias
+      run: |
+        echo "🔧 Creando archivo histórico de recomendaciones diarias..."
+        DATE_STAMP=$(date +%Y%m%d)
+        
+        if [ -f "rotation_recommendations.json" ]; then
+          cp rotation_recommendations.json "rotation_recommendations_${DATE_STAMP}.json"
+          echo "✅ Archivo histórico creado: rotation_recommendations_${DATE_STAMP}.json"
+          ls -la rotation_recommendations_${DATE_STAMP}.json
+        else
+          echo "❌ No se puede crear histórico - archivo principal no existe"
+        fi
         
     - name: 4. Generar reporte diario optimizado
       run: |
@@ -148,6 +188,7 @@ jobs:
 🌟 MA50 Bonus: +22pts for bullish rebounds  
 🎯 Philosophy: Daily screening, monthly rotation criteria
 ⚡ Features: Weekly ATR + Strict rotation thresholds
+🕘 Schedule: Mon-Fri 9:00 AM Spain (post-EU open)
 
 📊 Daily Stats:
 - Screening: Conservative momentum with MA50 priority
@@ -175,7 +216,7 @@ EOF
         git config --global user.name 'Daily Conservative Bot'
         git config --global user.email 'actions@github.com'
         
-    - name: 🔧 COMMIT DIARIO con gestión histórica optimizada
+    - name: 6. Commit diario con gestión histórica optimizada
       run: |
         echo "=== 🔧 INICIANDO COMMIT DIARIO ==="
         
@@ -235,19 +276,19 @@ EOF
       id: deployment
       uses: actions/deploy-pages@v4
       
-    - name: 🎉 Resumen final del análisis diario
+    - name: 7. Resumen final del análisis diario
       run: |
-        echo "🎉 ===== ANÁLISIS DIARIO COMPLETADO =====
+        echo "🎉 ===== ANÁLISIS DIARIO COMPLETADO ====="
         echo "🕐 Iniciado: $ANALYSIS_START_TIME UTC"
         echo "🕐 Finalizado: $(date -u +%H:%M) UTC"
         echo "📅 Fecha: $(date +%Y-%m-%d)"
         echo ""
         echo "📊 ARCHIVOS DIARIOS GENERADOS:"
-        ls -la *.json *.md 2>/dev/null | grep -E "(weekly_screening_results\.json|consistency_analysis\.json|rotation_recommendations\.json|ENHANCED_WEEKLY_REPORT_.*\.md)" || echo "Sin archivos principales"
+        ls -la *.json *.md 2>/dev/null | grep -E "(weekly_screening_results\.json|consistency_analysis\.json|rotation_recommendations\.json|ENHANCED_WEEKLY_REPORT_*.md)" || echo "Sin archivos principales"
         echo ""
         echo "🔄 CONFIGURACIÓN DIARIA APLICADA:"
         echo "🌟 MA50 Bonus System: +22pts por rebote alcista"
-        echo "📅 Frecuencia: Lunes-Viernes 15:30 España (post-market)"
+        echo "📅 Frecuencia: Lunes-Viernes 9:00 AM España"
         echo "🎯 Filosofía: Trades de ~1 mes con monitorización diaria"
         echo "⚠️ Rotaciones: Solo con criterios estrictos"
         echo ""
@@ -263,7 +304,7 @@ EOF
         echo "🌐 DASHBOARD: ${{ steps.deployment.outputs.page_url }}"
         echo ""
         echo "📈 PRÓXIMAS EJECUCIONES:"
-        echo "🔄 Próxima ejecución: Lunes-Viernes 15:30 España"
+        echo "🔄 Próxima ejecución: Lunes-Viernes 9:00 AM España"
         echo "⚡ Ejecución manual disponible en Actions tab"
         echo "🎯 Sistema: Optimizado para trades mensuales con gestión diaria"
         echo "🌟 Bonus MA50: Sistema implementado y funcionando"
