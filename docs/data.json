@@ -1,454 +1,283 @@
 {
-  "timestamp": "2025-08-02T09:53:25.540339",
+  "timestamp": "2025-08-02T16:30:40.774242",
   "market_date": "2025-08-02",
-  "analysis_type": "aggressive_momentum_responsive_weekly_atr_optimized",
+  "analysis_type": "daily_momentum_monthly_trading_ma50_bonus",
+  "execution_frequency": "daily",
+  "trading_philosophy": "daily_monitoring_monthly_trading",
   "optimization_stack": {
+    "ma50_bonus_system": true,
     "weekly_atr_take_profit": true,
-    "min_stop_loss_restrictive": true,
-    "fundamental_strict_filtering": true,
-    "timeframe_alignment": "1_month_swing_trading"
+    "strict_rotation_criteria": true,
+    "ultra_conservative_risk": true
   },
   "summary": {
-    "analysis_type": "Aggressive Momentum Responsive - Weekly ATR Optimized",
+    "analysis_type": "Daily Momentum Analysis - Monthly Trading Focus",
     "total_analyzed": 15,
-    "exceptional_momentum": 3,
-    "strong_momentum": 4,
+    "exceptional_momentum": 2,
+    "strong_momentum": 2,
+    "ma50_bonus_applied": 7,
     "rotation_opportunities": 0,
     "optimization_applied": true,
-    "message": "An\u00e1lisis momentum agresivo con stack de optimizaciones completado"
+    "message": "Daily momentum analysis with monthly trading philosophy completed"
   },
   "top_picks": [
     {
-      "rank": 1,
-      "symbol": "RMBS",
-      "company": "Rambus Inc.",
-      "sector": "Technology",
-      "price": 72.41,
-      "score": 144.0,
-      "technical_score": 112.7,
-      "rr_bonus": 31.3,
-      "stop_loss": 65.98,
-      "take_profit": 89.19,
-      "momentum_category": "MODERATE",
-      "metrics": {
-        "risk_pct": 8.88,
-        "upside_pct": 23.17,
-        "risk_reward_ratio": 2.61,
-        "outperformance_20d": 13.35,
-        "outperformance_60d": 31.22,
-        "volume_surge": 89.9,
-        "momentum_strength": 144.0
+      "symbol": "GNRC",
+      "score": 108.2700409146238,
+      "momentum_category": "EXCEPTIONAL",
+      "risk_pct": 6.460037995100329,
+      "upside_pct": 18.48038446189897,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 11.9278564453125,
+        "ma50_bonus_applied": false,
+        "ma50_bonus_value": 0
       },
-      "optimizations": {
-        "weekly_atr": 5.59,
-        "daily_atr": 2.67,
-        "atr_ratio": 2.093632958801498,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
-      },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
+      "target_hold": "~1 month with daily monitoring",
       "rotation_urgency": "MEDIUM"
     },
     {
-      "rank": 2,
-      "symbol": "AMD",
-      "company": "Advanced Micro Devices, Inc.",
-      "sector": "Technology",
-      "price": 171.7,
-      "score": 144.0,
-      "technical_score": 115.8,
-      "rr_bonus": 28.2,
-      "stop_loss": 154.62,
-      "take_profit": 211.81,
-      "momentum_category": "EXCEPTIONAL",
-      "metrics": {
-        "risk_pct": 9.95,
-        "upside_pct": 23.36,
-        "risk_reward_ratio": 2.35,
-        "outperformance_20d": 27.21,
-        "outperformance_60d": 59.96,
-        "volume_surge": 35.2,
-        "momentum_strength": 144.0
+      "symbol": "GE",
+      "score": 100.65933164516179,
+      "momentum_category": "MODERATE",
+      "risk_pct": 8.004215165915118,
+      "upside_pct": 16.672010696325174,
+      "ma50_bonus": true,
+      "ma50_bonus_value": 22,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 14.970354409274597,
+        "ma50_bonus_applied": true,
+        "ma50_bonus_value": 22
       },
-      "optimizations": {
-        "weekly_atr": 13.37,
-        "daily_atr": 6.39,
-        "atr_ratio": 2.092331768388106,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
-      },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
-      "rotation_urgency": "URGENT"
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "HIGH"
     },
     {
-      "rank": 3,
-      "symbol": "VRT",
-      "company": "Vertiv Holdings Co",
-      "sector": "Industrials",
-      "price": 141.59,
-      "score": 143.1,
-      "technical_score": 106.1,
-      "rr_bonus": 37.0,
-      "stop_loss": 129.3,
-      "take_profit": 179.48,
+      "symbol": "TRMB",
+      "score": 99.36323728980192,
       "momentum_category": "MODERATE",
-      "metrics": {
-        "risk_pct": 8.68,
-        "upside_pct": 26.76,
-        "risk_reward_ratio": 3.08,
-        "outperformance_20d": 11.97,
-        "outperformance_60d": 37.16,
-        "volume_surge": 60.6,
-        "momentum_strength": 143.1
+      "risk_pct": 8.769976182145339,
+      "upside_pct": 14.142233185835398,
+      "ma50_bonus": true,
+      "ma50_bonus_value": 22,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 3.8957138061523438,
+        "ma50_bonus_applied": true,
+        "ma50_bonus_value": 22
       },
-      "optimizations": {
-        "weekly_atr": 12.63,
-        "daily_atr": 6.84,
-        "atr_ratio": 1.8464912280701755,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "HIGH"
+    },
+    {
+      "symbol": "AVGO",
+      "score": 92.89851786610484,
+      "momentum_category": "MODERATE",
+      "risk_pct": 9.544116018492405,
+      "upside_pct": 19.376548167882834,
+      "ma50_bonus": true,
+      "ma50_bonus_value": 22,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 18.64282382337953,
+        "ma50_bonus_applied": true,
+        "ma50_bonus_value": 22
       },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "HIGH"
+    },
+    {
+      "symbol": "SCHW",
+      "score": 91.30847904778456,
+      "momentum_category": "MODERATE",
+      "risk_pct": 5.9967870345494205,
+      "upside_pct": 11.409854245076016,
+      "ma50_bonus": true,
+      "ma50_bonus_value": 22,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 3.6332778736802243,
+        "ma50_bonus_applied": true,
+        "ma50_bonus_value": 22
+      },
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "HIGH"
+    },
+    {
+      "symbol": "CVNA",
+      "score": 91.25169363224109,
+      "momentum_category": "MODERATE",
+      "risk_pct": 7.124923795255576,
+      "upside_pct": 28.532954429002732,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 34.97949981689453,
+        "ma50_bonus_applied": false,
+        "ma50_bonus_value": 0
+      },
+      "target_hold": "~1 month with daily monitoring",
       "rotation_urgency": "MEDIUM"
     },
     {
-      "rank": 4,
-      "symbol": "SMCI",
-      "company": "Super Micro Computer, Inc.",
-      "sector": "Technology",
-      "price": 56.64,
-      "score": 133.9,
-      "technical_score": 90.9,
-      "rr_bonus": 43.0,
-      "stop_loss": 52.07,
-      "take_profit": 73.02,
-      "momentum_category": "STRONG",
-      "metrics": {
-        "risk_pct": 8.07,
-        "upside_pct": 28.91,
-        "risk_reward_ratio": 3.58,
-        "outperformance_20d": 20.06,
-        "outperformance_60d": 63.26,
-        "volume_surge": 24.6,
-        "momentum_strength": 133.9
-      },
-      "optimizations": {
-        "weekly_atr": 6.55,
-        "daily_atr": 2.76,
-        "atr_ratio": 2.3731884057971016,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
-      },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
-      "rotation_urgency": "HIGH"
-    },
-    {
-      "rank": 5,
-      "symbol": "PTC",
-      "company": "PTC Inc.",
-      "sector": "Technology",
-      "price": 212.11,
-      "score": 132.8,
-      "technical_score": 108.8,
-      "rr_bonus": 24.0,
-      "stop_loss": 194.64,
-      "take_profit": 247.08,
-      "momentum_category": "STRONG",
-      "metrics": {
-        "risk_pct": 8.24,
-        "upside_pct": 16.49,
-        "risk_reward_ratio": 2.0,
-        "outperformance_20d": 21.16,
-        "outperformance_60d": 20.58,
-        "volume_surge": -2.5,
-        "momentum_strength": 132.8
-      },
-      "optimizations": {
-        "weekly_atr": 11.66,
-        "daily_atr": 7.71,
-        "atr_ratio": 1.5123216601815823,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
-      },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
-      "rotation_urgency": "HIGH"
-    },
-    {
-      "rank": 6,
-      "symbol": "KTOS",
-      "company": "Kratos Defense & Security Solu",
-      "sector": "Industrials",
-      "price": 56.71,
-      "score": 129.8,
-      "technical_score": 82.4,
-      "rr_bonus": 47.4,
-      "stop_loss": 53.21,
-      "take_profit": 70.52,
-      "momentum_category": "EXCEPTIONAL",
-      "metrics": {
-        "risk_pct": 6.17,
-        "upside_pct": 24.36,
-        "risk_reward_ratio": 3.95,
-        "outperformance_20d": 26.47,
-        "outperformance_60d": 46.14,
-        "volume_surge": -34.4,
-        "momentum_strength": 129.8
-      },
-      "optimizations": {
-        "weekly_atr": 5.53,
-        "daily_atr": 3.25,
-        "atr_ratio": 1.7015384615384617,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
-      },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
-      "rotation_urgency": "URGENT"
-    },
-    {
-      "rank": 7,
-      "symbol": "ANET",
-      "company": "Arista Networks Inc",
-      "sector": "Technology",
-      "price": 117.57,
-      "score": 129.6,
-      "technical_score": 90.8,
-      "rr_bonus": 38.7,
-      "stop_loss": 109.67,
-      "take_profit": 143.06,
-      "momentum_category": "STRONG",
-      "metrics": {
-        "risk_pct": 6.72,
-        "upside_pct": 21.68,
-        "risk_reward_ratio": 3.23,
-        "outperformance_20d": 15.7,
-        "outperformance_60d": 24.88,
-        "volume_surge": 17.1,
-        "momentum_strength": 129.6
-      },
-      "optimizations": {
-        "weekly_atr": 10.2,
-        "daily_atr": 3.49,
-        "atr_ratio": 2.922636103151862,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
-      },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
-      "rotation_urgency": "HIGH"
-    },
-    {
-      "rank": 8,
-      "symbol": "KLG",
-      "company": "WK Kellogg Co",
-      "sector": "Consumer Defensive",
-      "price": 23.08,
-      "score": 122.4,
-      "technical_score": 88.7,
-      "rr_bonus": 33.7,
-      "stop_loss": 21.69,
-      "take_profit": 26.97,
-      "momentum_category": "EXCEPTIONAL",
-      "metrics": {
-        "risk_pct": 6.01,
-        "upside_pct": 16.87,
-        "risk_reward_ratio": 2.81,
-        "outperformance_20d": 34.72,
-        "outperformance_60d": 24.14,
-        "volume_surge": -72.9,
-        "momentum_strength": 122.4
-      },
-      "optimizations": {
-        "weekly_atr": 1.56,
-        "daily_atr": 0.59,
-        "atr_ratio": 2.6440677966101696,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
-      },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
-      "rotation_urgency": "URGENT"
-    },
-    {
-      "rank": 9,
-      "symbol": "LVS",
-      "company": "Las Vegas Sands Corp.",
-      "sector": "Consumer Cyclical",
-      "price": 52.26,
-      "score": 119.9,
-      "technical_score": 86.9,
-      "rr_bonus": 32.9,
-      "stop_loss": 49.42,
-      "take_profit": 60.06,
+      "symbol": "ETN",
+      "score": 90.94949199163557,
       "momentum_category": "MODERATE",
-      "metrics": {
-        "risk_pct": 5.44,
-        "upside_pct": 14.93,
-        "risk_reward_ratio": 2.74,
-        "outperformance_20d": 7.94,
-        "outperformance_60d": 20.91,
-        "volume_surge": -0.9,
-        "momentum_strength": 119.9
+      "risk_pct": 9.632961740935396,
+      "upside_pct": 16.608836196728923,
+      "ma50_bonus": true,
+      "ma50_bonus_value": 22,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 21.10927765123993,
+        "ma50_bonus_applied": true,
+        "ma50_bonus_value": 22
       },
-      "optimizations": {
-        "weekly_atr": 3.12,
-        "daily_atr": 1.14,
-        "atr_ratio": 2.7368421052631584,
-        "earnings_positive": true,
-        "stop_method": "ma21_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "HIGH"
+    },
+    {
+      "symbol": "ACAD",
+      "score": 88.42642970110674,
+      "momentum_category": "MODERATE",
+      "risk_pct": 7.209068254951142,
+      "upside_pct": 27.90358762296947,
+      "ma50_bonus": true,
+      "ma50_bonus_value": 22,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 2.1885714530944824,
+        "ma50_bonus_applied": true,
+        "ma50_bonus_value": 22
       },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "HIGH"
+    },
+    {
+      "symbol": "CBRE",
+      "score": 85.99942634611904,
+      "momentum_category": "MODERATE",
+      "risk_pct": 7.5347916801542985,
+      "upside_pct": 14.70795380828544,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 7.547141483851841,
+        "ma50_bonus_applied": false,
+        "ma50_bonus_value": 0
+      },
+      "target_hold": "~1 month with daily monitoring",
       "rotation_urgency": "MEDIUM"
     },
     {
-      "rank": 10,
-      "symbol": "CALM",
-      "company": "Cal-Maine Foods, Inc.",
-      "sector": "Consumer Defensive",
-      "price": 107.88,
-      "score": 118.4,
-      "technical_score": 91.4,
-      "rr_bonus": 27.0,
-      "stop_loss": 99.54,
-      "take_profit": 126.65,
-      "momentum_category": "MODERATE",
-      "metrics": {
-        "risk_pct": 7.73,
-        "upside_pct": 17.4,
-        "risk_reward_ratio": 2.25,
-        "outperformance_20d": 6.48,
-        "outperformance_60d": 1.78,
-        "volume_surge": 8.0,
-        "momentum_strength": 118.4
+      "symbol": "CGNX",
+      "score": 83.49913839175795,
+      "momentum_category": "EXCEPTIONAL",
+      "risk_pct": 5.124297591497616,
+      "upside_pct": 19.31615788491527,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {
+        "weekly_atr": 2.6057497772727176,
+        "ma50_bonus_applied": false,
+        "ma50_bonus_value": 0
       },
-      "optimizations": {
-        "weekly_atr": 7.51,
-        "daily_atr": 4.67,
-        "atr_ratio": 1.60813704496788,
-        "earnings_positive": true,
-        "stop_method": "ma50_priority",
-        "take_profit_method": "weekly_atr_swing_for_fences",
-        "weekly_atr_optimized": true
-      },
-      "target_hold": "~1 mes (rotaci\u00f3n agresiva optimizada)",
+      "target_hold": "~1 month with daily monitoring",
       "rotation_urgency": "MEDIUM"
     }
   ],
   "momentum_analysis": {
-    "philosophy": "swing_for_fences_monthly_rotation_optimized",
+    "philosophy": "daily_monitoring_monthly_trading_ma50_bonus",
+    "execution_frequency": "daily",
     "momentum_weights": {
       "momentum_20d": 0.7,
       "momentum_60d": 0.3
     },
     "exceptional_momentum": [
-      "AMD",
-      "KTOS",
-      "KLG"
+      "GNRC",
+      "CGNX"
     ],
     "strong_momentum": [
-      "SMCI",
-      "PTC",
       "ANET",
-      "GRFS"
+      "SMCI"
     ],
     "emerging_momentum": [
-      "RMBS",
-      "VRT",
-      "LVS",
-      "CALM",
-      "CBRE",
+      "GE",
+      "TRMB",
+      "AVGO",
+      "SCHW",
+      "CVNA",
+      "ETN",
       "ACAD",
-      "URBN",
-      "VNT"
+      "CBRE",
+      "PEG",
+      "TAL"
     ]
   },
+  "ma50_bonus_highlights": [
+    {
+      "symbol": "GE",
+      "score": 100.65933164516179,
+      "bonus_value": 22,
+      "risk_pct": 8.004215165915118,
+      "upside_pct": 16.672010696325174
+    },
+    {
+      "symbol": "TRMB",
+      "score": 99.36323728980192,
+      "bonus_value": 22,
+      "risk_pct": 8.769976182145339,
+      "upside_pct": 14.142233185835398
+    },
+    {
+      "symbol": "AVGO",
+      "score": 92.89851786610484,
+      "bonus_value": 22,
+      "risk_pct": 9.544116018492405,
+      "upside_pct": 19.376548167882834
+    },
+    {
+      "symbol": "SCHW",
+      "score": 91.30847904778456,
+      "bonus_value": 22,
+      "risk_pct": 5.9967870345494205,
+      "upside_pct": 11.409854245076016
+    },
+    {
+      "symbol": "ETN",
+      "score": 90.94949199163557,
+      "bonus_value": 22,
+      "risk_pct": 9.632961740935396,
+      "upside_pct": 16.608836196728923
+    },
+    {
+      "symbol": "ACAD",
+      "score": 88.42642970110674,
+      "bonus_value": 22,
+      "risk_pct": 7.209068254951142,
+      "upside_pct": 27.90358762296947
+    },
+    {
+      "symbol": "PEG",
+      "score": 75.10148680629902,
+      "bonus_value": 22,
+      "risk_pct": 8.717914097666544,
+      "upside_pct": 9.085555023637653
+    }
+  ],
   "rotation_recommendations": {
     "overall_action": "CASH_DEPLOYMENT_OPPORTUNITIES",
-    "aggressive_rotations": [],
-    "urgent_exits": [],
-    "emerging_opportunities": [],
-    "detailed_recommendations": [
-      {
-        "symbol": "RMBS",
-        "action": "CASH_DEPLOYMENT_URGENT",
-        "reason": "Cash deployment opportunity - Score 180.7 + optimizations (Weekly ATR, ATR ratio 2.1x, Earnings+, Quality Stop)",
-        "urgency": "URGENT",
-        "allocation_usd": 5000,
-        "optimization_features": [
-          "Weekly ATR",
-          "ATR ratio 2.1x",
-          "Earnings+",
-          "Quality Stop"
-        ]
-      },
-      {
-        "symbol": "AMD",
-        "action": "CASH_DEPLOYMENT_URGENT",
-        "reason": "Cash deployment opportunity - Score 180.7 + optimizations (Weekly ATR, ATR ratio 2.1x, Earnings+, Quality Stop)",
-        "urgency": "URGENT",
-        "allocation_usd": 5000,
-        "optimization_features": [
-          "Weekly ATR",
-          "ATR ratio 2.1x",
-          "Earnings+",
-          "Quality Stop"
-        ]
-      },
-      {
-        "symbol": "LVS",
-        "action": "CASH_DEPLOYMENT_URGENT",
-        "reason": "Cash deployment opportunity - Score 180.6 + optimizations (Weekly ATR, ATR ratio 2.7x, Earnings+, Quality Stop, Low Risk 5.4%)",
-        "urgency": "URGENT",
-        "allocation_usd": 5000,
-        "optimization_features": [
-          "Weekly ATR",
-          "ATR ratio 2.7x",
-          "Earnings+",
-          "Quality Stop",
-          "Low Risk 5.4%"
-        ]
-      },
-      {
-        "symbol": "VRT",
-        "action": "CASH_DEPLOYMENT_URGENT",
-        "reason": "Cash deployment opportunity - Score 171.1 + optimizations (Weekly ATR, Earnings+, Quality Stop)",
-        "urgency": "URGENT",
-        "allocation_usd": 5000,
-        "optimization_features": [
-          "Weekly ATR",
-          "Earnings+",
-          "Quality Stop"
-        ]
-      },
-      {
-        "symbol": "SMCI",
-        "action": "CASH_DEPLOYMENT_URGENT",
-        "reason": "Cash deployment opportunity - Score 168.1 + optimizations (Weekly ATR, ATR ratio 2.4x, Earnings+, Quality Stop)",
-        "urgency": "URGENT",
-        "allocation_usd": 5000,
-        "optimization_features": [
-          "Weekly ATR",
-          "ATR ratio 2.4x",
-          "Earnings+",
-          "Quality Stop"
-        ]
-      }
-    ]
+    "strict_criteria_applied": true,
+    "urgent_exits": 0,
+    "rotation_opportunities": 0,
+    "cash_deployment": 10,
+    "philosophy_alignment": "daily_monitoring_monthly_trading"
   },
   "market_context": {
     "spy_20d": -0.5788940411422638,
@@ -456,11 +285,10 @@
     "spy_90d": 8.618647274904912
   },
   "optimization_metrics": {
-    "weekly_atr_implemented": true,
-    "avg_weekly_atr": 6.416,
-    "avg_daily_atr": 3.168666666666667,
-    "atr_ratio": 2.024826425415527,
-    "positive_earnings_count": 15,
-    "positive_earnings_percentage": 100.0
+    "ma50_bonus_system": true,
+    "weekly_atr_implemented": false,
+    "strict_rotation_criteria": true,
+    "avg_ma50_bonus": 22.0,
+    "ma50_bonus_percentage": 46.666666666666664
   }
 }
