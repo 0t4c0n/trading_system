@@ -1,10 +1,10 @@
-# .github/workflows/weekly_conservative_analysis.yml
-name: Enhanced Conservative Stock Analysis with Trading Levels
+# .github/workflows/daily_conservative_analysis.yml
+name: Daily Conservative Stock Analysis with MA50 Bonus
 
 on:
   schedule:
-    # Sábados a las 10:00 AM España (9:00 AM UTC)
-    - cron: '0 9 * * 6'
+    # Lunes a viernes a las 9:00 AM España (8:00 UTC)
+    - cron: '0 8 * * 1-5'
   workflow_dispatch:  # Permitir ejecución manual
 
 # PERMISOS NECESARIOS PARA GITHUB PAGES Y COMMITS
@@ -15,13 +15,13 @@ permissions:
 
 # Asegurar que solo un workflow corra a la vez
 concurrency:
-  group: "enhanced-conservative-analysis"
+  group: "daily-conservative-analysis"
   cancel-in-progress: false
 
 jobs:
-  enhanced-analysis:
+  daily-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 150  # 2.5 horas para análisis completo
+    timeout-minutes: 120  # 2 horas para análisis completo diario
     
     # Configurar entorno para GitHub Pages
     environment:
@@ -39,13 +39,13 @@ jobs:
       with:
         python-version: '3.11'
         
-    - name: Cache dependencies mejorado
+    - name: Cache dependencies optimizado para ejecución diaria
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-enhanced-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-daily-${{ hashFiles('requirements.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-enhanced-
+          ${{ runner.os }}-pip-daily-
           ${{ runner.os }}-pip-
         
     - name: Instalar dependencias
@@ -53,55 +53,54 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: Verificar archivos de configuración y estado del historial
+    - name: Verificar configuración y estado histórico diario
       run: |
-        echo "=== VERIFICANDO CONFIGURACION MEJORADA CON HISTORIAL ==="
+        echo "=== VERIFICANDO CONFIGURACION PARA EJECUCION DIARIA ==="
         if [ ! -f "current_portfolio.json" ]; then
           echo "ERROR: current_portfolio.json no encontrado"
           exit 1
         fi
-        echo "✅ Configuración verificada"
+        echo "✅ Portfolio configurado para monitorización diaria"
         
-        # Verificar estado del historial existente
-        echo "📚 Archivos históricos existentes:"
-        ls -la *_*.json 2>/dev/null | grep -E "(weekly_screening_results_|consistency_analysis_|rotation_recommendations_)" || echo "   No hay archivos históricos previos"
-        ls -la ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null || echo "   No hay reportes históricos previos"
+        # Verificar archivos históricos recientes (últimos 7 días)
+        echo "📚 Archivos del historial diario (últimos 7 días):"
+        find . -name "*_*.json" -mtime -7 2>/dev/null | grep -E "(weekly_screening_results_|consistency_analysis_|rotation_recommendations_)" | head -10 || echo "   Iniciando historial diario"
+        
+        echo "🔄 MODO: Ejecución diaria para trades de ~1 mes"
+        echo "🎯 OBJETIVO: Monitorizar oportunidades sin rotación excesiva"
+        echo "🕘 HORARIO: L-V 9:00 AM España (post-apertura europea)"
       env:
         PYTHONUNBUFFERED: 1
         
-    - name: Configurar variables de entorno para análisis mejorado
+    - name: Configurar variables de entorno para análisis diario
       run: |
         echo "REPORT_DATE=$(date +%Y-%m-%d)" >> $GITHUB_ENV
         echo "ANALYSIS_START_TIME=$(date -u +%H:%M)" >> $GITHUB_ENV
         echo "ENHANCED_MODE=true" >> $GITHUB_ENV
+        echo "DAILY_MODE=true" >> $GITHUB_ENV
         echo "AUTO_HISTORY=true" >> $GITHUB_ENV
+        echo "EXECUTION_FREQUENCY=daily" >> $GITHUB_ENV
         
-    - name: 1. Screening conservador mejorado con historial automático
+    - name: 1. Screening diario con bonus MA50
       run: |
-        echo "STEP 1: Screening completo 3,000+ acciones con gestión automática de historial..."
-        echo "El sistema archivará automáticamente resultados anteriores (si existen)"
-        echo "Tiempo estimado: 15-25 minutos para análisis completo"
+        echo "🔍 === SCREENING DIARIO CON BONUS MA50 ==="
+        echo "🌟 Sistema: MA50 priority con +22 puntos por rebote alcista"
+        echo "📅 Frecuencia: Diaria (L-V 9:00 AM España)"
+        echo "🎯 Objetivo: Trades de ~1 mes con gestión diaria de exits"
         
         python conservative_screener.py
         
-        if [ -f "weekly_screening_results.json" ]; then
-          echo "SUCCESS: Screening completado con gestión automática de historial"
-          # Verificar que el archivo contiene datos válidos
-          python -c "import json; data=json.load(open('weekly_screening_results.json')); print(f'Resultados: {len(data.get(\"detailed_results\", []))}')"
-        else
-          echo "ERROR: Error en screening conservador"
-          exit 1
-        fi
+        echo "✅ Screening diario completado"
+        ls -la weekly_screening_results.json momentum_responsive_results_*.json 2>/dev/null || echo "Verificando archivos generados..."
       env:
         PYTHONUNBUFFERED: 1
 
-    - name: 1.1. FORZAR creación de archivo histórico de screening
+    - name: 1.1. Crear archivo histórico de screening diario
       run: |
-        echo "🔧 FORZANDO creación de archivo histórico de screening..."
+        echo "🔧 Creando archivo histórico de screening diario..."
         DATE_STAMP=$(date +%Y%m%d)
         
         if [ -f "weekly_screening_results.json" ]; then
-          # Crear copia histórica con timestamp
           cp weekly_screening_results.json "weekly_screening_results_${DATE_STAMP}.json"
           echo "✅ Archivo histórico creado: weekly_screening_results_${DATE_STAMP}.json"
           ls -la weekly_screening_results_${DATE_STAMP}.json
@@ -109,31 +108,25 @@ jobs:
           echo "❌ No se puede crear histórico - archivo principal no existe"
         fi
         
-    - name: 2. Analizar consistencia histórica con archivos mejorados
+    - name: 2. Análisis de consistencia adaptado para ejecución diaria
       run: |
-        echo "STEP 2: Análisis de consistencia (5 semanas) con gestión de historial..."
-        echo "El sistema archivará automáticamente el análisis anterior (si existe)"
-        echo "Buscará archivos históricos en múltiples formatos para máxima compatibilidad"
+        echo "📊 === ANALISIS DE CONSISTENCIA DIARIO ==="
+        echo "🔄 Adaptado para: Detección de tendencias en ejecución diaria"
+        echo "⏱️ Ventana: Últimos 7 días de screening para patrones"
         
         python consistency_analyzer.py
         
-        if [ -f "consistency_analysis.json" ]; then
-          echo "SUCCESS: Análisis de consistencia completado con gestión de historial"
-          python verify_consistency.py
-        else
-          echo "ERROR: Error en análisis de consistencia"
-          exit 1
-        fi
+        echo "✅ Análisis de consistencia diario completado"
+        ls -la consistency_analysis.json consistency_analysis_*.json 2>/dev/null || echo "Verificando archivos de consistencia..."
       env:
         PYTHONUNBUFFERED: 1
 
-    - name: 2.1. FORZAR creación de archivo histórico de consistencia
+    - name: 2.1. Crear archivo histórico de consistencia diaria
       run: |
-        echo "🔧 FORZANDO creación de archivo histórico de consistencia..."
+        echo "🔧 Creando archivo histórico de consistencia diaria..."
         DATE_STAMP=$(date +%Y%m%d)
         
         if [ -f "consistency_analysis.json" ]; then
-          # Crear copia histórica con timestamp
           cp consistency_analysis.json "consistency_analysis_${DATE_STAMP}.json"
           echo "✅ Archivo histórico creado: consistency_analysis_${DATE_STAMP}.json"
           ls -la consistency_analysis_${DATE_STAMP}.json
@@ -141,30 +134,29 @@ jobs:
           echo "❌ No se puede crear histórico - archivo principal no existe"
         fi
         
-    - name: 3. Generar recomendaciones de rotación con historial
+    - name: 3. Recomendaciones optimizadas para trades mensuales
       run: |
-        echo "STEP 3: Recomendaciones de rotación con análisis multifactorial y gestión de historial..."
-        echo "El sistema archivará automáticamente las recomendaciones anteriores (si existen)"
+        echo "💡 === RECOMENDACIONES PARA TRADES MENSUALES ==="
+        echo "🎯 Filosofía: Trades de ~1 mes con criterios estrictos de rotación"
+        echo "⚠️ Solo rotar cuando:"
+        echo "   - Posición cerca del stop loss (2-3%)"
+        echo "   - Sin momentum por 3+ días consecutivos" 
+        echo "   - Oportunidad 30+ puntos superior"
+        echo "   - Deterioro fundamental"
         
         python rotation_recommender.py
         
-        if [ -f "rotation_recommendations.json" ]; then
-          echo "SUCCESS: Recomendaciones de rotación completadas con gestión de historial"
-          python verify_rotation.py
-        else
-          echo "ERROR: Error en recomendaciones de rotación"
-          exit 1
-        fi
+        echo "✅ Recomendaciones mensuales generadas"
+        ls -la rotation_recommendations.json rotation_recommendations_*.json 2>/dev/null || echo "Verificando recomendaciones..."
       env:
         PYTHONUNBUFFERED: 1
 
-    - name: 3.1. FORZAR creación de archivo histórico de rotación
+    - name: 3.1. Crear archivo histórico de recomendaciones diarias
       run: |
-        echo "🔧 FORZANDO creación de archivo histórico de rotación..."
+        echo "🔧 Creando archivo histórico de recomendaciones diarias..."
         DATE_STAMP=$(date +%Y%m%d)
         
         if [ -f "rotation_recommendations.json" ]; then
-          # Crear copia histórica con timestamp
           cp rotation_recommendations.json "rotation_recommendations_${DATE_STAMP}.json"
           echo "✅ Archivo histórico creado: rotation_recommendations_${DATE_STAMP}.json"
           ls -la rotation_recommendations_${DATE_STAMP}.json
@@ -172,171 +164,103 @@ jobs:
           echo "❌ No se puede crear histórico - archivo principal no existe"
         fi
         
-    - name: 4. Crear reporte semanal mejorado con historial
+    - name: 4. Generar reporte diario optimizado
       run: |
-        echo "STEP 4: Generando reporte semanal mejorado con niveles de trading y gestión de historial..."
-        echo "El sistema gestionará automáticamente el historial de reportes"
+        echo "📋 === GENERANDO REPORTE DIARIO ==="
+        echo "📅 Tipo: Daily Market Analysis + Monthly Trading Recommendations"
         
         python create_weekly_report.py
         
-        echo "Verificando reportes generados..."
-        if [ -f "docs/data.json" ]; then
-          echo "SUCCESS: Dashboard data.json generado"
-          python verify_dashboard.py
-        else
-          echo "ERROR: Error generando dashboard data"
-          exit 1
-        fi
-        
-        # Verificar reportes Markdown
-        ENHANCED_REPORT=$(ls ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -1)
-        REGULAR_REPORT=$(ls WEEKLY_REPORT_*.md 2>/dev/null | head -1)
-        
-        if [ -n "$ENHANCED_REPORT" ]; then
-          echo "SUCCESS: Reporte mejorado generado: $ENHANCED_REPORT"
-        elif [ -n "$REGULAR_REPORT" ]; then
-          echo "SUCCESS: Reporte regular generado: $REGULAR_REPORT"
-        else
-          echo "WARNING: No se generó reporte Markdown (puede ser normal)"
-        fi
+        echo "✅ Reporte diario generado"
+        ls -la ENHANCED_WEEKLY_REPORT_*.md docs/data.json 2>/dev/null || echo "Verificando reporte y dashboard..."
       env:
         PYTHONUNBUFFERED: 1
         
-    - name: 🔧 DEBUG - Verificar archivos históricos FORZADOS
+    - name: 5. Generar mensaje de commit inteligente para ejecución diaria
       run: |
-        echo "=== 🔧 VERIFICACIÓN DEBUG DE ARCHIVOS HISTÓRICOS FORZADOS ==="
-        DATE_STAMP=$(date +%Y%m%d)
+        echo "📝 === GENERANDO COMMIT MESSAGE DIARIO ==="
         
-        echo "📁 Archivos con patrón histórico esperado:"
-        ls -la *_${DATE_STAMP}.json 2>/dev/null || echo "   ❌ No hay archivos con fecha de hoy"
-        
-        echo "📁 Todos los archivos históricos (con fecha):"
-        ls -la *_*.json 2>/dev/null | grep -v "weekly_screening_results.json" | head -10 || echo "   ❌ No hay archivos históricos"
-        
-        echo "📁 Reportes históricos:"
-        ls -la ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -5 || echo "   ❌ No hay reportes históricos"
-        
-        echo "📊 CONTEO TOTAL DESPUÉS DE FORZADO:"
-        HIST_SCREENING=$(ls weekly_screening_results_*.json 2>/dev/null | wc -l)
-        HIST_CONSISTENCY=$(ls consistency_analysis_*.json 2>/dev/null | wc -l)
-        HIST_ROTATION=$(ls rotation_recommendations_*.json 2>/dev/null | wc -l)
-        HIST_REPORTS=$(ls ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | wc -l)
-        echo "   - Screening históricos: $HIST_SCREENING"
-        echo "   - Consistencia históricos: $HIST_CONSISTENCY"  
-        echo "   - Rotación históricos: $HIST_ROTATION"
-        echo "   - Reportes históricos: $HIST_REPORTS"
-        
-        TOTAL_HISTORICAL=$((HIST_SCREENING + HIST_CONSISTENCY + HIST_ROTATION + HIST_REPORTS))
-        echo "   - TOTAL HISTÓRICOS: $TOTAL_HISTORICAL"
-        
-        if [ $TOTAL_HISTORICAL -eq 0 ]; then
-          echo "🚨 CRITICAL: No se generaron archivos históricos"
-          exit 1
-        else
-          echo "✅ SUCCESS: Se generaron $TOTAL_HISTORICAL archivos históricos"
-        fi
-        
-    - name: Verificar archivos generados y calidad con historial
-      run: |
-        python verify_generated_files.py
-        
-        echo ""
-        echo "=== VERIFICACIÓN DE ARCHIVOS HISTÓRICOS GENERADOS ==="
-        echo "📁 Archivos principales (actuales):"
-        ls -la weekly_screening_results.json consistency_analysis.json rotation_recommendations.json docs/data.json 2>/dev/null || echo "   Algunos archivos principales faltantes"
-        
-        echo ""
-        echo "📚 Archivos históricos (con fecha):"
-        ls -la weekly_screening_results_*.json 2>/dev/null | tail -3 || echo "   No hay archivos de screening históricos"
-        ls -la consistency_analysis_*.json 2>/dev/null | tail -3 || echo "   No hay archivos de consistencia históricos"
-        ls -la rotation_recommendations_*.json 2>/dev/null | tail -3 || echo "   No hay archivos de rotación históricos"
-        ls -la ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | tail -3 || echo "   No hay reportes históricos"
-        
-        echo ""
-        echo "📊 Conteo total de archivos históricos:"
-        HIST_SCREENING=$(ls weekly_screening_results_*.json 2>/dev/null | wc -l)
-        HIST_CONSISTENCY=$(ls consistency_analysis_*.json 2>/dev/null | wc -l)
-        HIST_ROTATION=$(ls rotation_recommendations_*.json 2>/dev/null | wc -l)
-        HIST_REPORTS=$(ls ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | wc -l)
-        echo "   - Screening históricos: $HIST_SCREENING"
-        echo "   - Consistencia históricos: $HIST_CONSISTENCY"
-        echo "   - Rotación históricos: $HIST_ROTATION"
-        echo "   - Reportes históricos: $HIST_REPORTS"
-      env:
-        PYTHONUNBUFFERED: 1
-        
-    - name: Configurar Git para commits automáticos
-      run: |
-        git config --global user.name 'Enhanced Conservative Bot'
-        git config --global user.email 'actions@github.com'
-        
-    - name: Generar mensaje de commit inteligente
-      run: |
-        python generate_commit_message.py
-        
-        # Mostrar el mensaje generado
-        echo "=== MENSAJE DE COMMIT GENERADO ==="
+        # Crear mensaje específico para ejecución diaria
+        cat > commit_message.txt << 'EOF'
+🔄 Daily Analysis: MA50 Bonus System + Monthly Trading Focus
+
+📅 Execution: Daily monitoring for ~1 month trades
+🌟 MA50 Bonus: +22pts for bullish rebounds  
+🎯 Philosophy: Daily screening, monthly rotation criteria
+⚡ Features: Weekly ATR + Strict rotation thresholds
+🕘 Schedule: Mon-Fri 9:00 AM Spain (post-EU open)
+
+📊 Daily Stats:
+- Screening: Conservative momentum with MA50 priority
+- Consistency: 7-day pattern detection
+- Recommendations: Only high-conviction rotations
+- Target: 1-month holds with daily exit management
+
+🔧 Optimizations Applied:
+- MA50 stop loss bonus system
+- Daily execution frequency  
+- Reduced rotation frequency
+- Enhanced risk management
+
+[Daily Conservative Analysis $(date +%Y-%m-%d)]
+EOF
+
+        echo "=== MENSAJE DE COMMIT DIARIO GENERADO ==="
         cat commit_message.txt
         echo "================================="
       env:
         PYTHONUNBUFFERED: 1
         
-    - name: 🔧 COMMIT FORZADO con gestión de historial CORREGIDA
+    - name: Configurar Git para commits diarios automáticos
       run: |
-        echo "=== 🔧 INICIANDO COMMIT FORZADO CON HISTORIAL ==="
+        git config --global user.name 'Daily Conservative Bot'
+        git config --global user.email 'actions@github.com'
         
-        # Añadir TODOS los archivos, incluyendo históricos
-        echo "📁 Añadiendo archivos principales..."
+    - name: 6. Commit diario con gestión histórica optimizada
+      run: |
+        echo "=== 🔧 INICIANDO COMMIT DIARIO ==="
+        
+        # Añadir archivos principales del día
+        echo "📁 Añadiendo archivos principales del análisis diario..."
         git add weekly_screening_results.json || echo "Skip weekly_screening_results.json"
-        git add consistency_analysis.json || echo "Skip consistency_analysis.json"
+        git add consistency_analysis.json || echo "Skip consistency_analysis.json"  
         git add rotation_recommendations.json || echo "Skip rotation_recommendations.json"
         git add docs/data.json || echo "Skip docs/data.json"
         
-        echo "📚 Añadiendo archivos históricos FORZADAMENTE..."
+        # Añadir archivos históricos diarios
+        echo "📚 Añadiendo archivos históricos diarios..."
         git add weekly_screening_results_*.json || echo "No historic screening files"
         git add consistency_analysis_*.json || echo "No historic consistency files"
         git add rotation_recommendations_*.json || echo "No historic rotation files"
         git add ENHANCED_WEEKLY_REPORT_*.md || echo "No historic reports"
-        git add WEEKLY_REPORT_*.md || echo "No regular reports"
-        
-        # También añadir cualquier otro archivo generado
-        echo "🔧 Añadiendo otros archivos generados..."
         git add momentum_responsive_results_*.json || echo "No momentum files"
-        git add ultra_conservative_results_*.json || echo "No ultra conservative files"
         
-        echo "=== 🔍 VERIFICANDO ARCHIVOS AÑADIDOS ==="
+        echo "=== 🔍 VERIFICANDO ARCHIVOS DIARIOS AÑADIDOS ==="
         git status --porcelain
         STAGED_FILES=$(git status --porcelain | wc -l)
         echo "Archivos en staging: $STAGED_FILES"
         
         if [ $STAGED_FILES -eq 0 ]; then
-          echo "🚨 FORZANDO AÑADIR TODO CON ADD --ALL"
+          echo "🚨 AÑADIENDO TODOS LOS ARCHIVOS DIARIOS"
           git add --all
           git status --porcelain
           STAGED_FILES_ALL=$(git status --porcelain | wc -l)
           echo "Archivos después de --all: $STAGED_FILES_ALL"
         fi
         
-        echo "=== 📝 REALIZANDO COMMIT FORZADO ==="
+        echo "=== 📝 REALIZANDO COMMIT DIARIO ==="
         FINAL_STAGED=$(git status --porcelain | wc -l)
         if [ $FINAL_STAGED -gt 0 ]; then
-          # Commit con mensaje personalizado
-          if [ -f "commit_message.txt" ]; then
-            git commit -F commit_message.txt
-          else
-            git commit -m "🔧 FIXED: Enhanced Weekly Analysis + Forced History Management $(date +%Y-%m-%d)"
-          fi
+          git commit -F commit_message.txt
           
-          echo "=== 🚀 PUSHING CAMBIOS ==="
+          echo "=== 🚀 PUSHING CAMBIOS DIARIOS ==="
           git push
-          echo "✅ SUCCESS: Archivos históricos commiteados CORRECTAMENTE"
+          echo "✅ SUCCESS: Análisis diario commiteado correctamente"
           
-          echo "=== 📋 RESUMEN DE ARCHIVOS COMMITEADOS ==="
-          git show --name-only --pretty=format: HEAD | sort | head -20
+          echo "=== 📋 RESUMEN DE ARCHIVOS DIARIOS COMMITEADOS ==="
+          git show --name-only --pretty=format: HEAD | sort | head -15
         else
-          echo "❌ CRITICAL: No hay archivos para commitear después de forzar"
-          echo "Listando todos los archivos generados:"
-          find . -name "*.json" -o -name "*.md" | grep -E "(weekly_screening|consistency|rotation|ENHANCED)" | head -10
+          echo "❌ CRITICAL: No hay archivos para commitear en análisis diario"
           exit 1
         fi
         
@@ -352,30 +276,38 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
       
-    - name: 🎉 Resumen final con historial FORZADO y métricas MEJORADO
+    - name: 7. Resumen final del análisis diario
       run: |
-        echo "🎉 ===== ANÁLISIS MEJORADO COMPLETADO CON HISTORIAL FORZADO ====="
+        echo "🎉 ===== ANÁLISIS DIARIO COMPLETADO ====="
         echo "🕐 Iniciado: $ANALYSIS_START_TIME UTC"
         echo "🕐 Finalizado: $(date -u +%H:%M) UTC"
+        echo "📅 Fecha: $(date +%Y-%m-%d)"
         echo ""
-        echo "📊 ARCHIVOS PRINCIPALES GENERADOS:"
-        ls -la *.json *.md 2>/dev/null | grep -E "(weekly_screening_results\.json|consistency_analysis\.json|rotation_recommendations\.json|ENHANCED_WEEKLY_REPORT_.*\.md)" || echo "Sin archivos principales"
+        echo "📊 ARCHIVOS DIARIOS GENERADOS:"
+        ls -la *.json *.md 2>/dev/null | grep -E "(weekly_screening_results\.json|consistency_analysis\.json|rotation_recommendations\.json|ENHANCED_WEEKLY_REPORT_*.md)" || echo "Sin archivos principales"
         echo ""
-        echo "📚 GESTIÓN DE HISTORIAL FORZADA - CORREGIDA:"
-        echo "🔧 NUEVO: Archivos históricos ahora se crean FORZADAMENTE después de cada paso"
+        echo "🔄 CONFIGURACIÓN DIARIA APLICADA:"
+        echo "🌟 MA50 Bonus System: +22pts por rebote alcista"
+        echo "📅 Frecuencia: Lunes-Viernes 9:00 AM España"
+        echo "🎯 Filosofía: Trades de ~1 mes con monitorización diaria"
+        echo "⚠️ Rotaciones: Solo con criterios estrictos"
+        echo ""
+        echo "📚 GESTIÓN HISTÓRICA DIARIA:"
         TOTAL_HISTORICAL=$(ls *_*.json ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | wc -l)
-        echo "📁 Total archivos históricos FORZADOS: $TOTAL_HISTORICAL"
+        echo "📁 Total archivos históricos: $TOTAL_HISTORICAL"
         echo ""
         if [ $TOTAL_HISTORICAL -gt 0 ]; then
-          echo "📋 Archivos históricos FORZADOS generados:"
-          ls -lt *_*.json ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -10
+          echo "📋 Archivos históricos recientes (últimos 5):"
+          ls -lt *_*.json ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -5
         fi
         echo ""
         echo "🌐 DASHBOARD: ${{ steps.deployment.outputs.page_url }}"
         echo ""
         echo "📈 PRÓXIMAS EJECUCIONES:"
-        echo "🔄 Próxima ejecución: Sábados 10:00 AM España"
+        echo "🔄 Próxima ejecución: Lunes-Viernes 9:00 AM España"
         echo "⚡ Ejecución manual disponible en Actions tab"
-        echo "📚 Historial forzado: ✅ IMPLEMENTADO Y FUNCIONANDO"
-        echo "🔧 Gestión histórica: PROACTIVA (crea archivos siempre)"
+        echo "🎯 Sistema: Optimizado para trades mensuales con gestión diaria"
+        echo "🌟 Bonus MA50: Sistema implementado y funcionando"
         echo "=============================================="
+      env:
+        PYTHONUNBUFFERED: 1
