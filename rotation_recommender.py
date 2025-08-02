@@ -1,705 +1,786 @@
 #!/usr/bin/env python3
 """
-Aggressive Rotation Recommender - UPDATED: Currency Support + Empty Portfolio Handling
-🌍 Soporta portfolio en EUR con acciones en USD + conversión automática
-💰 Manejo correcto de portfolio 100% cash vs portfolio que perdió momentum
-🔧 Integra Weekly ATR + Stop Loss Restrictivo + Fundamentales Estrictos
+Monthly Trading Rotation Recommender
+===================================
+
+Sistema de recomendaciones optimizado para trades de ~1 mes con ejecución diaria.
+Solo recomienda rotaciones cuando se cumplen criterios estrictos:
+
+1. Posición cerca del stop loss (2-3% del stop)
+2. Pérdida de momentum (3+ días sin aparecer en screening)  
+3. Oportunidad 30+ puntos superior a posición actual
+4. Deterioro fundamental de posiciones actuales
+
+Filosofía: "Daily monitoring, monthly rotation"
 """
 
 import json
 import os
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-import math
-import requests
+import numpy as np
+from typing import Dict, List, Optional, Tuple
+import warnings
+warnings.filterwarnings('ignore')
 
-class PortfolioCurrencyHandler:
+class MonthlyTradingRecommender:
     def __init__(self):
-        self.exchange_rates = {}
-        self.cache_expiry = None
-        self.cache_duration_hours = 6
+        """Inicializar recomendador para trades mensuales con criterios estrictos"""
         
-    def get_exchange_rate(self, from_currency: str, to_currency: str) -> float:
-        """Obtiene tipo de cambio con cache de 6 horas"""
-        if from_currency == to_currency:
-            return 1.0
-            
-        cache_key = f"{from_currency}_{to_currency}"
+        # CRITERIOS ESTRICTOS PARA ROTACIÓN MENSUAL
+        self.min_score_difference = 30.0  # Mínimo 30 puntos de diferencia para recomendar rotación
+        self.stop_loss_proximity_threshold = 0.03  # 3% cerca del stop loss
+        self.momentum_loss_days = 3  # 3+ días sin aparecer en screening
+        self.min_consistency_weeks = 2  # Mínimo 2 semanas de consistencia
         
-        if (self.cache_expiry and 
-            datetime.now() < self.cache_expiry and 
-            cache_key in self.exchange_rates):
-            return self.exchange_rates[cache_key]
+        # UMBRALES DE CALIDAD
+        self.min_viable_score = 50.0  # Score mínimo para ser considerado viable
+        self.excellent_score_threshold = 80.0  # Score excelente
+        self.rotation_threshold = 0.15  # 15% mejor para considerar rotación
         
-        try:
-            rate = self._fetch_exchange_rate_multiple_sources(from_currency, to_currency)
-            
-            if rate > 0:
-                self.exchange_rates[cache_key] = rate
-                self.cache_expiry = datetime.now() + timedelta(hours=self.cache_duration_hours)
-                return rate
-            else:
-                return self._get_fallback_rate(from_currency, to_currency)
-                
-        except Exception as e:
-            return self._get_fallback_rate(from_currency, to_currency)
-    
-    def _fetch_exchange_rate_multiple_sources(self, from_currency: str, to_currency: str) -> float:
-        """Intenta múltiples fuentes para obtener el tipo de cambio"""
+        # BONUS Y MULTIPLICADORES
+        self.weekly_atr_bonus = 1.15  # 15% bonus por Weekly ATR
+        self.ma50_bonus_multiplier = 1.20  # 20% bonus extra por MA50 stop loss
+        self.strict_fundamentals_bonus = 1.10  # 10% bonus por fundamentales estrictos
+        self.quality_stop_bonus = 1.05  # 5% bonus por stop loss de calidad
         
-        # Source 1: exchangerate-api.com (free tier)
-        try:
-            url = f"https://api.exchangerate-api.com/v4/latest/{from_currency}"
-            response = requests.get(url, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                if to_currency in data.get('rates', {}):
-                    return float(data['rates'][to_currency])
-        except Exception:
-            pass
-        
-        # Source 2: European Central Bank (free, no API key needed)
-        try:
-            if from_currency == 'EUR' or to_currency == 'EUR':
-                ecb_url = "https://api.exchangerate.host/latest?base=EUR"
-                response = requests.get(ecb_url, timeout=10)
-                if response.status_code == 200:
-                    data = response.json()
-                    if from_currency == 'EUR' and to_currency in data.get('rates', {}):
-                        return float(data['rates'][to_currency])
-                    elif to_currency == 'EUR' and from_currency in data.get('rates', {}):
-                        return 1.0 / float(data['rates'][from_currency])
-        except Exception:
-            pass
-        
-        return 0
-    
-    def _get_fallback_rate(self, from_currency: str, to_currency: str) -> float:
-        """Tipos de cambio de fallback"""
-        fallback_rates = {
-            'EUR_USD': 1.08,
-            'USD_EUR': 0.93,
-            'EUR_GBP': 0.87,
-            'GBP_EUR': 1.15,
-            'USD_GBP': 0.80,
-            'GBP_USD': 1.25
-        }
-        
-        key = f"{from_currency}_{to_currency}"
-        return fallback_rates.get(key, 1.0)
-    
-    def normalize_portfolio_to_usd(self, portfolio_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Normaliza portfolio a USD para cálculos internos"""
-        if not portfolio_data:
-            return portfolio_data
-        
-        base_currency = portfolio_data.get('base_currency', 'EUR')
-        
-        if base_currency == 'USD':
-            return portfolio_data
-        
-        eur_to_usd = self.get_exchange_rate(base_currency, 'USD')
-        normalized_portfolio = portfolio_data.copy()
-        
-        if 'cash' in portfolio_data:
-            original_cash = portfolio_data['cash']
-            normalized_portfolio['cash_usd'] = original_cash * eur_to_usd
-            normalized_portfolio['cash_original'] = original_cash
-            normalized_portfolio['cash_currency'] = base_currency
-        
-        if 'total_invested' in portfolio_data:
-            original_total = portfolio_data['total_invested']
-            normalized_portfolio['total_invested_usd'] = original_total * eur_to_usd
-            normalized_portfolio['total_invested_original'] = original_total
-        
-        normalized_portfolio['currency_conversion'] = {
-            'base_currency': base_currency,
-            'target_currency': 'USD',
-            'exchange_rate': eur_to_usd,
-            'conversion_timestamp': datetime.now().isoformat()
-        }
-        
-        return normalized_portfolio
-    
-    def analyze_portfolio_status(self, portfolio_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Analiza el estado del portfolio distinguiendo entre cash y momentum perdido"""
-        if not portfolio_data:
-            return {
-                'status': 'NO_PORTFOLIO',
-                'description': 'No portfolio data available',
-                'positions_count': 0,
-                'is_waiting_for_opportunities': False
-            }
-        
-        positions = portfolio_data.get('positions', {})
-        cash = portfolio_data.get('cash_usd', portfolio_data.get('cash', 0))
-        total_invested = portfolio_data.get('total_invested_usd', portfolio_data.get('total_invested', 0))
-        
-        positions_count = len(positions)
-        total_portfolio_value = total_invested + cash
-        
-        if total_portfolio_value > 0:
-            cash_percentage = (cash / total_portfolio_value) * 100
-        else:
-            cash_percentage = 100 if cash > 0 else 0
-        
-        if positions_count == 0 and cash > 0:
-            status = 'ALL_CASH_WAITING'
-            description = 'Portfolio 100% en cash - Esperando oportunidades de inversión'
-            is_waiting_for_opportunities = True
-        elif positions_count == 0 and cash == 0:
-            status = 'EMPTY_PORTFOLIO'
-            description = 'Portfolio vacío - Necesita capitalización'
-            is_waiting_for_opportunities = False
-        elif cash_percentage > 90:
-            status = 'MOSTLY_CASH'
-            description = f'Portfolio mayormente en cash ({cash_percentage:.1f}%) - Posiciones mínimas'
-            is_waiting_for_opportunities = True
-        elif positions_count > 0:
-            status = 'INVESTED'
-            description = f'Portfolio activo con {positions_count} posiciones ({100-cash_percentage:.1f}% invertido)'
-            is_waiting_for_opportunities = False
-        else:
-            status = 'UNKNOWN'
-            description = 'Estado del portfolio no determinado'
-            is_waiting_for_opportunities = False
-        
-        return {
-            'status': status,
-            'description': description,
-            'positions_count': positions_count,
-            'cash_percentage': cash_percentage,
-            'total_portfolio_value_usd': total_portfolio_value,
-            'cash_usd': cash,
-            'invested_usd': total_invested,
-            'is_waiting_for_opportunities': is_waiting_for_opportunities,
-            'currency_info': portfolio_data.get('currency_conversion', {})
-        }
-
-class AggressiveRotationRecommender:
-    def __init__(self):
+        # ESTADO INTERNO
         self.current_portfolio = None
+        self.portfolio_status = None
         self.consistency_analysis = None
         self.screening_data = None
-        self.currency_handler = PortfolioCurrencyHandler()
-        self.portfolio_status = None
         
-        # Parámetros para rotación agresiva
-        self.rotation_threshold = 0.20
-        self.min_consistency_weeks = 2
-        self.emerging_opportunity_weight = 1.5
-        self.momentum_decay_threshold = 0.15
-        self.fallback_avg_score = 100.0
-        self.min_viable_score = 50.0
-        
-        # Optimizations integration
-        self.weekly_atr_bonus = 1.15
-        self.strict_fundamentals_bonus = 1.10
-        self.quality_stop_bonus = 1.05
-        
+        print(f"🎯 Recomendador inicializado para TRADES MENSUALES")
+        print(f"📊 Criterios estrictos: Score +{self.min_score_difference}, Stop {self.stop_loss_proximity_threshold*100}%, Momentum {self.momentum_loss_days}d")
+    
     def load_current_portfolio(self):
-        """Carga la cartera actual del usuario con soporte de divisas"""
+        """Carga la cartera actual del usuario"""
         try:
             with open('current_portfolio.json', 'r') as f:
-                raw_portfolio = json.load(f)
+                self.current_portfolio = json.load(f)
             
-            # Normalize to USD for calculations
-            self.current_portfolio = self.currency_handler.normalize_portfolio_to_usd(raw_portfolio)
+            # Analizar estado del portfolio
+            positions = self.current_portfolio.get('positions', {})
+            cash = self.current_portfolio.get('cash', 0)
             
-            # Analyze portfolio status
-            self.portfolio_status = self.currency_handler.analyze_portfolio_status(self.current_portfolio)
+            if len(positions) == 0:
+                portfolio_context = "ALL_CASH_WAITING"
+                description = "Portfolio 100% cash - Esperando oportunidades de deployment"
+            elif len(positions) <= 2:
+                portfolio_context = "LIGHT_POSITIONS"
+                description = f"Portfolio con {len(positions)} posiciones - Espacio para nuevas oportunidades"
+            else:
+                portfolio_context = "FULL_POSITIONS"
+                description = f"Portfolio con {len(positions)} posiciones - Evaluar rotaciones"
             
-            print(f"📂 Portfolio loaded: {self.portfolio_status['description']}")
-            print(f"💰 Status: {self.portfolio_status['status']}")
+            self.portfolio_status = {
+                'positions_count': len(positions),
+                'cash_available': cash,
+                'context': portfolio_context,
+                'description': description,
+                'status': 'loaded'
+            }
             
-            # Display currency info if conversion happened
-            if 'currency_conversion' in self.current_portfolio:
-                conv = self.current_portfolio['currency_conversion']
-                print(f"💱 Currency: {conv['base_currency']} → {conv['target_currency']} @ {conv['exchange_rate']:.4f}")
-            
+            print(f"📂 Portfolio loaded: {description}")
             return True
             
         except FileNotFoundError:
             print("⚠️ No se encontró current_portfolio.json - Creando archivo ejemplo")
-            self.create_enhanced_portfolio_example()
+            self.create_portfolio_example()
             return False
             
         except Exception as e:
             print(f"❌ Error cargando cartera: {e}")
             return False
     
-    def create_enhanced_portfolio_example(self):
-        """Crea un archivo de ejemplo con soporte de divisas"""
-        # Crear dos ejemplos: uno con posiciones y otro 100% cash
-        
-        # Portfolio con posiciones (mixed)
-        mixed_portfolio = {
-            "base_currency": "EUR",
+    def create_portfolio_example(self):
+        """Crea un archivo de ejemplo para portfolio"""
+        example_portfolio = {
             "last_manual_update": datetime.now().isoformat(),
             "positions": {
                 "AAPL": {
                     "shares": 50,
-                    "entry_price": 150.25,  # USD
+                    "entry_price": 150.25,
                     "entry_date": "2024-01-15T14:30:00Z",
                     "broker": "Interactive Brokers",
                     "notes": "Entrada tras breakout",
-                    "currency": "USD"
+                    "target_hold_period": "1_month"
                 }
             },
-            "cash": 5000.00,  # EUR
-            "total_invested": 7000.00,  # EUR
+            "cash": 10000.00,
+            "total_invested": 7500.00,
             "portfolio_summary": {
-                "total_portfolio_value_eur": 12000.00,
-                "cash_percentage": 41.7,
-                "invested_percentage": 58.3
+                "total_portfolio_value": 17500.00,
+                "cash_percentage": 57.1,
+                "invested_percentage": 42.9
             },
             "strategy": {
                 "max_positions": 5,
-                "target_hold_period": "2-3 meses",
+                "target_hold_period": "1 month with daily monitoring",
                 "risk_per_position": "10% máximo",
-                "objective": "Superar SPY con riesgo controlado"
-            },
-            "notes": "Portfolio multi-divisa: EUR base con acciones USD - EJEMPLO"
+                "rotation_philosophy": "Monthly trades with strict rotation criteria"
+            }
         }
         
-        # Portfolio 100% cash
-        all_cash_portfolio = {
-            "base_currency": "EUR",
-            "last_manual_update": datetime.now().isoformat(),
-            "positions": {},  # ⚠️ SIN POSICIONES - 100% CASH
-            "cash": 25000.00,  # EUR disponible
-            "total_invested": 0.00,  # EUR - nada invertido
-            "portfolio_summary": {
-                "total_portfolio_value_eur": 25000.00,
-                "cash_percentage": 100.0,
-                "invested_percentage": 0.0
-            },
-            "strategy": {
-                "max_positions": 5,
-                "target_hold_period": "2-3 meses",
-                "risk_per_position": "10% máximo",
-                "objective": "Esperando oportunidades de momentum",
-                "cash_deployment_plan": "Invertir progresivamente en top opportunities"
-            },
-            "notes": "Portfolio 100% cash - Esperando oportunidades - CAMBIAR POR TUS DATOS REALES"
-        }
-        
-        # Save the all-cash example as default
         with open('current_portfolio.json', 'w') as f:
-            json.dump(all_cash_portfolio, f, indent=2)
+            json.dump(example_portfolio, f, indent=2)
         
-        # Also save mixed example for reference
-        with open('current_portfolio_mixed_example.json', 'w') as f:
-            json.dump(mixed_portfolio, f, indent=2)
+        print("📝 Archivo current_portfolio.json creado - ¡Edítalo con tus posiciones reales!")
         
-        print("✅ Creados ejemplos de portfolio:")
-        print("   - current_portfolio.json (100% cash)")
-        print("   - current_portfolio_mixed_example.json (con posiciones)")
-        print("💡 Edita current_portfolio.json con tus datos reales")
+        # Configurar portfolio status para ejemplo
+        self.portfolio_status = {
+            'positions_count': 1,
+            'cash_available': 10000.00,
+            'context': 'EXAMPLE_CREATED',
+            'description': 'Portfolio ejemplo creado - Configura tus posiciones reales',
+            'status': 'example'
+        }
     
     def load_consistency_analysis(self):
-        """Carga el análisis de consistencia"""
+        """Carga análisis de consistencia"""
         try:
             with open('consistency_analysis.json', 'r') as f:
                 self.consistency_analysis = json.load(f)
-                print("📊 Análisis de consistencia cargado")
-                return True
+            print(f"📊 Consistency analysis loaded")
+            return True
         except FileNotFoundError:
-            print("❌ No se encontró consistency_analysis.json")
+            print("⚠️ consistency_analysis.json no encontrado")
             return False
         except Exception as e:
-            print(f"❌ Error cargando análisis de consistencia: {e}")
+            print(f"❌ Error cargando consistency analysis: {e}")
             return False
     
     def load_screening_data(self):
-        """Carga los datos detallados del screening"""
+        """Carga datos de screening más recientes"""
         try:
             with open('weekly_screening_results.json', 'r') as f:
                 self.screening_data = json.load(f)
-                print("📊 Datos de screening cargados")
-                return True
+            print(f"🔍 Screening data loaded")
+            return True
         except FileNotFoundError:
-            print("❌ No se encontró weekly_screening_results.json")
+            print("⚠️ weekly_screening_results.json no encontrado")
             return False
         except Exception as e:
-            print(f"❌ Error cargando datos de screening: {e}")
+            print(f"❌ Error cargando screening data: {e}")
             return False
     
-    def calculate_optimization_quality_score(self, screening_detail):
-        """Calcula score de calidad basado en optimizaciones implementadas"""
-        if not screening_detail:
-            return {'quality_multiplier': 1.0, 'optimization_factors': []}
-        
-        quality_multiplier = 1.0
-        optimization_factors = []
-        
-        # Weekly ATR Optimization Bonus
-        weekly_atr = screening_detail.get('weekly_atr', 0)
-        daily_atr = screening_detail.get('atr', 0)
-        weekly_atr_optimized = screening_detail.get('weekly_atr_optimized', False)
-        
-        if weekly_atr_optimized and weekly_atr > 0:
-            quality_multiplier *= self.weekly_atr_bonus
-            optimization_factors.append('Weekly ATR')
+    def check_position_near_stop_loss(self, symbol: str, current_price: float, entry_price: float) -> Tuple[bool, float, str]:
+        """
+        Verifica si una posición está cerca del stop loss
+        Retorna: (cerca_stop, distancia_porcentaje, razon)
+        """
+        try:
+            # Buscar datos de la acción en screening actual
+            if not self.screening_data:
+                return False, 0.0, "No screening data available"
             
-            if daily_atr > 0:
-                atr_ratio = weekly_atr / daily_atr
-                if atr_ratio > 2.0:
-                    quality_multiplier *= 1.05
-                    optimization_factors.append(f'ATR ratio {atr_ratio:.1f}x')
-        
-        # Strict Fundamentals Bonus
-        fundamental_data = screening_detail.get('fundamental_data', {})
-        earnings_positive = fundamental_data.get('quarterly_earnings_positive', False)
-        has_required_data = fundamental_data.get('has_required_data', False)
-        
-        if earnings_positive and has_required_data:
-            quality_multiplier *= self.strict_fundamentals_bonus
-            optimization_factors.append('Earnings+')
-        
-        # Quality Stop Loss Bonus
-        stop_analysis = screening_detail.get('stop_analysis', {})
-        stop_selection = stop_analysis.get('stop_selection', '')
-        
-        if 'ma50_priority' in stop_selection or 'ma21_priority' in stop_selection:
-            quality_multiplier *= self.quality_stop_bonus
-            optimization_factors.append(f'Quality Stop')
-        elif 'descartar' in stop_selection:
-            quality_multiplier *= 0.3  # Severe penalty
-            optimization_factors.append('Poor Stop (marked for discard)')
-        
-        # Risk Management Quality
-        risk_pct = screening_detail.get('risk_pct', 100)
-        if risk_pct <= 6:
-            quality_multiplier *= 1.08
-            optimization_factors.append(f'Low Risk {risk_pct:.1f}%')
-        elif risk_pct >= 15:
-            quality_multiplier *= 0.5
-            optimization_factors.append(f'High Risk {risk_pct:.1f}%')
-        
-        return {
-            'quality_multiplier': quality_multiplier,
-            'optimization_factors': optimization_factors,
-            'weekly_atr_optimized': weekly_atr_optimized,
-            'earnings_positive': earnings_positive,
-            'stop_quality': stop_selection,
-            'risk_level': 'LOW' if risk_pct <= 6 else 'HIGH' if risk_pct >= 10 else 'MEDIUM'
-        }
+            detailed_results = self.screening_data.get('detailed_results', [])
+            stock_data = None
+            
+            for result in detailed_results:
+                if result.get('symbol') == symbol:
+                    stock_data = result
+                    break
+            
+            if not stock_data:
+                # Calcular stop loss básico si no hay datos
+                basic_stop = entry_price * 0.90  # 10% stop loss básico
+                distance_to_stop = ((current_price - basic_stop) / current_price)
+                
+                if distance_to_stop <= self.stop_loss_proximity_threshold:
+                    return True, distance_to_stop * 100, f"Cerca de stop loss básico (10%)"
+                return False, distance_to_stop * 100, "OK - Lejos del stop loss básico"
+            
+            # Usar stop loss calculado del screening
+            calculated_stop = stock_data.get('stop_loss', entry_price * 0.90)
+            distance_to_stop = ((current_price - calculated_stop) / current_price)
+            
+            if distance_to_stop <= self.stop_loss_proximity_threshold:
+                return True, distance_to_stop * 100, f"CRÍTICO: Cerca del stop loss calculado ({calculated_stop:.2f})"
+            
+            return False, distance_to_stop * 100, "OK - Distancia segura del stop loss"
+            
+        except Exception as e:
+            return False, 0.0, f"Error verificando stop loss: {e}"
     
-    def identify_rotation_opportunities_aggressive(self):
+    def check_momentum_loss(self, symbol: str) -> Tuple[bool, int, str]:
         """
-        🆕 IDENTIFICA OPORTUNIDADES con manejo correcto de portfolio vacío/cash
+        Verifica si una acción ha perdido momentum (no aparece en screening por X días)
+        Retorna: (perdio_momentum, dias_ausente, razon)
         """
-        if not self.consistency_analysis or not self.screening_data:
-            return []
-        
-        rotation_opportunities = []
-        
-        # 🌍 NUEVO: Manejo inteligente según estado del portfolio
-        if not self.portfolio_status:
-            print("⚠️ Portfolio status no determinado")
-            return []
-        
-        portfolio_state = self.portfolio_status['status']
-        current_positions = set(self.current_portfolio.get('positions', {}).keys()) if self.current_portfolio else set()
-        
-        print(f"💼 Portfolio State: {portfolio_state}")
-        print(f"📊 Description: {self.portfolio_status['description']}")
-        
-        # Obtener scores y configurar lógica según estado del portfolio
-        screening_details = {}
-        current_position_scores = {}
-        
-        for result in self.screening_data.get('detailed_results', []):
-            screening_details[result['symbol']] = result
-            if result['symbol'] in current_positions:
-                current_score = result.get('score', 0)
-                optimization_quality = self.calculate_optimization_quality_score(result)
-                adjusted_current_score = current_score * optimization_quality['quality_multiplier']
-                current_position_scores[result['symbol']] = adjusted_current_score
-        
-        # 🌍 LÓGICA ADAPTADA según estado del portfolio
-        if portfolio_state in ['ALL_CASH_WAITING', 'MOSTLY_CASH', 'EMPTY_PORTFOLIO']:
-            # Portfolio esperando oportunidades - criterios más flexibles
-            avg_current_score = self.min_viable_score  # Usar mínimo viable
-            min_score_for_rotation = self.min_viable_score
-            portfolio_context = "CASH_DEPLOYMENT"
+        try:
+            if not self.consistency_analysis:
+                return False, 0, "No consistency data available"
             
-            print(f"💰 Portfolio en cash - Buscando oportunidades de deployment")
-            print(f"🎯 Score mínimo para inversión: {min_score_for_rotation:.1f}")
+            # Buscar el símbolo en análisis de consistencia
+            consistency_data = self.consistency_analysis.get('consistency_analysis', {})
             
-        elif portfolio_state == 'INVESTED':
-            # Portfolio con posiciones - lógica normal de rotación
-            if current_position_scores:
-                avg_current_score = sum(current_position_scores.values()) / len(current_position_scores)
-                min_score_for_rotation = avg_current_score * (1 + self.rotation_threshold)
-                portfolio_context = "ROTATION_OPTIMIZATION"
+            # Verificar en todas las categorías
+            all_symbols = []
+            for category in ['consistent_winners', 'strong_candidates', 'emerging_opportunities', 'newly_emerged']:
+                category_symbols = [item['symbol'] for item in consistency_data.get(category, [])]
+                all_symbols.extend(category_symbols)
+            
+            if symbol not in all_symbols:
+                # No aparece en screening actual - verificar historial
+                historical_presence = self.check_historical_presence(symbol)
                 
-                print(f"📊 Portfolio invertido - Score promedio: {avg_current_score:.1f}")
-                print(f"🎯 Score mínimo para rotación: {min_score_for_rotation:.1f}")
-            else:
-                # Posiciones perdieron momentum
-                avg_current_score = self.fallback_avg_score
-                min_score_for_rotation = self.min_viable_score
-                portfolio_context = "MOMENTUM_RECOVERY"
-                
-                print(f"🚨 Posiciones perdieron momentum - Modo recovery")
+                if historical_presence >= self.momentum_loss_days:
+                    return True, historical_presence, f"Ausente del screening por {historical_presence}+ días"
+                else:
+                    return False, historical_presence, f"Ausente solo {historical_presence} días"
+            
+            return False, 0, "Presente en screening actual"
+            
+        except Exception as e:
+            return False, 0, f"Error verificando momentum: {e}"
+    
+    def check_historical_presence(self, symbol: str) -> int:
+        """Verifica cuántos días consecutivos una acción ha estado ausente del screening"""
+        # Esta es una función simplificada - en producción se podría 
+        # verificar archivos históricos de screening
+        try:
+            # Simular verificación de archivos históricos
+            import glob
+            historical_files = glob.glob('weekly_screening_results_*.json')
+            historical_files.sort(reverse=True)  # Más recientes primero
+            
+            days_absent = 0
+            for i, file in enumerate(historical_files[:7]):  # Últimos 7 días
+                try:
+                    with open(file, 'r') as f:
+                        historical_data = json.load(f)
+                    
+                    # Buscar símbolo en resultados históricos
+                    top_symbols = historical_data.get('top_symbols', [])
+                    if symbol not in top_symbols:
+                        days_absent += 1
+                    else:
+                        break  # Encontrado, detener búsqueda
+                        
+                except Exception:
+                    continue
+            
+            return days_absent
+            
+        except Exception:
+            # Fallback: asumir ausente por 1 día si no hay datos históricos
+            return 1
+    
+    def calculate_opportunity_score_with_bonuses(self, stock_data: Dict) -> float:
+        """
+        Calcula score de oportunidad con todos los bonuses aplicados
+        Incluye bonus especial por MA50 stop loss
+        """
+        try:
+            base_score = stock_data.get('score', 0)
+            
+            # Multiplicadores por optimizaciones
+            multiplier = 1.0
+            bonus_reasons = []
+            
+            # Bonus por Weekly ATR
+            if stock_data.get('weekly_atr', 0) > 0:
+                multiplier *= self.weekly_atr_bonus
+                bonus_reasons.append(f"Weekly ATR (+{(self.weekly_atr_bonus-1)*100:.0f}%)")
+            
+            # Bonus especial por MA50 stop loss
+            optimizations = stock_data.get('optimizations', {})
+            if optimizations.get('ma50_bonus_applied', False):
+                multiplier *= self.ma50_bonus_multiplier
+                ma50_bonus_value = optimizations.get('ma50_bonus_value', 0)
+                bonus_reasons.append(f"MA50 Rebound (+{ma50_bonus_value}pts + {(self.ma50_bonus_multiplier-1)*100:.0f}%)")
+            
+            # Bonus por fundamentales estrictos
+            fundamental_data = stock_data.get('fundamental_data', {})
+            if fundamental_data.get('quarterly_earnings_positive', False):
+                multiplier *= self.strict_fundamentals_bonus
+                bonus_reasons.append(f"Fundamentales (+{(self.strict_fundamentals_bonus-1)*100:.0f}%)")
+            
+            # Bonus por calidad del stop loss
+            stop_analysis = stock_data.get('stop_analysis', {})
+            if stop_analysis.get('stop_selection', '').startswith('ma'):
+                multiplier *= self.quality_stop_bonus
+                bonus_reasons.append(f"Quality Stop (+{(self.quality_stop_bonus-1)*100:.0f}%)")
+            
+            final_score = base_score * multiplier
+            
+            return {
+                'base_score': base_score,
+                'final_score': final_score,
+                'multiplier_applied': multiplier,
+                'bonus_reasons': bonus_reasons,
+                'quality_tier': self.classify_opportunity_quality(final_score)
+            }
+            
+        except Exception as e:
+            return {
+                'base_score': stock_data.get('score', 0),
+                'final_score': stock_data.get('score', 0),
+                'multiplier_applied': 1.0,
+                'bonus_reasons': [],
+                'quality_tier': 'UNKNOWN',
+                'error': str(e)
+            }
+    
+    def classify_opportunity_quality(self, score: float) -> str:
+        """Clasifica la calidad de una oportunidad"""
+        if score >= 90:
+            return 'EXCEPTIONAL'
+        elif score >= 75:
+            return 'EXCELLENT'
+        elif score >= 60:
+            return 'GOOD'
+        elif score >= 45:
+            return 'AVERAGE'
         else:
-            # Estado desconocido - usar valores por defecto
-            avg_current_score = self.fallback_avg_score
-            min_score_for_rotation = self.min_viable_score
-            portfolio_context = "DEFAULT_ANALYSIS"
+            return 'POOR'
+    
+    def analyze_current_positions_for_monthly_trading(self):
+        """
+        Analiza posiciones actuales con criterios estrictos para trading mensual
+        Solo recomienda cambios en casos críticos
+        """
+        if not self.current_portfolio or not self.screening_data:
+            return {}
         
-        # Analizar oportunidades
-        consistency_data = self.consistency_analysis['consistency_analysis']
+        current_positions = self.current_portfolio.get('positions', {})
+        if not current_positions:
+            return {}
+        
+        position_analysis = {}
+        
+        for symbol, position_data in current_positions.items():
+            try:
+                entry_price = position_data.get('entry_price', 0)
+                entry_date = position_data.get('entry_date', '')
+                shares = position_data.get('shares', 0)
+                
+                # Buscar precio actual en screening data
+                current_price = self.get_current_price_from_screening(symbol)
+                if not current_price:
+                    current_price = entry_price  # Fallback
+                
+                # CRITERIO 1: Verificar proximidad al stop loss
+                near_stop, stop_distance, stop_reason = self.check_position_near_stop_loss(
+                    symbol, current_price, entry_price
+                )
+                
+                # CRITERIO 2: Verificar pérdida de momentum
+                momentum_lost, days_absent, momentum_reason = self.check_momentum_loss(symbol)
+                
+                # CRITERIO 3: Verificar deterioro fundamental (simplificado)
+                fundamental_deterioration = self.check_fundamental_deterioration(symbol)
+                
+                # Calcular P&L actual
+                current_pnl = ((current_price - entry_price) / entry_price) * 100
+                
+                # DETERMINAR RECOMENDACIÓN CON CRITERIOS ESTRICTOS
+                recommendation = self.determine_position_recommendation(
+                    near_stop, momentum_lost, fundamental_deterioration, current_pnl, days_absent
+                )
+                
+                # Calcular urgencia
+                urgency = self.calculate_action_urgency(near_stop, momentum_lost, fundamental_deterioration)
+                
+                position_analysis[symbol] = {
+                    'entry_price': entry_price,
+                    'current_price': current_price,
+                    'current_pnl': current_pnl,
+                    'shares': shares,
+                    'position_value': current_price * shares,
+                    'stop_loss_analysis': {
+                        'near_stop': near_stop,
+                        'distance_pct': stop_distance,
+                        'reason': stop_reason
+                    },
+                    'momentum_analysis': {
+                        'momentum_lost': momentum_lost,
+                        'days_absent': days_absent,
+                        'reason': momentum_reason
+                    },
+                    'fundamental_analysis': fundamental_deterioration,
+                    'recommendation': recommendation,
+                    'action_urgency': urgency,
+                    'monthly_trading_assessment': {
+                        'meets_exit_criteria': near_stop or momentum_lost or fundamental_deterioration['deteriorated'],
+                        'action_required': urgency in ['URGENT', 'HIGH'],
+                        'can_hold_monthly': not (near_stop or momentum_lost)
+                    }
+                }
+                
+            except Exception as e:
+                print(f"❌ Error analizando posición {symbol}: {e}")
+                position_analysis[symbol] = {
+                    'error': str(e),
+                    'recommendation': 'ERROR_REQUIRES_MANUAL_REVIEW',
+                    'action_urgency': 'HIGH'
+                }
+        
+        return position_analysis
+    
+    def get_current_price_from_screening(self, symbol: str) -> Optional[float]:
+        """Obtiene precio actual desde datos de screening"""
+        try:
+            if not self.screening_data:
+                return None
+            
+            detailed_results = self.screening_data.get('detailed_results', [])
+            for result in detailed_results:
+                if result.get('symbol') == symbol:
+                    return result.get('current_price', None)
+            
+            return None
+        except Exception:
+            return None
+    
+    def check_fundamental_deterioration(self, symbol: str) -> Dict:
+        """Verifica deterioro fundamental (simplificado)"""
+        try:
+            # En una implementación completa, esto verificaría cambios fundamentales
+            # Por ahora, retorna estado neutral
+            return {
+                'deteriorated': False,
+                'reason': 'No deterioration detected',
+                'severity': 'NONE'
+            }
+        except Exception as e:
+            return {
+                'deteriorated': False,
+                'reason': f'Error checking fundamentals: {e}',
+                'severity': 'UNKNOWN'
+            }
+    
+    def determine_position_recommendation(self, near_stop: bool, momentum_lost: bool, 
+                                        fundamental_deterioration: Dict, current_pnl: float, 
+                                        days_absent: int) -> str:
+        """
+        Determina recomendación para posición con criterios estrictos de trading mensual
+        """
+        # CRITERIOS DE SALIDA URGENTE
+        if near_stop and current_pnl < -5:
+            return "URGENT_EXIT - Near stop loss with significant loss"
+        
+        if momentum_lost and days_absent >= 5:
+            return "URGENT_EXIT - Lost momentum for 5+ days"
+        
+        if fundamental_deterioration.get('deteriorated', False) and fundamental_deterioration.get('severity') == 'HIGH':
+            return "URGENT_EXIT - Fundamental deterioration"
+        
+        # CRITERIOS DE VIGILANCIA
+        if near_stop and current_pnl > 0:
+            return "CONSIDER_EXIT - Near stop but profitable, monitor closely"
+        
+        if momentum_lost and days_absent >= 3:
+            return "WATCH_CAREFULLY - Lost momentum, consider exit if continues"
+        
+        # MANTENER POSICIÓN (filosofía de trading mensual)
+        if current_pnl > 10:
+            return "HOLD_STRONG - Profitable position within monthly timeframe"
+        
+        if current_pnl > 0:
+            return "HOLD - Positive position, consistent with monthly strategy"
+        
+        if current_pnl > -5:
+            return "HOLD_MONITOR - Small loss, within monthly trading tolerance"
+        
+        return "EVALUATE - Position requires detailed analysis"
+    
+    def calculate_action_urgency(self, near_stop: bool, momentum_lost: bool, 
+                               fundamental_deterioration: Dict) -> str:
+        """Calcula urgencia de acción"""
+        if near_stop or fundamental_deterioration.get('severity') == 'HIGH':
+            return 'URGENT'
+        
+        if momentum_lost:
+            return 'HIGH'
+        
+        if fundamental_deterioration.get('deteriorated', False):
+            return 'MEDIUM'
+        
+        return 'LOW'
+    
+    def identify_monthly_rotation_opportunities(self):
+        """
+        Identifica oportunidades de rotación con criterios estrictos para trading mensual
+        Solo recomienda oportunidades superiores con alta convicción
+        """
+        if not self.screening_data or not self.consistency_analysis:
+            return []
+        
+        opportunities = []
+        current_positions = self.current_portfolio.get('positions', {}) if self.current_portfolio else {}
+        
+        # Obtener datos de screening y consistencia
+        detailed_results = self.screening_data.get('detailed_results', [])
+        consistency_data = self.consistency_analysis.get('consistency_analysis', {})
+        
+        # Analizar categorías de consistencia por orden de prioridad
         priority_categories = [
-            ('consistent_winners', 1.0),
-            ('strong_candidates', 0.9),
-            ('emerging_opportunities', 1.2)
+            ('consistent_winners', 1.0),    # Máxima prioridad
+            ('strong_candidates', 0.95),    # Alta prioridad  
+            ('emerging_opportunities', 0.85) # Prioridad moderada (solo para casos excepcionales)
         ]
         
         for category, weight_multiplier in priority_categories:
-            for symbol_info in consistency_data.get(category, []):
-                symbol = symbol_info['symbol']
+            category_stocks = consistency_data.get(category, [])
+            
+            for stock_info in category_stocks:
+                symbol = stock_info['symbol']
+                consistency_weeks = stock_info.get('frequency', 0)
                 
-                # Solo analizar nuevas oportunidades (no posiciones actuales)
+                # Solo analizar acciones que NO están en portfolio actual
                 if symbol not in current_positions:
-                    screening_detail = screening_details.get(symbol)
+                    # Buscar datos detallados de screening
+                    stock_data = None
+                    for result in detailed_results:
+                        if result.get('symbol') == symbol:
+                            stock_data = result
+                            break
                     
-                    if screening_detail:
-                        current_score = screening_detail.get('score', 0)
-                        optimization_quality = self.calculate_optimization_quality_score(screening_detail)
-                        optimization_multiplier = optimization_quality['quality_multiplier']
-                        total_multiplier = weight_multiplier * optimization_multiplier
-                        adjusted_score = current_score * total_multiplier
+                    if stock_data and consistency_weeks >= self.min_consistency_weeks:
+                        # Calcular score con bonuses
+                        opportunity_analysis = self.calculate_opportunity_score_with_bonuses(stock_data)
+                        final_score = opportunity_analysis['final_score']
                         
-                        should_recommend = False
-                        recommendation_reason = ""
-                        
-                        # 🌍 CRITERIOS ADAPTADOS según contexto del portfolio
-                        if portfolio_context == "CASH_DEPLOYMENT":
-                            # Portfolio en cash - criterios para deployment inicial
-                            if (adjusted_score >= min_score_for_rotation and 
-                                symbol_info.get('frequency', 0) >= self.min_consistency_weeks):
-                                should_recommend = True
-                                opt_text = f" + optimizations ({', '.join(optimization_quality['optimization_factors'])})" if optimization_quality['optimization_factors'] else ""
-                                recommendation_reason = f"Cash deployment opportunity - Score {adjusted_score:.1f}{opt_text}"
+                        # CRITERIO ESTRICTO: Solo recomendar si score >= threshold
+                        if final_score >= self.min_viable_score:
+                            # Determinar urgencia basada en calidad y consistencia
+                            urgency = self.determine_opportunity_urgency(
+                                final_score, consistency_weeks, opportunity_analysis['quality_tier']
+                            )
                             
-                        elif portfolio_context == "ROTATION_OPTIMIZATION":
-                            # Portfolio normal - lógica de rotación estándar
-                            if adjusted_score >= min_score_for_rotation:
-                                should_recommend = True
-                                percentage_superior = ((adjusted_score/avg_current_score-1)*100)
-                                recommendation_reason = f"Score {adjusted_score:.1f} es {percentage_superior:+.1f}% superior"
-                            
-                        elif portfolio_context == "MOMENTUM_RECOVERY":
-                            # Portfolio perdió momentum - criterios de recovery
-                            if (adjusted_score >= self.min_viable_score and 
-                                symbol_info.get('frequency', 0) >= self.min_consistency_weeks):
-                                should_recommend = True
-                                recommendation_reason = f"Momentum recovery opportunity - Score {adjusted_score:.1f}"
-                        
-                        # Criterios adicionales independientes del contexto
-                        momentum_strength_score = self.calculate_momentum_strength_score(symbol_info, screening_detail)
-                        
-                        if not should_recommend and momentum_strength_score['momentum_category'] == 'EXCEPTIONAL':
-                            should_recommend = True
-                            recommendation_reason = f"Momentum excepcional emergente"
-                        
-                        if should_recommend:
-                            urgency = 'HIGH'
-                            if momentum_strength_score['momentum_category'] == 'EXCEPTIONAL':
-                                urgency = 'URGENT'
-                            elif optimization_quality['quality_multiplier'] > 1.2:
-                                urgency = 'URGENT'
-                            
-                            # Para portfolio en cash, determinar qué % del cash usar
-                            recommended_allocation = None
-                            if portfolio_context == "CASH_DEPLOYMENT":
-                                cash_available = self.portfolio_status.get('cash_usd', 0)
-                                if cash_available > 0:
-                                    # Sugerir 20% del cash para primera posición, menos para siguientes
-                                    recommended_allocation = min(cash_available * 0.2, 5000)  # Max $5k per position initially
+                            # Calcular score de reemplazo vs posiciones actuales
+                            replacement_analysis = self.analyze_replacement_potential(final_score, current_positions)
                             
                             opportunity = {
                                 'symbol': symbol,
-                                'category': category,
-                                'current_score': current_score,
-                                'adjusted_score': adjusted_score,
-                                'optimization_quality': optimization_quality,
-                                'momentum_strength': momentum_strength_score,
-                                'rotation_reason': recommendation_reason,
+                                'base_score': opportunity_analysis['base_score'],
+                                'final_score': final_score,
+                                'quality_tier': opportunity_analysis['quality_tier'],
+                                'consistency_weeks': consistency_weeks,
+                                'consistency_category': category,
                                 'urgency': urgency,
-                                'consistency_weeks': symbol_info.get('frequency', 0),
-                                'appeared_this_week': symbol_info.get('appeared_this_week', False),
-                                'screening_detail': screening_detail,
-                                'portfolio_context': portfolio_context,
-                                'recommended_allocation_usd': recommended_allocation,
-                                'optimization_features': optimization_quality['optimization_factors']
+                                'bonus_reasons': opportunity_analysis['bonus_reasons'],
+                                'multiplier_applied': opportunity_analysis['multiplier_applied'],
+                                'replacement_analysis': replacement_analysis,
+                                'monthly_trading_assessment': {
+                                    'high_conviction': final_score >= self.excellent_score_threshold,
+                                    'meets_rotation_criteria': replacement_analysis['significant_improvement'],
+                                    'recommended_for_monthly_hold': consistency_weeks >= 3
+                                },
+                                'rotation_reason': self.generate_rotation_reason(
+                                    opportunity_analysis, consistency_weeks, replacement_analysis
+                                ),
+                                'stock_data': stock_data  # Incluir datos completos para referencia
                             }
                             
-                            rotation_opportunities.append(opportunity)
+                            opportunities.append(opportunity)
         
-        # Ordenar por score ajustado y urgencia
-        rotation_opportunities.sort(key=lambda x: (
-            x['urgency'] == 'URGENT',
-            x['urgency'] == 'HIGH',
-            x['adjusted_score']
-        ), reverse=True)
+        # Ordenar por score final (mejor primero)
+        opportunities.sort(key=lambda x: x['final_score'], reverse=True)
         
-        print(f"🎯 Oportunidades identificadas: {len(rotation_opportunities)} ({portfolio_context})")
-        return rotation_opportunities
+        # Filtrar solo oportunidades que realmente justifican rotación
+        filtered_opportunities = []
+        for opp in opportunities:
+            if (opp['monthly_trading_assessment']['meets_rotation_criteria'] or
+                opp['quality_tier'] in ['EXCEPTIONAL', 'EXCELLENT']):
+                filtered_opportunities.append(opp)
+        
+        return filtered_opportunities[:15]  # Top 15 oportunidades
     
-    def calculate_momentum_strength_score(self, symbol_info, screening_detail=None):
-        """Score de fuerza de momentum para rotación agresiva"""
-        score = 0
-        factors = {}
+    def determine_opportunity_urgency(self, score: float, consistency_weeks: int, quality_tier: str) -> str:
+        """Determina urgencia de oportunidad"""
+        if quality_tier == 'EXCEPTIONAL' and consistency_weeks >= 4:
+            return 'URGENT'
         
-        frequency = symbol_info.get('frequency', 0)
-        weeks_appeared = symbol_info.get('weeks_appeared', [])
-        appeared_this_week = symbol_info.get('appeared_this_week', False)
+        if quality_tier == 'EXCELLENT' and consistency_weeks >= 3:
+            return 'HIGH'
         
-        if appeared_this_week:
-            recent_momentum_score = frequency * 25
-            if frequency >= 3:
-                recent_momentum_score += 20
-            elif frequency >= 2:
-                recent_momentum_score += 15
-        else:
-            recent_momentum_score = max(frequency * 15 - 20, 0)
+        if score >= 70 and consistency_weeks >= 3:
+            return 'MEDIUM'
         
-        score += recent_momentum_score
-        factors['recent_momentum'] = recent_momentum_score
+        return 'LOW'
+    
+    def analyze_replacement_potential(self, new_score: float, current_positions: Dict) -> Dict:
+        """
+        Analiza si una nueva oportunidad justifica reemplazar posiciones actuales
+        """
+        if not current_positions:
+            return {
+                'significant_improvement': True,
+                'can_replace': 'ANY',
+                'improvement_margin': new_score,
+                'reason': 'Portfolio has available capacity'
+            }
         
-        if screening_detail:
-            raw_score = screening_detail.get('score', 0)
-            technical_quality = min(raw_score / 200 * 100, 100)
+        # Encontrar la posición más débil del portfolio
+        weakest_position = None
+        weakest_score = float('inf')
+        
+        if self.screening_data:
+            detailed_results = self.screening_data.get('detailed_results', [])
             
-            optimization_quality = self.calculate_optimization_quality_score(screening_detail)
-            technical_quality *= optimization_quality['quality_multiplier']
-            factors['optimization_quality'] = optimization_quality
-            
-            rr_ratio = screening_detail.get('risk_reward_ratio', 0)
-            if rr_ratio > 4.0:
-                technical_quality += 20
-            elif rr_ratio > 3.0:
-                technical_quality += 10
-            
-            momentum_20d = screening_detail.get('outperformance_20d', 0)
-            if momentum_20d > 15:
-                technical_quality += 15
-            elif momentum_20d > 10:
-                technical_quality += 8
-            
-            score += technical_quality
-            factors['technical_quality'] = technical_quality
+            for symbol in current_positions.keys():
+                for result in detailed_results:
+                    if result.get('symbol') == symbol:
+                        position_score = result.get('score', 0)
+                        if position_score < weakest_score:
+                            weakest_score = position_score
+                            weakest_position = symbol
+                        break
         
-        momentum_category = 'EXCEPTIONAL' if score > 200 else 'STRONG' if score > 150 else 'MODERATE' if score > 100 else 'WEAK' if score > 50 else 'POOR'
+        if weakest_position and weakest_score > 0:
+            score_improvement = new_score - weakest_score
+            percentage_improvement = (score_improvement / weakest_score) * 100 if weakest_score > 0 else 0
+            
+            # CRITERIO ESTRICTO: Debe ser significativamente mejor
+            significant_improvement = score_improvement >= self.min_score_difference
+            
+            return {
+                'significant_improvement': significant_improvement,
+                'can_replace': weakest_position if significant_improvement else None,
+                'weakest_position_score': weakest_score,
+                'improvement_margin': score_improvement,
+                'improvement_percentage': percentage_improvement,
+                'reason': f"{'Significant' if significant_improvement else 'Insufficient'} improvement vs {weakest_position}"
+            }
         
         return {
-            'total_score': score,
-            'factors': factors,
-            'momentum_category': momentum_category,
-            'optimization_applied': screening_detail.get('weekly_atr_optimized', False) if screening_detail else False
+            'significant_improvement': False,
+            'can_replace': None,
+            'improvement_margin': 0,
+            'reason': 'Cannot assess current positions'
         }
     
-    def create_aggressive_action_summary(self, position_analysis, rotation_opportunities):
-        """Crea resumen de acciones adaptado al estado del portfolio"""
+    def generate_rotation_reason(self, opportunity_analysis: Dict, consistency_weeks: int, 
+                               replacement_analysis: Dict) -> str:
+        """Genera razón para rotación"""
+        quality = opportunity_analysis['quality_tier']
+        bonus_count = len(opportunity_analysis['bonus_reasons'])
+        
+        base_reason = f"{quality} opportunity with {consistency_weeks}w consistency"
+        
+        if bonus_count > 0:
+            base_reason += f" + {bonus_count} optimizations"
+        
+        if replacement_analysis['significant_improvement']:
+            improvement = replacement_analysis['improvement_margin']
+            base_reason += f" (+{improvement:.1f}pts vs current)"
+        
+        return base_reason
+    
+    def create_monthly_action_summary(self, position_analysis: Dict, rotation_opportunities: List):
+        """
+        Crea resumen de acciones con filosofía de trading mensual
+        Solo recomienda acciones críticas o de alta convicción
+        """
         actions = {
-            'holds': [],
-            'consider_exits': [],
+            'overall_action': 'MAINTAIN_MONTHLY_STRATEGY',
             'urgent_exits': [],
-            'aggressive_rotations': [],
-            'cash_deployment_opportunities': [],  # 🌍 NUEVO
-            'optimization_rotations': [],
-            'overall_action': 'NO_ACTION',
+            'consider_exits': [],
+            'holds': [],
+            'rotation_opportunities': [],
+            'high_conviction_adds': [],
             'detailed_recommendations': [],
-            'portfolio_context': self.portfolio_status['status'] if self.portfolio_status else 'UNKNOWN'
+            'monthly_trading_summary': {
+                'positions_requiring_action': 0,
+                'high_conviction_opportunities': 0,
+                'rotation_recommendations': 0,
+                'philosophy_status': 'ALIGNED'
+            }
         }
         
-        # Adaptar recomendaciones según estado del portfolio
-        portfolio_state = self.portfolio_status['status'] if self.portfolio_status else 'UNKNOWN'
+        # Analizar posiciones actuales
+        urgent_actions = 0
         
-        if portfolio_state in ['ALL_CASH_WAITING', 'MOSTLY_CASH']:
-            # Portfolio en cash - enfocarse en deployment
-            actions['overall_action'] = 'CASH_DEPLOYMENT_OPPORTUNITIES'
+        for symbol, analysis in position_analysis.items():
+            recommendation = analysis['recommendation']
+            urgency = analysis.get('action_urgency', 'LOW')
             
-            for opp in rotation_opportunities:
-                deployment_data = {
-                    'symbol': opp['symbol'],
-                    'reason': opp['rotation_reason'],
-                    'urgency': opp['urgency'],
-                    'momentum_category': opp['momentum_strength']['momentum_category'],
-                    'optimization_features': opp.get('optimization_features', []),
-                    'recommended_allocation_usd': opp.get('recommended_allocation_usd'),
-                    'consistency_weeks': opp['consistency_weeks']
-                }
+            if 'URGENT_EXIT' in recommendation:
+                actions['urgent_exits'].append({
+                    'symbol': symbol,
+                    'reason': recommendation,
+                    'urgency': urgency,
+                    'pnl': analysis.get('current_pnl', 0)
+                })
+                urgent_actions += 1
                 
-                actions['cash_deployment_opportunities'].append(deployment_data)
+            elif 'CONSIDER_EXIT' in recommendation:
+                actions['consider_exits'].append({
+                    'symbol': symbol,
+                    'reason': recommendation,
+                    'urgency': urgency,
+                    'pnl': analysis.get('current_pnl', 0)
+                })
                 
-                # También añadir a detailed recommendations
-                actions['detailed_recommendations'].append({
-                    'symbol': opp['symbol'],
-                    'action': f"CASH_DEPLOYMENT_{opp['urgency']}",
-                    'reason': opp['rotation_reason'],
-                    'urgency': opp['urgency'],
-                    'allocation_usd': opp.get('recommended_allocation_usd'),
-                    'optimization_features': opp.get('optimization_features', [])
+            elif 'WATCH_CAREFULLY' in recommendation:
+                actions['consider_exits'].append({
+                    'symbol': symbol,
+                    'reason': recommendation,
+                    'urgency': urgency,
+                    'pnl': analysis.get('current_pnl', 0)
+                })
+                
+            else:
+                actions['holds'].append({
+                    'symbol': symbol,
+                    'reason': recommendation,
+                    'pnl': analysis.get('current_pnl', 0)
                 })
         
+        # Analizar oportunidades de rotación
+        high_conviction_count = 0
+        
+        for opp in rotation_opportunities:
+            urgency = opp.get('urgency', 'LOW')
+            quality_tier = opp.get('quality_tier', 'UNKNOWN')
+            
+            if quality_tier in ['EXCEPTIONAL', 'EXCELLENT']:
+                actions['high_conviction_adds'].append({
+                    'symbol': opp['symbol'],
+                    'score': opp['final_score'],
+                    'quality': quality_tier,
+                    'consistency': opp['consistency_weeks'],
+                    'urgency': urgency,
+                    'reason': opp['rotation_reason']
+                })
+                high_conviction_count += 1
+            
+            if opp['monthly_trading_assessment']['meets_rotation_criteria']:
+                actions['rotation_opportunities'].append({
+                    'symbol': opp['symbol'],
+                    'score': opp['final_score'],
+                    'improvement': opp['replacement_analysis']['improvement_margin'],
+                    'reason': opp['rotation_reason'],
+                    'urgency': urgency
+                })
+        
+        # Determinar acción general con filosofía mensual
+        if urgent_actions >= 2:
+            actions['overall_action'] = 'URGENT_PORTFOLIO_REVIEW'
+        elif urgent_actions >= 1:
+            actions['overall_action'] = 'POSITION_EXIT_REQUIRED'
+        elif high_conviction_count >= 2:
+            actions['overall_action'] = 'HIGH_CONVICTION_OPPORTUNITIES_AVAILABLE'
+        elif len(actions['rotation_opportunities']) > 0:
+            actions['overall_action'] = 'CONSIDER_SELECTIVE_ROTATION'
         else:
-            # Portfolio con posiciones - lógica normal de rotación/exits
-            urgent_actions = 0
-            
-            for symbol, analysis in position_analysis.items():
-                recommendation = analysis['recommendation']
-                urgency = analysis.get('action_urgency', 'LOW')
-                
-                if 'URGENT_EXIT' in recommendation:
-                    actions['urgent_exits'].append({
-                        'symbol': symbol,
-                        'reason': recommendation,
-                        'urgency': urgency
-                    })
-                    urgent_actions += 1
-                elif 'CONSIDER_EXIT' in recommendation or 'WATCH_CAREFULLY' in recommendation:
-                    actions['consider_exits'].append({
-                        'symbol': symbol,
-                        'reason': recommendation,
-                        'urgency': urgency
-                    })
-                else:
-                    actions['holds'].append({
-                        'symbol': symbol,
-                        'reason': recommendation
-                    })
-            
-            # Añadir oportunidades de rotación
-            for opp in rotation_opportunities:
-                urgency = opp.get('urgency', 'MEDIUM')
-                
-                if urgency in ['URGENT', 'HIGH']:
-                    actions['aggressive_rotations'].append({
-                        'symbol': opp['symbol'],
-                        'reason': opp['rotation_reason'],
-                        'urgency': urgency
-                    })
-            
-            # Determinar acción general
-            if urgent_actions >= 2:
-                actions['overall_action'] = 'URGENT_PORTFOLIO_ROTATION'
-            elif urgent_actions >= 1 or len(actions['aggressive_rotations']) > 0:
-                actions['overall_action'] = 'AGGRESSIVE_ROTATION_REQUIRED'
-            elif len(actions['consider_exits']) > 0:
-                actions['overall_action'] = 'EVALUATE_MOMENTUM_OPPORTUNITIES'
-            else:
-                actions['overall_action'] = 'MAINTAIN_WITH_VIGILANCE'
+            actions['overall_action'] = 'MAINTAIN_MONTHLY_STRATEGY'
+        
+        # Actualizar resumen mensual
+        actions['monthly_trading_summary'] = {
+            'positions_requiring_action': urgent_actions + len(actions['consider_exits']),
+            'high_conviction_opportunities': high_conviction_count,
+            'rotation_recommendations': len(actions['rotation_opportunities']),
+            'philosophy_status': 'ALIGNED' if urgent_actions == 0 else 'REQUIRES_ATTENTION'
+        }
         
         return actions
     
-    def generate_aggressive_rotation_recommendations(self):
-        """Genera recomendaciones completas con soporte de divisas y portfolio vacío"""
-        print("🎯 Generando recomendaciones AGRESIVAS con soporte de divisas + portfolio vacío...")
+    def generate_monthly_trading_recommendations(self):
+        """Genera recomendaciones completas para trading mensual"""
+        print("🎯 Generando recomendaciones para TRADING MENSUAL...")
         
         if not self.load_consistency_analysis():
             return None
@@ -722,53 +803,46 @@ class AggressiveRotationRecommender:
             except Exception as e:
                 print(f"⚠️ Error archivando recomendaciones anteriores: {e}")
         
-        # Análisis adaptado
-        rotation_opportunities = self.identify_rotation_opportunities_aggressive()
-        
-        # Para portfolio con posiciones, analizar posiciones actuales
+        # Análisis de posiciones actuales
         position_analysis = {}
         if self.portfolio_status and self.portfolio_status['positions_count'] > 0:
-            position_analysis = self.analyze_current_positions_aggressive()
+            position_analysis = self.analyze_current_positions_for_monthly_trading()
         
-        # Extract optimization metrics
-        optimization_features = {}
-        if self.screening_data:
-            detailed_results = self.screening_data.get('detailed_results', [])
-            weekly_atr_available = any(r.get('weekly_atr', 0) > 0 for r in detailed_results)
-            weekly_atr_optimized = any(r.get('weekly_atr_optimized', False) for r in detailed_results)
-            earnings_positive_available = any(r.get('fundamental_data', {}).get('quarterly_earnings_positive', False) for r in detailed_results)
-            
-            optimization_features = {
-                'weekly_atr_available': weekly_atr_available,
-                'weekly_atr_optimized': weekly_atr_optimized,
-                'earnings_positive_available': earnings_positive_available,
-                'total_results': len(detailed_results),
-                'optimization_count': sum([weekly_atr_optimized, earnings_positive_available])
-            }
+        # Identificar oportunidades de rotación
+        rotation_opportunities = self.identify_monthly_rotation_opportunities()
+        
+        # Crear resumen de acciones
+        action_summary = self.create_monthly_action_summary(position_analysis, rotation_opportunities)
         
         # Generar reporte completo
         recommendations = {
             'analysis_date': datetime.now().isoformat(),
             'portfolio_status': 'loaded' if portfolio_loaded else 'example_created',
             'portfolio_details': self.portfolio_status,
-            'currency_support': {
-                'base_currency': self.current_portfolio.get('base_currency', 'EUR') if self.current_portfolio else 'EUR',
-                'conversion_applied': 'currency_conversion' in (self.current_portfolio or {}),
-                'exchange_rate': self.current_portfolio.get('currency_conversion', {}).get('exchange_rate') if self.current_portfolio else None
+            'analysis_type': 'monthly_trading_conservative_with_strict_criteria',
+            'rotation_philosophy': 'monthly_trades_daily_monitoring_strict_rotation',
+            'strict_criteria_applied': {
+                'min_score_difference': self.min_score_difference,
+                'stop_loss_proximity': self.stop_loss_proximity_threshold,
+                'momentum_loss_days': self.momentum_loss_days,
+                'min_consistency_weeks': self.min_consistency_weeks
             },
-            'analysis_type': 'aggressive_momentum_responsive_with_currency_support',
-            'rotation_philosophy': 'swing_for_fences_monthly_rotation_currency_aware',
-            'optimization_features': optimization_features,
             'current_positions_count': len(position_analysis),
             'position_analysis': position_analysis,
-            'rotation_opportunities': rotation_opportunities[:15],
-            'action_summary': self.create_aggressive_action_summary(position_analysis, rotation_opportunities),
+            'rotation_opportunities': rotation_opportunities[:10],  # Top 10
+            'action_summary': action_summary,
+            'monthly_trading_insights': {
+                'total_opportunities_analyzed': len(rotation_opportunities),
+                'high_conviction_opportunities': len(action_summary['high_conviction_adds']),
+                'positions_requiring_immediate_action': len(action_summary['urgent_exits']),
+                'alignment_with_monthly_strategy': action_summary['monthly_trading_summary']['philosophy_status']
+            },
             'methodology_notes': {
-                'philosophy': 'Momentum trading agresivo con soporte multi-divisa y manejo de portfolio vacío',
-                'currency_handling': 'EUR base currency con acciones USD - conversión automática',
-                'empty_portfolio_logic': 'Distingue portfolio vacío (cash waiting) vs momentum perdido',
-                'cash_deployment': 'Recomendaciones específicas para deployment desde cash',
-                'optimization_integration': 'Weekly ATR + Stop Loss + Fundamentales integrados'
+                'philosophy': 'Monthly trading with daily monitoring - strict rotation criteria',
+                'execution_frequency': 'Daily screening, monthly rotation mindset',
+                'rotation_criteria': 'Only for significant opportunities or risk management',
+                'score_threshold': f'Minimum {self.min_score_difference}pt improvement for rotation',
+                'ma50_bonus_integration': 'Prioritizes MA50 stop loss with 20% bonus multiplier'
             }
         }
         
@@ -776,126 +850,80 @@ class AggressiveRotationRecommender:
         with open('rotation_recommendations.json', 'w') as f:
             json.dump(recommendations, f, indent=2, default=str)
         
-        print("✅ Recomendaciones con soporte de divisas guardadas: rotation_recommendations.json")
+        print("✅ Recomendaciones para trading mensual guardadas: rotation_recommendations.json")
         return recommendations
     
-    def analyze_current_positions_aggressive(self):
-        """Análisis de posiciones actuales (solo si existen)"""
-        if not self.current_portfolio or not self.consistency_analysis:
-            return {}
-        
-        current_positions = self.current_portfolio.get('positions', {})
-        if not current_positions:
-            return {}
-        
-        position_analysis = {}
-        screening_details = {}
-        
-        if self.screening_data:
-            for result in self.screening_data.get('detailed_results', []):
-                screening_details[result['symbol']] = result
-        
-        # Simplified position analysis for existing positions
-        for symbol, position_data in current_positions.items():
-            screening_detail = screening_details.get(symbol)
-            
-            if screening_detail:
-                # Position found in screening - analyze normally
-                position_analysis[symbol] = {
-                    'status': 'found_in_screening',
-                    'screening_detail': screening_detail,
-                    'recommendation': 'ANALYZE_MOMENTUM',
-                    'optimization_applied': screening_detail.get('weekly_atr_optimized', False)
-                }
-            else:
-                # Position not in screening - lost momentum
-                position_analysis[symbol] = {
-                    'status': 'not_in_screening',
-                    'recommendation': 'URGENT_EXIT - Momentum perdido completamente',
-                    'action_urgency': 'URGENT',
-                    'optimization_applied': False
-                }
-        
-        return position_analysis
-    
-    def print_currency_aware_summary(self, recommendations):
-        """Imprime resumen con información de divisas"""
+    def print_monthly_trading_summary(self, recommendations):
+        """Imprime resumen para trading mensual"""
         if not recommendations:
             return
         
-        print(f"\n=== RECOMENDACIONES AGRESIVAS CON SOPORTE DE DIVISAS ===")
-        print(f"Análisis: {recommendations['analysis_date'][:10]}")
-        
-        # Currency info
-        currency_info = recommendations.get('currency_support', {})
-        print(f"💱 Moneda base: {currency_info.get('base_currency', 'EUR')}")
-        if currency_info.get('conversion_applied'):
-            rate = currency_info.get('exchange_rate', 0)
-            print(f"💱 Conversión aplicada: EUR/USD @ {rate:.4f}")
-        
-        # Portfolio status
-        portfolio_details = recommendations.get('portfolio_details', {})
-        print(f"💼 Estado: {portfolio_details.get('status', 'UNKNOWN')}")
-        print(f"📊 {portfolio_details.get('description', 'No description')}")
-        
-        if portfolio_details.get('is_waiting_for_opportunities'):
-            cash_eur = portfolio_details.get('cash_usd', 0) / currency_info.get('exchange_rate', 1.08)
-            print(f"💰 Cash disponible: €{cash_eur:,.2f}")
-        
         action_summary = recommendations.get('action_summary', {})
-        portfolio_context = action_summary.get('portfolio_context', 'UNKNOWN')
+        monthly_insights = recommendations.get('monthly_trading_insights', {})
         
-        # Show context-specific recommendations
-        if portfolio_context in ['ALL_CASH_WAITING', 'MOSTLY_CASH']:
-            cash_opportunities = action_summary.get('cash_deployment_opportunities', [])
-            print(f"\n💰 OPORTUNIDADES DE DEPLOYMENT DE CASH:")
-            for opp in cash_opportunities[:5]:
-                allocation = opp.get('recommended_allocation_usd', 0)
-                allocation_eur = allocation / currency_info.get('exchange_rate', 1.08)
-                opt_indicator = " 🔧" if opp.get('optimization_features') else ""
-                print(f"   💎 {opp['symbol']}{opt_indicator} - {opp['urgency']} - ~€{allocation_eur:,.0f} - {opp['reason']}")
+        print(f"\n🎯 === RESUMEN TRADING MENSUAL ===")
+        print(f"📅 Filosofía: Trades de ~1 mes con monitorización diaria")
+        print(f"⚠️ Criterios estrictos: Score +{self.min_score_difference}, Stop {self.stop_loss_proximity_threshold*100}%, Momentum {self.momentum_loss_days}d")
         
-        else:
-            # Normal rotation recommendations
-            aggressive_rotations = action_summary.get('aggressive_rotations', [])
-            if aggressive_rotations:
-                print(f"\n⚡ ROTACIONES AGRESIVAS:")
-                for rot in aggressive_rotations[:3]:
-                    print(f"   🔥 {rot['symbol']} - {rot['urgency']} - {rot['reason']}")
-            
-            urgent_exits = action_summary.get('urgent_exits', [])
-            if urgent_exits:
-                print(f"\n🚨 SALIDAS URGENTES:")
-                for exit in urgent_exits:
-                    print(f"   ❌ {exit['symbol']} - {exit['reason']}")
+        portfolio_details = recommendations.get('portfolio_details', {})
+        print(f"\n💼 PORTFOLIO: {portfolio_details.get('description', 'Unknown')}")
+        
+        # Acciones urgentes
+        urgent_exits = action_summary.get('urgent_exits', [])
+        if urgent_exits:
+            print(f"\n🚨 SALIDAS URGENTES ({len(urgent_exits)}):")
+            for exit in urgent_exits:
+                pnl = exit.get('pnl', 0)
+                pnl_str = f"({pnl:+.1f}%)" if pnl != 0 else ""
+                print(f"   ❌ {exit['symbol']} {pnl_str} - {exit['reason']}")
+        
+        # Consideraciones de salida
+        consider_exits = action_summary.get('consider_exits', [])
+        if consider_exits:
+            print(f"\n⚠️ EVALUAR SALIDAS ({len(consider_exits)}):")
+            for exit in consider_exits:
+                pnl = exit.get('pnl', 0)
+                pnl_str = f"({pnl:+.1f}%)" if pnl != 0 else ""
+                print(f"   🔍 {exit['symbol']} {pnl_str} - {exit['reason']}")
+        
+        # Oportunidades de alta convicción
+        high_conviction = action_summary.get('high_conviction_adds', [])
+        if high_conviction:
+            print(f"\n🌟 ALTA CONVICCIÓN ({len(high_conviction)}):")
+            for opp in high_conviction[:3]:
+                print(f"   💎 {opp['symbol']} - {opp['quality']} - {opp['consistency']}w - {opp['reason']}")
+        
+        # Mantener posiciones
+        holds = action_summary.get('holds', [])
+        if holds:
+            print(f"\n✅ MANTENER ({len(holds)}):")
+            for hold in holds[:3]:
+                pnl = hold.get('pnl', 0)
+                pnl_str = f"({pnl:+.1f}%)" if pnl != 0 else ""
+                print(f"   🔒 {hold['symbol']} {pnl_str} - {hold['reason'][:50]}...")
+        
+        print(f"\n📊 ALINEACIÓN ESTRATÉGICA: {monthly_insights.get('alignment_with_monthly_strategy', 'Unknown')}")
+        print(f"🎯 ACCIÓN GENERAL: {action_summary.get('overall_action', 'Unknown')}")
 
 def main():
-    """Función principal con soporte de divisas y portfolio vacío"""
-    recommender = AggressiveRotationRecommender()
+    """Función principal para recomendaciones de trading mensual"""
+    recommender = MonthlyTradingRecommender()
     
-    recommendations = recommender.generate_aggressive_rotation_recommendations()
+    recommendations = recommender.generate_monthly_trading_recommendations()
     
     if recommendations:
-        recommender.print_currency_aware_summary(recommendations)
-        print("\n✅ Recomendaciones con soporte de divisas completadas")
+        recommender.print_monthly_trading_summary(recommendations)
+        print("\n✅ Recomendaciones para trading mensual completadas")
         
-        portfolio_details = recommendations.get('portfolio_details', {})
-        currency_info = recommendations.get('currency_support', {})
+        print(f"\n🎯 CARACTERÍSTICAS IMPLEMENTADAS:")
+        print(f"   - Criterios estrictos: ✅ Score +30pts, Stop 3%, Momentum 3d")
+        print(f"   - Trading mensual: ✅ Filosofía de holds de ~1 mes")
+        print(f"   - Monitorización diaria: ✅ Sin rotación excesiva")
+        print(f"   - Bonus MA50: ✅ 20% multiplicador por rebote alcista")
+        print(f"   - Gestión de riesgo: ✅ Criterios conservadores")
         
-        print(f"\n🌍 CARACTERÍSTICAS IMPLEMENTADAS:")
-        print(f"   - Soporte multi-divisa: ✅ {currency_info.get('base_currency', 'EUR')} → USD")
-        print(f"   - Portfolio vacío: ✅ Manejo correcto de cash waiting")
-        print(f"   - Conversión automática: ✅ Tipos de cambio en tiempo real")
-        print(f"   - Optimizations integration: ✅ Weekly ATR + Fundamentales")
-        
-        if portfolio_details.get('is_waiting_for_opportunities'):
-            print(f"\n💡 TU PORTFOLIO:")
-            print(f"   - Estado: Esperando oportunidades de inversión")
-            print(f"   - Acción: Revisar cash deployment opportunities")
-            print(f"   - Próximo paso: Seleccionar 1-2 top opportunities para iniciar")
-    
     else:
-        print("\n❌ No se pudieron generar recomendaciones con soporte de divisas")
+        print("\n❌ No se pudieron generar recomendaciones para trading mensual")
 
 if __name__ == "__main__":
     main()
