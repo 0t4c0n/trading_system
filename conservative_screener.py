@@ -222,6 +222,7 @@ class MomentumResponsiveScreener:
         
         print(f"🚀 Screener inicializado - BONUS MA50: +{self.ma50_stop_bonus} pts")
         print(f"⚡ Optimizaciones: Paralelización (5 threads) + Rate limiting (3 req/sec)")
+        print(f"🌟 MA50 Bonus: Se aplica cuando MA50 es el stop loss óptimo seleccionado")
     
     def get_nyse_nasdaq_symbols(self):
         """Obtiene símbolos de NYSE y NASDAQ - OPTIMIZADO"""
@@ -354,32 +355,54 @@ class MomentumResponsiveScreener:
         except Exception:
             return 0
     
-    def is_near_ma50_support(self, hist, current_price):
-        """🌟 DETECTA REBOTE EN MA50 PARA BONUS"""
+    def is_ma50_used_as_stop_loss(self, hist, current_price, stop_price):
+        """🌟 VERIFICA SI MA50 SE USA COMO STOP LOSS PARA BONUS"""
         try:
             if len(hist) < 50:
                 return False
             
             ma50 = hist['Close'].rolling(window=50).mean().iloc[-1]
+            ma21 = hist['Close'].rolling(window=21).mean().iloc[-1]
             
-            # Rango de ±3% para considerar "cerca" de MA50
-            distance_pct = abs((current_price - ma50) / ma50) * 100
-            
-            if distance_pct > 3.0:
+            # Verificar que MA50 sea válida
+            if pd.isna(ma50) or ma50 <= 0:
                 return False
             
-            # Debe estar por encima (rebote, no rotura)
-            if current_price < ma50 * 0.99:
-                return False
+            # Calcular los componentes del stop loss como en la lógica original
+            support_level = min(ma21, ma50, current_price * 0.92)
             
-            # Verificar tendencia alcista reciente (últimos 5 días)
-            recent_returns = hist['Close'].pct_change().tail(5).sum()
-            if recent_returns < 0:
-                return False
+            # Calcular ATR stop
+            hist['tr1'] = hist['High'] - hist['Low']
+            hist['tr2'] = abs(hist['High'] - hist['Close'].shift(1))
+            hist['tr3'] = abs(hist['Low'] - hist['Close'].shift(1))
+            hist['true_range'] = hist[['tr1', 'tr2', 'tr3']].max(axis=1)
+            atr = hist['true_range'].tail(14).mean()
+            atr_stop = current_price - (atr * 2)
             
-            return True
+            # El stop loss final es el máximo entre support_level y atr_stop
+            calculated_stop = max(support_level, atr_stop)
             
-        except Exception:
+            # Verificar si MA50 es efectivamente el stop loss usado
+            # 1. MA50 debe ser el mínimo en support_level (ma21, ma50, current_price * 0.92)
+            # 2. Y ese support_level debe ser el stop loss final (mayor que atr_stop)
+            
+            is_ma50_the_support = (support_level == ma50)
+            is_support_the_stop = (calculated_stop == support_level)
+            
+            # Verificar que el stop calculado coincida con el stop pasado (tolerancia de 1%)
+            stop_matches = abs(calculated_stop - stop_price) / stop_price < 0.01
+            
+            ma50_is_stop_loss = is_ma50_the_support and is_support_the_stop and stop_matches
+            
+            if ma50_is_stop_loss:
+                print(f"🌟 MA50 STOP LOSS DETECTED: MA50=${ma50:.2f} | MA21=${ma21:.2f} | "
+                      f"Support=${support_level:.2f} | ATR_Stop=${atr_stop:.2f} | "
+                      f"Final_Stop=${calculated_stop:.2f}")
+            
+            return ma50_is_stop_loss
+            
+        except Exception as e:
+            print(f"⚠️ Error verificando MA50 como stop loss: {e}")
             return False
     
     def get_fundamental_data(self, symbol):
@@ -547,9 +570,14 @@ class MomentumResponsiveScreener:
             if risk_pct > self.max_allowed_risk:
                 return None
             
-            # 🌟 DETECTAR REBOTE MA50 PARA BONUS
-            is_ma50_rebote = self.is_near_ma50_support(hist, current_price)
-            ma50_bonus = self.ma50_stop_bonus if is_ma50_rebote else 0
+            # 🌟 VERIFICAR SI MA50 SE USA COMO STOP LOSS PARA BONUS
+            is_ma50_stop_loss = self.is_ma50_used_as_stop_loss(hist, current_price, stop_price)
+            ma50_bonus = self.ma50_stop_bonus if is_ma50_stop_loss else 0
+            
+            # Log específico para MA50 bonus
+            if is_ma50_stop_loss:
+                print(f"🌟 {normalized_symbol}: MA50 COMO STOP LOSS (+{ma50_bonus} pts) | "
+                      f"Stop: ${stop_price:.2f} | MA50: ${ma50:.2f}")
             
             # FUNDAMENTAL DATA
             fundamental_data = self.get_fundamental_data(normalized_symbol)
@@ -647,7 +675,7 @@ class MomentumResponsiveScreener:
                 'technical_score': round(technical_score, 1),
                 'rr_bonus': round(rr_bonus, 1),
                 'ma50_bonus': ma50_bonus,
-                'is_ma50_rebote': is_ma50_rebote,
+                'is_ma50_stop_loss': is_ma50_stop_loss,  # Cambiado nombre
                 'current_price': round(current_price, 2),
                 'stop_loss': round(stop_price, 2),
                 'take_profit': round(take_profit_price, 2),
@@ -687,6 +715,7 @@ class MomentumResponsiveScreener:
         print(f"=== CONSERVATIVE SCREENER OPTIMIZADO ===")
         print(f"🌟 Bonus MA50: +{self.ma50_stop_bonus} puntos")
         print(f"🚀 Paralelización: 5 threads habilitados")
+        print(f"🎯 MA50 Bonus: Solo cuando MA50 es el stop loss seleccionado por el algoritmo")
         
         # Obtener símbolos
         self.stock_symbols = self.get_nyse_nasdaq_symbols()
@@ -726,21 +755,29 @@ class MomentumResponsiveScreener:
                     batch_results = future.result()
                     all_results.extend(batch_results)
                     
-                    # Progress cada 10 lotes
+                    # Progress cada 10 lotes con información detallada
                     if (batch_idx + 1) % 10 == 0:
                         elapsed = time.time() - start_time
                         processed = (batch_idx + 1) * batch_size
                         total = len(filtered_symbols)
                         remaining_batches = len(batches) - (batch_idx + 1)
-                        eta_minutes = (remaining_batches * elapsed / (batch_idx + 1)) / 60
+                        eta_minutes = (remaining_batches * elapsed / (batch_idx + 1)) / 60 if (batch_idx + 1) > 0 else 0
                         
-                        ma50_count = sum(1 for r in all_results if r.get('is_ma50_rebote', False))
+                        ma50_count = sum(1 for r in all_results if r.get('is_ma50_stop_loss', False))
+                        avg_score = sum(r.get('score', 0) for r in all_results) / len(all_results) if all_results else 0
                         
                         print(f"📊 Lote {batch_idx+1}/{len(batches)} | "
-                              f"Procesados: {processed}/{total} | "
+                              f"Procesados: {processed}/{total} ({processed/total*100:.1f}%) | "
                               f"Candidatos: {len(all_results)} | "
-                              f"MA50 Bonus: {ma50_count} | "
+                              f"🌟 MA50 Stop Loss: {ma50_count} | "
+                              f"Score Promedio: {avg_score:.1f} | "
                               f"ETA: {eta_minutes:.1f}min")
+                        
+                        # Log de ejemplo de último candidato con MA50 como stop loss
+                        recent_ma50 = [r for r in all_results if r.get('is_ma50_stop_loss', False)]
+                        if recent_ma50:
+                            last_ma50 = recent_ma50[-1]
+                            print(f"     🌟 Último MA50 Stop: {last_ma50.get('symbol', 'N/A')} (Score: {last_ma50.get('score', 0):.1f})")
                         
                 except Exception:
                     continue
@@ -750,14 +787,33 @@ class MomentumResponsiveScreener:
         # Ordenar resultados
         all_results.sort(key=lambda x: x['score'], reverse=True)
         
-        ma50_bonus_count = sum(1 for r in all_results if r.get('is_ma50_rebote', False))
+        ma50_bonus_count = sum(1 for r in all_results if r.get('is_ma50_stop_loss', False))
         
         print(f"\n🎯 SCREENING OPTIMIZADO COMPLETADO:")
         print(f"⏱️ Tiempo: {elapsed/60:.1f} minutos")
         print(f"🔍 Símbolos: {len(filtered_symbols)}")
         print(f"✅ Candidatos: {len(all_results)}")
-        print(f"🌟 MA50 Bonus: {ma50_bonus_count}")
+        print(f"🌟 MA50 como Stop Loss: {ma50_bonus_count}")
         print(f"📈 Velocidad: {len(filtered_symbols)/(elapsed/60):.0f} símbolos/min")
+        
+        # Mostrar específicamente las acciones con MA50 como stop loss
+        if ma50_bonus_count > 0:
+            ma50_stocks = [r for r in all_results if r.get('is_ma50_stop_loss', False)]
+            print(f"\n🌟 ACCIONES CON MA50 COMO STOP LOSS (+{self.ma50_stop_bonus} pts):")
+            for i, stock in enumerate(ma50_stocks[:10], 1):  # Top 10 con MA50 stop loss
+                price = stock.get('current_price', 0)
+                stop = stock.get('stop_loss', 0)
+                score = stock.get('score', 0)
+                technical_score = stock.get('technical_score', 0)
+                print(f"  {i:2d}. {stock.get('symbol', 'N/A'):6s} | "
+                      f"Score: {score:5.1f} (Base: {technical_score-self.ma50_stop_bonus:.1f} + MA50: +{self.ma50_stop_bonus}) | "
+                      f"Price: ${price:.2f} | Stop: ${stop:.2f}")
+        else:
+            print(f"\n⚠️ NINGUNA ACCIÓN USA MA50 COMO STOP LOSS")
+            print(f"   Esto significa que para todas las acciones analizadas:")
+            print(f"   - MA21, precio*0.92, o ATR stop fueron mejores opciones")
+            print(f"   - MA50 no fue el nivel de soporte óptimo")
+            print(f"   - Es normal en mercados con tendencias fuertes")
         
         # Guardar resultados
         self.save_results_optimized(all_results, elapsed, len(filtered_symbols), ma50_bonus_count)
@@ -815,11 +871,59 @@ class MomentumResponsiveScreener:
         
         print(f"💾 Archivos guardados: {filename} + weekly_screening_results.json")
 
+def test_ma50_detection():
+    """Función de test para verificar MA50 como stop loss"""
+    print("🔍 === TEST DE MA50 COMO STOP LOSS ===")
+    
+    screener = MomentumResponsiveScreener()
+    test_symbols = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA']
+    
+    print(f"Probando si MA50 es elegida como stop loss en {len(test_symbols)} símbolos...")
+    
+    for symbol in test_symbols:
+        try:
+            hist = screener.data_fetcher.robust_yfinance_history(symbol, period="6mo")
+            if len(hist) < 50:
+                print(f"❌ {symbol}: Datos insuficientes ({len(hist)} días)")
+                continue
+                
+            current_price = hist['Close'].iloc[-1]
+            ma21 = hist['Close'].rolling(window=21).mean().iloc[-1]
+            ma50 = hist['Close'].rolling(window=50).mean().iloc[-1]
+            
+            # Simular cálculo de stop loss
+            support_level = min(ma21, ma50, current_price * 0.92)
+            hist['tr1'] = hist['High'] - hist['Low']
+            hist['tr2'] = abs(hist['High'] - hist['Close'].shift(1))
+            hist['tr3'] = abs(hist['Low'] - hist['Close'].shift(1))
+            hist['true_range'] = hist[['tr1', 'tr2', 'tr3']].max(axis=1)
+            atr = hist['true_range'].tail(14).mean()
+            atr_stop = current_price - (atr * 2)
+            final_stop = max(support_level, atr_stop)
+            
+            is_ma50_stop = screener.is_ma50_used_as_stop_loss(hist, current_price, final_stop)
+            
+            if is_ma50_stop:
+                print(f"🌟 {symbol}: MA50 ES EL STOP LOSS (+{screener.ma50_stop_bonus} pts)")
+                print(f"     MA21: ${ma21:.2f} | MA50: ${ma50:.2f} | 0.92*Price: ${current_price*0.92:.2f}")
+                print(f"     Support: ${support_level:.2f} | ATR Stop: ${atr_stop:.2f} | Final: ${final_stop:.2f}")
+            else:
+                print(f"⚪ {symbol}: MA50 NO es stop loss")
+                print(f"     MA21: ${ma21:.2f} | MA50: ${ma50:.2f} | ATR Stop: ${atr_stop:.2f} | Final: ${final_stop:.2f}")
+                
+        except Exception as e:
+            print(f"❌ {symbol}: Error en test - {e}")
+    
+    print("=== FIN TEST MA50 STOP LOSS ===\n")
+
 def main():
     """Función principal optimizada"""
     try:
         print("🚀 Conservative Screener - Versión Optimizada")
         print("⚡ Paralelización + Rate limiting (3 req/sec)")
+        
+        # Test opcional del MA50 (comentar para producción)
+        # test_ma50_detection()
         
         screener = MomentumResponsiveScreener()
         results = screener.screen_all_stocks_momentum_responsive()
@@ -827,11 +931,29 @@ def main():
         if results:
             print(f"\n🏆 TOP 10 CANDIDATOS:")
             for i, stock in enumerate(results[:10], 1):
-                ma50_indicator = " 🌟" if stock.get('is_ma50_rebote', False) else ""
+                ma50_indicator = " 🌟" if stock.get('is_ma50_stop_loss', False) else ""
+                ma50_bonus_val = stock.get('ma50_bonus', 0)
+                score_breakdown = f"Score: {stock['score']:5.1f}"
+                if ma50_bonus_val > 0:
+                    base_score = stock['score'] - ma50_bonus_val
+                    score_breakdown = f"Score: {stock['score']:5.1f} (Base: {base_score:.1f} + MA50: +{ma50_bonus_val})"
+                
                 print(f"{i:2d}. {stock['symbol']:6s} | "
-                      f"Score: {stock['score']:5.1f} | "
+                      f"{score_breakdown} | "
                       f"R/R: {stock['risk_reward_ratio']:4.1f} | "
                       f"Risk: {stock['risk_pct']:4.1f}%{ma50_indicator}")
+            
+            # Estadísticas adicionales del MA50 bonus
+            ma50_count = sum(1 for r in results if r.get('is_ma50_stop_loss', False))
+            if ma50_count > 0:
+                print(f"\n🌟 RESUMEN MA50 STOP LOSS BONUS:")
+                print(f"   - Total usando MA50 como stop: {ma50_count}")
+                print(f"   - Valor del bonus: +{results[0].get('ma50_bonus', 22)} pts cada uno")
+                print(f"   - Porcentaje: {ma50_count/len(results)*100:.1f}% de candidatos")
+                print(f"   - Concepto: Bonus por usar MA50 como nivel de stop loss óptimo")
+            else:
+                print(f"\n⚠️ Ninguna acción usa MA50 como stop loss en esta ejecución")
+                print(f"   (MA21, precio*0.92, o ATR stop fueron mejores opciones)")
         else:
             print("⚠️ Sin resultados - verificar conectividad")
         

@@ -88,10 +88,19 @@ jobs:
         echo "Frecuencia: Diaria (L-V 9:00 AM Espana)"
         echo "Objetivo: Trades de 1 mes con gestion diaria de exits"
         
+        echo "Ejecutando conservative_screener.py..."
         python conservative_screener.py
         
-        echo "Screening diario completado"
-        ls -la weekly_screening_results.json momentum_responsive_results_*.json 2>/dev/null || echo "Verificando archivos generados..."
+        echo "Verificando archivos generados..."
+        if [ ! -f "weekly_screening_results.json" ]; then
+          echo "ERROR: weekly_screening_results.json no fue generado"
+          echo "Listando archivos actuales:"
+          ls -la *.json 2>/dev/null || echo "No hay archivos JSON"
+          exit 1
+        fi
+        
+        echo "SUCCESS: Screening completado y archivo generado"
+        ls -la weekly_screening_results.json
       env:
         PYTHONUNBUFFERED: 1
 
@@ -114,10 +123,19 @@ jobs:
         echo "Adaptado para: Deteccion de tendencias en ejecucion diaria"
         echo "Ventana: Ultimos 7 dias de screening para patrones"
         
+        echo "Ejecutando consistency_analyzer.py..."
         python consistency_analyzer.py
         
-        echo "Analisis de consistencia diario completado"
-        ls -la consistency_analysis.json consistency_analysis_*.json 2>/dev/null || echo "Verificando archivos de consistencia..."
+        echo "Verificando archivos generados..."
+        if [ ! -f "consistency_analysis.json" ]; then
+          echo "ERROR: consistency_analysis.json no fue generado"
+          echo "Listando archivos actuales:"
+          ls -la *.json 2>/dev/null || echo "No hay archivos JSON"
+          exit 1
+        fi
+        
+        echo "SUCCESS: Analisis de consistencia completado y archivo generado"
+        ls -la consistency_analysis.json
       env:
         PYTHONUNBUFFERED: 1
 
@@ -144,10 +162,19 @@ jobs:
         echo "   - Oportunidad 30+ puntos superior"
         echo "   - Deterioro fundamental"
         
+        echo "Ejecutando rotation_recommender.py..."
         python rotation_recommender.py
         
-        echo "Recomendaciones mensuales generadas"
-        ls -la rotation_recommendations.json rotation_recommendations_*.json 2>/dev/null || echo "Verificando recomendaciones..."
+        echo "Verificando archivos generados..."
+        if [ ! -f "rotation_recommendations.json" ]; then
+          echo "ERROR: rotation_recommendations.json no fue generado"
+          echo "Listando archivos actuales:"
+          ls -la *.json 2>/dev/null || echo "No hay archivos JSON"
+          exit 1
+        fi
+        
+        echo "SUCCESS: Recomendaciones generadas y archivo creado"
+        ls -la rotation_recommendations.json
       env:
         PYTHONUNBUFFERED: 1
 
@@ -169,14 +196,69 @@ jobs:
         echo "Generando reporte diario..."
         echo "Tipo: Daily Market Analysis + Monthly Trading Recommendations"
         
+        echo "Ejecutando create_weekly_report.py..."
         python create_weekly_report.py
         
-        echo "Reporte diario generado"
-        ls -la ENHANCED_WEEKLY_REPORT_*.md docs/data.json 2>/dev/null || echo "Verificando reporte y dashboard..."
+        echo "Verificando archivos generados..."
+        if [ ! -f "docs/data.json" ]; then
+          echo "ERROR: docs/data.json no fue generado"
+          echo "Verificando directorio docs:"
+          ls -la docs/ 2>/dev/null || echo "Directorio docs no existe"
+          exit 1
+        fi
+        
+        echo "SUCCESS: Reporte diario y dashboard generados"
+        ls -la docs/data.json
+        ls -la ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null || echo "Sin reporte markdown (puede ser normal)"
       env:
         PYTHONUNBUFFERED: 1
         
-    - name: "5. Generar mensaje de commit inteligente para ejecucion diaria"
+    - name: "5. Verificacion final de archivos generados"
+      run: |
+        echo "Verificacion final de todos los archivos..."
+        
+        # Lista de archivos requeridos
+        REQUIRED_FILES=(
+          "weekly_screening_results.json"
+          "consistency_analysis.json"
+          "rotation_recommendations.json"
+          "docs/data.json"
+        )
+        
+        ALL_OK=true
+        
+        echo "Verificando archivos principales:"
+        for file in "${REQUIRED_FILES[@]}"; do
+          if [ -f "$file" ]; then
+            SIZE=$(stat -c%s "$file" 2>/dev/null || echo "0")
+            echo "  ✓ $file ($SIZE bytes)"
+          else
+            echo "  ✗ $file (FALTA)"
+            ALL_OK=false
+          fi
+        done
+        
+        echo ""
+        echo "Archivos opcionales:"
+        ls -la ENHANCED_WEEKLY_REPORT_*.md 2>/dev/null | head -3 || echo "  Sin reportes markdown"
+        ls -la momentum_responsive_results_*.json 2>/dev/null | head -3 || echo "  Sin archivos momentum"
+        
+        echo ""
+        echo "Todos los archivos JSON en directorio:"
+        ls -la *.json 2>/dev/null || echo "  No hay archivos JSON"
+        
+        if [ "$ALL_OK" = false ]; then
+          echo ""
+          echo "ERROR: Faltan archivos requeridos. No se puede continuar con commit."
+          exit 1
+        fi
+        
+        echo ""
+        echo "SUCCESS: Todos los archivos principales generados correctamente"
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: "5.1. Generar mensaje de commit inteligente para ejecucion diaria"
       run: |
         echo "Generando commit message diario..."
         
@@ -215,7 +297,50 @@ jobs:
         git config --global user.name 'Daily Conservative Bot'
         git config --global user.email 'actions@github.com'
         
-    - name: "6. Commit diario con gestion historica optimizada"
+    - name: "6. Debug y diagnostico del entorno"
+      run: |
+        echo "Informacion del entorno para debugging..."
+        
+        echo "Python version:"
+        python --version
+        
+        echo "Pip packages instalados:"
+        pip list | grep -E "(yfinance|pandas|numpy|requests)"
+        
+        echo "Conectividad a Yahoo Finance:"
+        python -c "
+        import yfinance as yf
+        try:
+            spy = yf.Ticker('SPY')
+            data = spy.history(period='5d')
+            print(f'✓ Yahoo Finance OK: {len(data)} dias de datos SPY')
+        except Exception as e:
+            print(f'✗ Error Yahoo Finance: {e}')
+        "
+        
+        echo "Conectividad a NASDAQ API:"
+        python -c "
+        import requests
+        try:
+            url = 'https://api.nasdaq.com/api/screener/stocks'
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            params = {'tableonly': 'true', 'limit': '10', 'exchange': 'NYSE'}
+            resp = requests.get(url, headers=headers, params=params, timeout=10)
+            print(f'✓ NASDAQ API OK: Status {resp.status_code}')
+        except Exception as e:
+            print(f'✗ Error NASDAQ API: {e}')
+        "
+        
+        echo "Archivos actuales en directorio:"
+        ls -la *.json *.py 2>/dev/null || echo "Sin archivos relevantes"
+        
+        echo "Espacio en disco:"
+        df -h . | head -2
+        
+      env:
+        PYTHONUNBUFFERED: 1
+        
+    - name: "7. Commit diario con gestion historica optimizada"
       run: |
         echo "Iniciando commit diario..."
         
@@ -259,7 +384,17 @@ jobs:
           echo "Resumen de archivos diarios commiteados:"
           git show --name-only --pretty=format: HEAD | sort | head -15
         else
-          echo "CRITICAL: No hay archivos para commitear en analisis diario"
+          echo "WARNING: No hay archivos para commitear"
+          echo "Esto indica que todos los scripts fallaron en generar archivos"
+          echo "Verificando nuevamente archivos principales:"
+          for file in "weekly_screening_results.json" "consistency_analysis.json" "rotation_recommendations.json" "docs/data.json"; do
+            if [ -f "$file" ]; then
+              echo "  ✓ $file existe"
+            else
+              echo "  ✗ $file falta"
+            fi
+          done
+          echo "ERROR: No se pudieron generar los archivos necesarios"
           exit 1
         fi
         
@@ -275,7 +410,7 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
       
-    - name: "7. Resumen final del analisis diario"
+    - name: "9. Resumen final del analisis diario"
       run: |
         echo "Analisis diario completado"
         echo "Iniciado: $ANALYSIS_START_TIME UTC"
