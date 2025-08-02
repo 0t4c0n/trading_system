@@ -1,0 +1,205 @@
+{
+  "timestamp": "2025-08-02T20:32:26.182142",
+  "market_date": "2025-08-02",
+  "analysis_type": "daily_momentum_monthly_trading_ma50_bonus",
+  "execution_frequency": "daily",
+  "trading_philosophy": "daily_monitoring_monthly_trading",
+  "optimization_stack": {
+    "ma50_bonus_system": true,
+    "weekly_atr_take_profit": true,
+    "strict_rotation_criteria": true,
+    "ultra_conservative_risk": true
+  },
+  "summary": {
+    "analysis_type": "Daily Momentum Analysis - Monthly Trading Focus",
+    "total_analyzed": 15,
+    "exceptional_momentum": 2,
+    "strong_momentum": 3,
+    "ma50_bonus_applied": 0,
+    "rotation_opportunities": 0,
+    "optimization_applied": true,
+    "message": "Daily momentum analysis with monthly trading philosophy completed"
+  },
+  "top_picks": [
+    {
+      "symbol": "AMD",
+      "score": 89.6,
+      "momentum_category": "EXCEPTIONAL",
+      "risk_pct": 8.08,
+      "upside_pct": 29.03,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "MOD",
+      "score": 83.1,
+      "momentum_category": "EXCEPTIONAL",
+      "risk_pct": 9.85,
+      "upside_pct": 34.58,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "GE",
+      "score": 80.7,
+      "momentum_category": "MODERATE",
+      "risk_pct": 4.91,
+      "upside_pct": 17.02,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "NVDA",
+      "score": 77.0,
+      "momentum_category": "MODERATE",
+      "risk_pct": 5.12,
+      "upside_pct": 18.68,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "GLW",
+      "score": 76.8,
+      "momentum_category": "STRONG",
+      "risk_pct": 5.19,
+      "upside_pct": 15.08,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "NSC",
+      "score": 72.2,
+      "momentum_category": "MODERATE",
+      "risk_pct": 4.69,
+      "upside_pct": 12.71,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "ACAD",
+      "score": 69.9,
+      "momentum_category": "MODERATE",
+      "risk_pct": 6.35,
+      "upside_pct": 20.93,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "IBKR",
+      "score": 68.9,
+      "momentum_category": "MODERATE",
+      "risk_pct": 6.92,
+      "upside_pct": 23.7,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "PLTR",
+      "score": 68.8,
+      "momentum_category": "STRONG",
+      "risk_pct": 6.31,
+      "upside_pct": 24.56,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    },
+    {
+      "symbol": "GOOGL",
+      "score": 68.6,
+      "momentum_category": "MODERATE",
+      "risk_pct": 4.11,
+      "upside_pct": 16.85,
+      "ma50_bonus": false,
+      "ma50_bonus_value": 0,
+      "monthly_trading_suitable": true,
+      "optimization_features": {},
+      "target_hold": "~1 month with daily monitoring",
+      "rotation_urgency": "MEDIUM"
+    }
+  ],
+  "momentum_analysis": {
+    "philosophy": "daily_monitoring_monthly_trading_ma50_bonus",
+    "execution_frequency": "daily",
+    "momentum_weights": {
+      "momentum_20d": 0.7,
+      "momentum_60d": 0.3
+    },
+    "exceptional_momentum": [
+      "AMD",
+      "MOD"
+    ],
+    "strong_momentum": [
+      "GLW",
+      "PLTR",
+      "ZWS"
+    ],
+    "emerging_momentum": [
+      "GE",
+      "NVDA",
+      "NSC",
+      "ACAD",
+      "IBKR",
+      "GOOGL",
+      "DLTR",
+      "APH",
+      "JHG",
+      "LHX"
+    ]
+  },
+  "ma50_bonus_highlights": [],
+  "rotation_recommendations": {
+    "overall_action": "CASH_DEPLOYMENT_OPPORTUNITIES",
+    "strict_criteria_applied": true,
+    "urgent_exits": 0,
+    "rotation_opportunities": 0,
+    "cash_deployment": 7,
+    "philosophy_alignment": "daily_monitoring_monthly_trading"
+  },
+  "market_context": {
+    "spy_20d": -0.5788940411422653,
+    "spy_60d": 11.588753902247635,
+    "spy_90d": 8.618647274904903
+  },
+  "optimization_metrics": {
+    "ma50_bonus_system": true,
+    "weekly_atr_implemented": false,
+    "strict_rotation_criteria": true,
+    "avg_ma50_bonus": 0.0,
+    "ma50_bonus_percentage": 0.0
+  }
+}

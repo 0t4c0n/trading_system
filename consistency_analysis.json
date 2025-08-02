@@ -1,0 +1,288 @@
+{
+  "analysis_date": "2025-08-02T20:32:25.869736",
+  "analysis_type": "daily_consistency_for_monthly_trading",
+  "days_analyzed": 7,
+  "execution_frequency": "daily",
+  "trading_philosophy": "monthly_trades_daily_monitoring",
+  "data_sources": {
+    "historical_files": [
+      "weekly_screening_results.json",
+      "N/A - Sin datos",
+      "N/A - Sin datos",
+      "N/A - Sin datos",
+      "N/A - Sin datos",
+      "N/A - Sin datos"
+    ],
+    "current_day_file": "weekly_screening_results.json"
+  },
+  "consistency_analysis": {
+    "consistent_winners": [],
+    "strong_candidates": [],
+    "emerging_opportunities": [
+      {
+        "symbol": "AMD",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 171.7,
+        "score": 89.6,
+        "risk_pct": 8.08,
+        "outperformance_20d": 25.08,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "MOD",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 133.7,
+        "score": 83.1,
+        "risk_pct": 9.85,
+        "outperformance_20d": 28.47,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "GE",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 269.38,
+        "score": 80.7,
+        "risk_pct": 4.91,
+        "outperformance_20d": 9.85,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "NVDA",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 173.72,
+        "score": 77.0,
+        "risk_pct": 5.12,
+        "outperformance_20d": 9.6,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "GLW",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 62.05,
+        "score": 76.8,
+        "risk_pct": 5.19,
+        "outperformance_20d": 17.57,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "NSC",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 274.85,
+        "score": 72.2,
+        "risk_pct": 4.69,
+        "outperformance_20d": 5.79,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "ACAD",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 23.53,
+        "score": 69.9,
+        "risk_pct": 6.35,
+        "outperformance_20d": 12.89,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "IBKR",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 63.61,
+        "score": 68.9,
+        "risk_pct": 6.92,
+        "outperformance_20d": 10.29,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "PLTR",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 154.27,
+        "score": 68.8,
+        "risk_pct": 6.31,
+        "outperformance_20d": 15.4,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "GOOGL",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 189.13,
+        "score": 68.6,
+        "risk_pct": 4.11,
+        "outperformance_20d": 5.93,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "ZWS",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 44.98,
+        "score": 68.3,
+        "risk_pct": 5.83,
+        "outperformance_20d": 20.33,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "DLTR",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 114.72,
+        "score": 67.2,
+        "risk_pct": 3.93,
+        "outperformance_20d": 13.15,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "APH",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 104.31,
+        "score": 65.6,
+        "risk_pct": 6.26,
+        "outperformance_20d": 5.46,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "JHG",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 42.3,
+        "score": 64.4,
+        "risk_pct": 4.68,
+        "outperformance_20d": 5.54,
+        "ma50_bonus_applied": false
+      },
+      {
+        "symbol": "LHX",
+        "frequency": 2,
+        "days_appeared": [
+          1,
+          7
+        ],
+        "appeared_today": true,
+        "consistency_score": 58.57142857142857,
+        "trend": "EMERGING",
+        "current_price": 278.26,
+        "score": 64.3,
+        "risk_pct": 3.57,
+        "outperformance_20d": 9.39,
+        "ma50_bonus_applied": false
+      }
+    ],
+    "newly_emerged": [],
+    "disappeared_stocks": []
+  },
+  "trend_changes": {
+    "newly_emerged_today": [],
+    "gaining_momentum": [],
+    "losing_momentum": [],
+    "disappeared_today": [],
+    "consecutive_winners": []
+  },
+  "summary_stats": {
+    "total_unique_symbols": 15,
+    "consistent_winners_count": 0,
+    "strong_candidates_count": 0,
+    "emerging_count": 15,
+    "newly_emerged_today_count": 0,
+    "disappeared_today_count": 0,
+    "consecutive_winners_count": 0
+  },
+  "daily_insights": {
+    "high_conviction_signals": 0,
+    "momentum_building": 0,
+    "momentum_fading": 0,
+    "new_opportunities": 0
+  }
+}

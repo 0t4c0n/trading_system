@@ -1,0 +1,643 @@
+{
+  "analysis_date": "2025-08-02T20:32:26.099906",
+  "portfolio_status": "loaded",
+  "portfolio_details": {
+    "status": "ALL_CASH_WAITING",
+    "description": "Portfolio 100% en cash - Esperando oportunidades de inversi\u00f3n",
+    "positions_count": 0,
+    "cash_percentage": 100.0,
+    "total_portfolio_value_usd": 28749.999999999996,
+    "cash_usd": 28749.999999999996,
+    "invested_usd": 0.0,
+    "is_waiting_for_opportunities": true,
+    "currency_info": {
+      "base_currency": "EUR",
+      "target_currency": "USD",
+      "exchange_rate": 1.15,
+      "conversion_timestamp": "2025-08-02T20:32:26.099691"
+    }
+  },
+  "currency_support": {
+    "base_currency": "EUR",
+    "conversion_applied": true,
+    "exchange_rate": 1.15
+  },
+  "analysis_type": "monthly_trading_with_strict_criteria_ma50_bonus",
+  "rotation_philosophy": "daily_monitoring_monthly_trading_strict_criteria",
+  "strict_criteria_applied": {
+    "min_score_difference": 30.0,
+    "stop_loss_proximity": 0.03,
+    "momentum_loss_days": 3,
+    "ma50_bonus_integration": true
+  },
+  "optimization_features": {
+    "weekly_atr_available": true,
+    "ma50_bonus_available": false,
+    "ma50_bonus_count": 0,
+    "earnings_positive_available": false,
+    "total_results": 15
+  },
+  "current_positions_count": 0,
+  "position_analysis": {},
+  "rotation_opportunities": [
+    {
+      "symbol": "AMD",
+      "base_score": 89.6,
+      "final_score": 103.03999999999999,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 103.03999999999999,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+103.0pts vs current)",
+      "stock_data": {
+        "symbol": "AMD",
+        "score": 89.6,
+        "technical_score": 73.6,
+        "rr_bonus": 20.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 171.7,
+        "stop_loss": 157.82,
+        "take_profit": 221.54,
+        "risk_pct": 8.08,
+        "upside_pct": 29.03,
+        "risk_reward_ratio": 3.59,
+        "outperformance_20d": 25.08,
+        "outperformance_60d": 62.51,
+        "outperformance_90d": 42.19,
+        "volume_surge": 35.2,
+        "fundamental_score": 25,
+        "atr": 6.94,
+        "weekly_atr": 16.61,
+        "volatility_rank": "MEDIUM",
+        "company_info": {
+          "name": "Advanced Micro Devices, Inc.",
+          "sector": "Technology",
+          "market_cap": 278394372096
+        }
+      }
+    },
+    {
+      "symbol": "MOD",
+      "base_score": 83.1,
+      "final_score": 95.56499999999998,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 95.56499999999998,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+95.6pts vs current)",
+      "stock_data": {
+        "symbol": "MOD",
+        "score": 83.1,
+        "technical_score": 67.1,
+        "rr_bonus": 20.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 133.7,
+        "stop_loss": 120.54,
+        "take_profit": 179.93,
+        "risk_pct": 9.85,
+        "upside_pct": 34.58,
+        "risk_reward_ratio": 3.51,
+        "outperformance_20d": 28.47,
+        "outperformance_60d": 36.59,
+        "outperformance_90d": 35.42,
+        "volume_surge": 95.8,
+        "fundamental_score": 25,
+        "atr": 6.58,
+        "weekly_atr": 15.41,
+        "volatility_rank": "HIGH",
+        "company_info": {
+          "name": "Modine Manufacturing Company",
+          "sector": "Consumer Cyclical",
+          "market_cap": 7017939456
+        }
+      }
+    },
+    {
+      "symbol": "GE",
+      "base_score": 80.7,
+      "final_score": 92.80499999999999,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 92.80499999999999,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+92.8pts vs current)",
+      "stock_data": {
+        "symbol": "GE",
+        "score": 80.7,
+        "technical_score": 64.7,
+        "rr_bonus": 20.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 269.38,
+        "stop_loss": 256.16,
+        "take_profit": 315.23,
+        "risk_pct": 4.91,
+        "upside_pct": 17.02,
+        "risk_reward_ratio": 3.47,
+        "outperformance_20d": 9.85,
+        "outperformance_60d": 17.74,
+        "outperformance_90d": 19.7,
+        "volume_surge": -37.1,
+        "fundamental_score": 40,
+        "atr": 6.61,
+        "weekly_atr": 15.28,
+        "volatility_rank": "LOW",
+        "company_info": {
+          "name": "GE Aerospace",
+          "sector": "Industrials",
+          "market_cap": 285661331456
+        }
+      }
+    },
+    {
+      "symbol": "NVDA",
+      "base_score": 77.0,
+      "final_score": 88.55,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 88.55,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+88.5pts vs current)",
+      "stock_data": {
+        "symbol": "NVDA",
+        "score": 77.0,
+        "technical_score": 61.0,
+        "rr_bonus": 20.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 173.72,
+        "stop_loss": 164.82,
+        "take_profit": 206.18,
+        "risk_pct": 5.12,
+        "upside_pct": 18.68,
+        "risk_reward_ratio": 3.65,
+        "outperformance_20d": 9.6,
+        "outperformance_60d": 41.43,
+        "outperformance_90d": 34.48,
+        "volume_surge": 1.0,
+        "fundamental_score": 35,
+        "atr": 4.45,
+        "weekly_atr": 10.82,
+        "volatility_rank": "MEDIUM",
+        "company_info": {
+          "name": "NVIDIA Corporation",
+          "sector": "Technology",
+          "market_cap": 4236614041600
+        }
+      }
+    },
+    {
+      "symbol": "GLW",
+      "base_score": 76.8,
+      "final_score": 88.32,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 88.32,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+88.3pts vs current)",
+      "stock_data": {
+        "symbol": "GLW",
+        "score": 76.8,
+        "technical_score": 64.8,
+        "rr_bonus": 15.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 62.05,
+        "stop_loss": 58.83,
+        "take_profit": 71.41,
+        "risk_pct": 5.19,
+        "upside_pct": 15.08,
+        "risk_reward_ratio": 2.91,
+        "outperformance_20d": 17.57,
+        "outperformance_60d": 27.82,
+        "outperformance_90d": 16.46,
+        "volume_surge": 79.0,
+        "fundamental_score": 25,
+        "atr": 1.61,
+        "weekly_atr": 3.12,
+        "volatility_rank": "MEDIUM",
+        "company_info": {
+          "name": "Corning Incorporated",
+          "sector": "Technology",
+          "market_cap": 53081972736
+        }
+      }
+    },
+    {
+      "symbol": "NSC",
+      "base_score": 72.2,
+      "final_score": 83.03,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 83.03,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+83.0pts vs current)",
+      "stock_data": {
+        "symbol": "NSC",
+        "score": 72.2,
+        "technical_score": 60.2,
+        "rr_bonus": 15.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 274.85,
+        "stop_loss": 261.96,
+        "take_profit": 309.79,
+        "risk_pct": 4.69,
+        "upside_pct": 12.71,
+        "risk_reward_ratio": 2.71,
+        "outperformance_20d": 5.79,
+        "outperformance_60d": 14.74,
+        "outperformance_90d": 9.35,
+        "volume_surge": 110.3,
+        "fundamental_score": 25,
+        "atr": 6.45,
+        "weekly_atr": 11.65,
+        "volatility_rank": "MEDIUM",
+        "company_info": {
+          "name": "Norfolk Southern Corporation",
+          "sector": "Industrials",
+          "market_cap": 61663698944
+        }
+      }
+    },
+    {
+      "symbol": "ACAD",
+      "base_score": 69.9,
+      "final_score": 80.385,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 80.385,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+80.4pts vs current)",
+      "stock_data": {
+        "symbol": "ACAD",
+        "score": 69.9,
+        "technical_score": 53.9,
+        "rr_bonus": 20.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 23.53,
+        "stop_loss": 22.04,
+        "take_profit": 28.45,
+        "risk_pct": 6.35,
+        "upside_pct": 20.93,
+        "risk_reward_ratio": 3.3,
+        "outperformance_20d": 12.89,
+        "outperformance_60d": 50.24,
+        "outperformance_90d": 27.95,
+        "volume_surge": -4.6,
+        "fundamental_score": 25,
+        "atr": 0.75,
+        "weekly_atr": 1.64,
+        "volatility_rank": "MEDIUM",
+        "company_info": {
+          "name": "ACADIA Pharmaceuticals Inc.",
+          "sector": "Healthcare",
+          "market_cap": 3938028032
+        }
+      }
+    },
+    {
+      "symbol": "IBKR",
+      "base_score": 68.9,
+      "final_score": 79.235,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 79.235,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+79.2pts vs current)",
+      "stock_data": {
+        "symbol": "IBKR",
+        "score": 68.9,
+        "technical_score": 52.9,
+        "rr_bonus": 20.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 63.61,
+        "stop_loss": 59.21,
+        "take_profit": 78.69,
+        "risk_pct": 6.92,
+        "upside_pct": 23.7,
+        "risk_reward_ratio": 3.42,
+        "outperformance_20d": 10.29,
+        "outperformance_60d": 31.32,
+        "outperformance_90d": 33.0,
+        "volume_surge": -20.0,
+        "fundamental_score": 35,
+        "atr": 2.2,
+        "weekly_atr": 5.03,
+        "volatility_rank": "MEDIUM",
+        "company_info": {
+          "name": "Interactive Brokers Group, Inc.",
+          "sector": "Financial Services",
+          "market_cap": 107878744064
+        }
+      }
+    },
+    {
+      "symbol": "PLTR",
+      "base_score": 68.8,
+      "final_score": 79.11999999999999,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 79.11999999999999,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+79.1pts vs current)",
+      "stock_data": {
+        "symbol": "PLTR",
+        "score": 68.8,
+        "technical_score": 52.8,
+        "rr_bonus": 20.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 154.27,
+        "stop_loss": 144.54,
+        "take_profit": 192.16,
+        "risk_pct": 6.31,
+        "upside_pct": 24.56,
+        "risk_reward_ratio": 3.89,
+        "outperformance_20d": 15.4,
+        "outperformance_60d": 30.13,
+        "outperformance_90d": 50.83,
+        "volume_surge": -22.3,
+        "fundamental_score": 30,
+        "atr": 4.87,
+        "weekly_atr": 12.63,
+        "volatility_rank": "MEDIUM",
+        "company_info": {
+          "name": "Palantir Technologies Inc.",
+          "sector": "Technology",
+          "market_cap": 364063293440
+        }
+      }
+    },
+    {
+      "symbol": "GOOGL",
+      "base_score": 68.6,
+      "final_score": 78.88999999999999,
+      "consistency_weeks": 2,
+      "consistency_category": "emerging_opportunities",
+      "optimization_features": [
+        "weekly_atr"
+      ],
+      "ma50_bonus_applied": false,
+      "ma50_bonus_value": 0,
+      "replacement_analysis": {
+        "significant_improvement": true,
+        "can_replace": "ANY",
+        "improvement_margin": 78.88999999999999,
+        "reason": "Portfolio has available capacity"
+      },
+      "monthly_trading_assessment": {
+        "meets_strict_criteria": true,
+        "significant_improvement": true,
+        "recommended_for_monthly_hold": false
+      },
+      "rotation_reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+78.9pts vs current)",
+      "stock_data": {
+        "symbol": "GOOGL",
+        "score": 68.6,
+        "technical_score": 48.6,
+        "rr_bonus": 25.0,
+        "ma50_bonus": 0,
+        "is_ma50_stop_loss": false,
+        "current_price": 189.13,
+        "stop_loss": 181.35,
+        "take_profit": 220.99,
+        "risk_pct": 4.11,
+        "upside_pct": 16.85,
+        "risk_reward_ratio": 4.1,
+        "outperformance_20d": 5.93,
+        "outperformance_60d": 4.42,
+        "outperformance_90d": 4.31,
+        "volume_surge": -9.1,
+        "fundamental_score": 30,
+        "atr": 3.89,
+        "weekly_atr": 10.62,
+        "volatility_rank": "LOW",
+        "company_info": {
+          "name": "Alphabet Inc.",
+          "sector": "Communication Services",
+          "market_cap": 2291782909952
+        }
+      }
+    }
+  ],
+  "action_summary": {
+    "holds": [],
+    "consider_exits": [],
+    "urgent_exits": [],
+    "aggressive_rotations": [],
+    "cash_deployment_opportunities": [
+      {
+        "symbol": "AMD",
+        "reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+103.0pts vs current)",
+        "urgency": "MEDIUM",
+        "optimization_features": [
+          "weekly_atr"
+        ],
+        "ma50_bonus_applied": false,
+        "consistency_weeks": 2
+      },
+      {
+        "symbol": "MOD",
+        "reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+95.6pts vs current)",
+        "urgency": "MEDIUM",
+        "optimization_features": [
+          "weekly_atr"
+        ],
+        "ma50_bonus_applied": false,
+        "consistency_weeks": 2
+      },
+      {
+        "symbol": "GE",
+        "reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+92.8pts vs current)",
+        "urgency": "MEDIUM",
+        "optimization_features": [
+          "weekly_atr"
+        ],
+        "ma50_bonus_applied": false,
+        "consistency_weeks": 2
+      },
+      {
+        "symbol": "NVDA",
+        "reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+88.5pts vs current)",
+        "urgency": "MEDIUM",
+        "optimization_features": [
+          "weekly_atr"
+        ],
+        "ma50_bonus_applied": false,
+        "consistency_weeks": 2
+      },
+      {
+        "symbol": "GLW",
+        "reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+88.3pts vs current)",
+        "urgency": "MEDIUM",
+        "optimization_features": [
+          "weekly_atr"
+        ],
+        "ma50_bonus_applied": false,
+        "consistency_weeks": 2
+      },
+      {
+        "symbol": "NSC",
+        "reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+83.0pts vs current)",
+        "urgency": "MEDIUM",
+        "optimization_features": [
+          "weekly_atr"
+        ],
+        "ma50_bonus_applied": false,
+        "consistency_weeks": 2
+      },
+      {
+        "symbol": "ACAD",
+        "reason": "High-quality opportunity with 2d consistency + Weekly ATR optimized (+80.4pts vs current)",
+        "urgency": "MEDIUM",
+        "optimization_features": [
+          "weekly_atr"
+        ],
+        "ma50_bonus_applied": false,
+        "consistency_weeks": 2
+      }
+    ],
+    "optimization_rotations": [],
+    "overall_action": "CASH_DEPLOYMENT_OPPORTUNITIES",
+    "detailed_recommendations": [],
+    "portfolio_context": "ALL_CASH_WAITING"
+  },
+  "methodology_notes": {
+    "philosophy": "Daily monitoring, monthly trading with strict rotation criteria",
+    "currency_handling": "EUR base currency con acciones USD - conversi\u00f3n autom\u00e1tica",
+    "strict_criteria": "Score +30pts, Stop 3%, Momentum 3d minimum for rotation",
+    "ma50_bonus_integration": "MA50 rebound signals receive 20% score bonus",
+    "optimization_integration": "Weekly ATR + MA50 bonus + Fundamentales integrados"
+  }
+}
